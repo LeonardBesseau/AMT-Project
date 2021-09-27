@@ -2,9 +2,11 @@ package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.models.Product;
 import java.util.List;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.jdbi.v3.core.Jdbi;
 
+@ApplicationScoped
 public class ProductService {
 
   private final Jdbi jdbi;
