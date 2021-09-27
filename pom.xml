@@ -14,6 +14,7 @@
     <version.quarkus>2.0.3.Final</version.quarkus>
     <version.quarkus-platform>2.2.1.Final</version.quarkus-platform>
     <version.quarkus-plugin>2.2.1.Final</version.quarkus-plugin>
+    <version.jdbi>3.21.0</version.jdbi>
   </properties>
 
 
@@ -33,6 +34,21 @@
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jdbc-postgresql</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.jdbi</groupId>
+      <artifactId>jdbi3-core</artifactId>
+      <version>${version.jdbi}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jdbi</groupId>
+      <artifactId>jdbi3-postgres</artifactId>
+      <version>${version.jdbi}</version>
     </dependency>
   </dependencies>
 
