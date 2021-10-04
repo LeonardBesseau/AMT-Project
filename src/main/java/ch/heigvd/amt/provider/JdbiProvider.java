@@ -14,12 +14,9 @@ public class JdbiProvider {
 
   private final Jdbi jdbi;
 
-
   @Inject
   public JdbiProvider(DataSource dataSource) {
-    jdbi =
-        Jdbi.create(dataSource)
-            .installPlugin(new PostgresPlugin());
+    jdbi = Jdbi.create(dataSource).installPlugin(new PostgresPlugin());
     jdbi.registerRowMapper(ConstructorMapper.factory(Product.class));
   }
 

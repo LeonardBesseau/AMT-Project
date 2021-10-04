@@ -14,7 +14,7 @@ public class PostgisResource implements QuarkusTestResourceLifecycleManager {
 
   PostgreSQLContainer<?> postgis =
       new PostgreSQLContainer<>(
-          DockerImageName.parse("postgis/postgis:13-3.1").asCompatibleSubstituteFor("postgres"))
+              DockerImageName.parse("postgis/postgis:13-3.1").asCompatibleSubstituteFor("postgres"))
           .withExposedPorts(5432)
           .withDatabaseName("tests")
           .withUsername("username")

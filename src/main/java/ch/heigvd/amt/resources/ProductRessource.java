@@ -12,14 +12,12 @@ import javax.ws.rs.core.MediaType;
 @Path("/product")
 public class ProductRessource {
 
-
   private final ProductService productService;
 
   @Inject
-  public ProductRessource(ProductService productService){
+  public ProductRessource(ProductService productService) {
     this.productService = productService;
   }
-
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
