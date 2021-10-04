@@ -41,12 +41,21 @@ public class Product {
 
   @Override
   public String toString() {
-    return "Product{" +
-        "name='" + name + '\'' +
-        ", price=" + price +
-        ", description='" + description + '\'' +
-        ", refCode='" + refCode + '\'' +
-        ", tags='" + tags + '\'' +
-        '}';
+    return "Product{"
+        + "name='"
+        + name
+        + '\''
+        + ", price="
+        + price
+        + ", description='"
+        + description
+        + '\''
+        + ", refCode='"
+        + refCode
+        + '\''
+        + ", tags='"
+        + tags
+        + '\''
+        + '}';
   }
 }
