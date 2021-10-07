@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>List</title>
+</head>
+<body>
+<p> Welcome to our super site. You can find below our super list of products</p>
+
+<h1>Product List</h1>
+{#for item in items}
+<h3>{item.name}</h3>
+<a href="/view/product/{item.name}">Price: {item.price}</a>
+{/for}
+</body>
+</html>
+
