@@ -21,7 +21,7 @@ public class ProductRessource {
 
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  public List<Product> hello() {
+  public List<Product> getAll() {
     return productService.getAllProduct();
   }
 }
