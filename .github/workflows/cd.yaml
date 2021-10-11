@@ -10,19 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy release
     steps:
-      - name: build
-        run: make build
-      - name: version
-        run: echo "::set-output name=version::$(./bin/azblogfilter --version)"
-        id: version
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
         with:
-          draft: false
-          prerelease: false
-          release_name: ${{ steps.version.outputs.version }}
-          tag_name: ${{ github.ref }}
-          body_path: CHANGELOG.md
+          java-version: 11
+      - name: Install the dependencies
+        working-directory: .
+        run: mvn clean install -DskipTests=true
+      - name: Run the tests
+        run: mvn test
+      - name: Release
+        uses: softprops/action-gh-release@91409e712cf565ce9eff10c87a8d1b11b81757ae
+        with:
+          # Identify if this is a pre release by checking if the tag name contains -rc, -b, -a
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-b') || contains(github.ref, '-a') }}
+          name: v${{ github.ref }}
+          tag_name: v.tag
+          files: target/quarkus-app/*
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
