@@ -18,15 +18,14 @@ jobs:
       - name: Install the dependencies
         working-directory: .
         run: mvn clean package
-      - name: Release
-        uses: softprops/action-gh-release@91409e712cf565ce9eff10c87a8d1b11b81757ae
-        with:
-          # Identify if this is a pre release by checking if the tag name contains -rc, -b, -a
-          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-b') || contains(github.ref, '-a') }}
-          name: v${{ github.ref }}
-          tag_name: v.tag
-          files: target/quarkus-app/*
+      - name: Create release
+        uses: Roang-zero1/github-create-release-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    permissions:
-      contents: write
+      - name: Create GitHub release
+        uses: Roang-zero1/github-upload-release-artifacts-action@master
+        with:
+          args: |
+            - target/quarkus-app/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
