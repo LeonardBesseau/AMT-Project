@@ -31,6 +31,6 @@ jobs:
         uses: Roang-zero1/github-upload-release-artifacts-action@master
         with:
           args: |
-            target/quarkus-app/
+            target/quarkus-app/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
