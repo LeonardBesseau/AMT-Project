@@ -8,8 +8,8 @@ Boutique en ligne de boulangerie et pâtisserie.
 - Postgresql (v13 ou supérieur)
 - Java 11
 
-## Deployement
-Télécharger la release et l'extraire. Ajouter les données de connection à la base de données dans le fichier .env.
+## Déploiement
+Télécharger la release et l'extraire. Ajouter les données de connection à la base de données dans le fichier `.env`.
 Lancer le serveur avec `java -jar target/quarkus-app/quarkus-run.jar`
 
 
