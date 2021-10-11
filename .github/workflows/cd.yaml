@@ -23,14 +23,16 @@ jobs:
         run: ls target
       - name: display
         run: ls target/quarkus-app
-      - name: Create release
-        uses: Roang-zero1/github-create-release-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create GitHub release
-        uses: Roang-zero1/github-upload-release-artifacts-action@master
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
         with:
-          args: |
-            target/quarkus-app/*
+          type: 'zip'
+          path: target/quarkus-app
+          filename: 'release.zip'
+      - name: Upload Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "release.zip"
+          token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
