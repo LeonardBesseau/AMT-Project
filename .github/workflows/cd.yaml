@@ -20,6 +20,16 @@ jobs:
         run: mvn clean install -DskipTests=true
       - name: Run the tests
         run: mvn test
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
       - name: Archive Artifacts
         uses: actions/upload-artifact@v2
         with:
