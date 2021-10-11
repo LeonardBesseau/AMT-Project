@@ -15,11 +15,11 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-            - name: Install the dependencies
-              working-directory: .
-              run: mvn clean install -DskipTests=true
-            - name: Run the tests
-              run: mvn test
+      - name: Install the dependencies
+        working-directory: .
+        run: mvn clean install -DskipTests=true
+      - name: Run the tests
+        run: mvn test
       - name: release
         uses: actions/create-release@v1
         id: create_release
