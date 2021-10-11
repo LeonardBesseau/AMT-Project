@@ -20,12 +20,8 @@ jobs:
         run: mvn clean install -DskipTests=true
       - name: Run the tests
         run: mvn test
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v2
         with:
-          draft: false
-          prerelease: false
-          tag_name: ${{ github.ref }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+          name: "Release"
+          path: target/quarkus-app/*
