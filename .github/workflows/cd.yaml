@@ -27,6 +27,5 @@ jobs:
           draft: false
           prerelease: false
           tag_name: ${{ github.ref }}
-          body_path: CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ github.token }}
