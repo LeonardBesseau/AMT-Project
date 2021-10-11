@@ -17,9 +17,7 @@ jobs:
           java-version: 11
       - name: Install the dependencies
         working-directory: .
-        run: mvn clean install -DskipTests=true
-      - name: Run the tests
-        run: mvn test
+        run: mvn clean package
       - name: Release
         uses: softprops/action-gh-release@91409e712cf565ce9eff10c87a8d1b11b81757ae
         with:
