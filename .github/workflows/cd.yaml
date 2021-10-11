@@ -19,6 +19,10 @@ jobs:
       - name: Install the dependencies
         working-directory: .
         run: mvn clean package
+      - name: display
+        run: ls target
+      - name: display
+        run: ls target/quarkus-app
       - name: Create release
         uses: Roang-zero1/github-create-release-action@master
         env:
