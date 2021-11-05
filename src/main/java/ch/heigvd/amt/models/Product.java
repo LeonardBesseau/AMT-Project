@@ -7,16 +7,14 @@ public class Product {
   private final String name;
   private final double price;
   private final String description;
-  private final String refCode;
-  private final String tags;
+  private final int quantity;
 
-  @ConstructorProperties({"name", "price", "description", "refCode", "tags"})
-  public Product(String name, double price, String description, String refCode, String tags) {
+  @ConstructorProperties({"name", "price", "description", "quantity"})
+  public Product(String name, double price, String description, int quantity) {
     this.name = name;
     this.price = price;
     this.description = description;
-    this.refCode = refCode;
-    this.tags = tags;
+    this.quantity = quantity;
   }
 
   public String getName() {
@@ -31,31 +29,17 @@ public class Product {
     return description;
   }
 
-  public String getRefCode() {
-    return refCode;
-  }
-
-  public String getTags() {
-    return tags;
+  public int getQuantity() {
+    return quantity;
   }
 
   @Override
   public String toString() {
-    return "Product{"
-        + "name='"
-        + name
-        + '\''
-        + ", price="
-        + price
-        + ", description='"
-        + description
-        + '\''
-        + ", refCode='"
-        + refCode
-        + '\''
-        + ", tags='"
-        + tags
-        + '\''
-        + '}';
+    return "Product{" +
+        "name='" + name + '\'' +
+        ", price=" + price +
+        ", description='" + description + '\'' +
+        ", quantity=" + quantity +
+        '}';
   }
 }

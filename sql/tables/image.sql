@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS image
+(
+    id   SERIAL PRIMARY KEY,
+    data BYTEA
+);
