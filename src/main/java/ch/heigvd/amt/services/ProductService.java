@@ -18,6 +18,6 @@ public class ProductService {
 
   public List<Product> getAllProduct() {
     return jdbi.withHandle(
-        handle -> handle.createQuery("SELECT * FROM products").mapTo(Product.class).list());
+        handle -> handle.createQuery("SELECT * FROM product").mapTo(Product.class).list());
   }
 }
