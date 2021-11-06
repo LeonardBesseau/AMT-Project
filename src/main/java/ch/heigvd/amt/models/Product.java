@@ -8,15 +8,15 @@ public class Product {
   private final double price;
   private final String description;
   private final int quantity;
-  private final int image;
+  private final int imageId;
 
-  @ConstructorProperties({"name", "price", "description", "quantity", "image"})
-  public Product(String name, double price, String description, int quantity, int image) {
+  @ConstructorProperties({"name", "price", "description", "quantity", "image_id"})
+  public Product(String name, double price, String description, int quantity, int imageId) {
     this.name = name;
     this.price = price;
     this.description = description;
     this.quantity = quantity;
-    this.image = image;
+    this.imageId = imageId;
   }
 
   public String getName() {
@@ -35,8 +35,8 @@ public class Product {
     return quantity;
   }
 
-  public int getImage() {
-    return image;
+  public int getImageId() {
+    return imageId;
   }
 
   @Override

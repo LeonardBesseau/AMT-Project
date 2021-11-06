@@ -18,7 +18,7 @@ class ProductResourceTest {
 
   @Test
   void testHelloEndpoint() {
-    PostgisResource.runQuery(dataSource, "sql/create_products_table.sql");
+    PostgisResource.runQuery(dataSource, "sql/create_product_and_image_table.sql");
     given().when().get("/product").then().statusCode(200).body(is("[]"));
   }
 }
