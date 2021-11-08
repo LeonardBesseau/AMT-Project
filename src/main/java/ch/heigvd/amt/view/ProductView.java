@@ -28,7 +28,7 @@ public class ProductView {
     this.productService = productService;
   }
 
-  /**
+  /** 
    * Get the view with the list of all products
    *
    * @return a html page with the list of all products
