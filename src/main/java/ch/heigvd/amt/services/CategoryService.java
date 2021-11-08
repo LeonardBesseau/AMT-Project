@@ -49,4 +49,10 @@ public class CategoryService {
                 .mapTo(Category.class)
                 .findOne());
   }
+
+  public void deleteCategory(String name) {
+    jdbi.useHandle(
+        handle -> handle.createUpdate(ResourceLoader.loadResource("sql/category/delete.sql")).bind("name", name).execute());
+  }
+
 }
