@@ -4,6 +4,7 @@ import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +26,9 @@ public class ProductService {
   }
 
   /**
-   * Get all product from databases
+   * Get all product from database
    *
-   * @return a list of product
+   * @return a list of product present in the database
    */
   public List<Product> getAllProduct() {
     return new ArrayList<>(
@@ -35,6 +36,27 @@ public class ProductService {
                 handle ->
                     handle
                         .createQuery(ResourceLoader.loadResource("sql/product/getAll.sql"))
+                        .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
+                        .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
+                        .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
+            .values());
+  }
+
+  /**
+   * Get all product with selected category from database
+   * @param categories A list of the categories to filter by
+   * @return a list of product present in the database with the given filter applied
+   */
+  public List<Product> getAllProductForCategories(List<String> categories) {
+    if (categories.isEmpty()){
+      throw new IllegalArgumentException("Filter cannot be empty");
+    }
+    return new ArrayList<>(
+        jdbi.withHandle(
+                handle ->
+                    handle
+                        .createQuery(ResourceLoader.loadResource("sql/product/getAllWithCategoryFilter.sql"))
+                        .bindList("categoryList",categories) //even if the list
                         .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
                         .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
                         .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
