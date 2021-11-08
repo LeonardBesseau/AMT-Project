@@ -5,5 +5,4 @@ SELECT name          AS p_name,
        image_id      AS p_image_id,
        category_name AS c_category_name
 FROM product
-         LEFT JOIN category_product cp ON product.name = cp.product_name
-WHERE product.name = :name;
+         LEFT JOIN category_product cp ON product.name = cp.product_name;
