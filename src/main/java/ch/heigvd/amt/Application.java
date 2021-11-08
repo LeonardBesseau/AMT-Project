@@ -1,5 +1,6 @@
 package ch.heigvd.amt;
 
+import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import org.jboss.logging.Logger;
 import org.jdbi.v3.core.Jdbi;
@@ -14,12 +15,7 @@ public class Application {
     Jdbi jdbi = Jdbi.create("jdbc:postgresql://localhost:5432/amt?user=amt&password=amt");
     jdbi.installPlugin(new PostgresPlugin());
     jdbi.registerRowMapper(ConstructorMapper.factory(Product.class));
+    jdbi.registerRowMapper(ConstructorMapper.factory(Category.class));
     logger.info("HELLO\n");
-    jdbi.useHandle(
-        handle ->
-            handle
-                .createQuery("SELECT * FROM products")
-                .mapTo(Product.class)
-                .forEach(logger::info));
   }
 }
