@@ -10,14 +10,18 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.jboss.logging.Logger;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.reflect.ConstructorMapper;
 import org.jdbi.v3.core.result.RowView;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
 @ApplicationScoped
 public class ProductService {
 
   private final Jdbi jdbi;
+
+  private static final Logger logger = Logger.getLogger(ProductService.class);
 
   @Inject
   public ProductService(Jdbi jdbi) {
@@ -85,6 +89,26 @@ public class ProductService {
         .findFirst();
   }
 
+  public void addCategory(String productName, String categoryName) {
+    try {
+      jdbi.useHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/product/add.sql"))
+                  .bind("product_name", productName)
+                  .bind("category_name", categoryName)
+                  .execute());
+    } catch (UnableToExecuteStatementException e) {
+      // Cannot have a more precise exception to manage the invalid foreign key constraint
+      throw new IllegalArgumentException(e);
+    }
+  }
+
+  /**
+   * Accumulator function for aggregating multiple categories for the same product
+   *
+   * @return a map of the of all the products with their categories aggregated
+   */
   private BiFunction<LinkedHashMap<String, Product>, RowView, LinkedHashMap<String, Product>>
       accumulateProductRow() {
     return (map, rowView) -> {
