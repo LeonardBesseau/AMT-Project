@@ -1,11 +1,7 @@
 package ch.heigvd.amt;
 
-import static java.util.stream.Collectors.toList;
-
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
-import ch.heigvd.amt.utils.ResourceLoader;
-import java.util.LinkedHashMap;
 import org.jboss.logging.Logger;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.reflect.ConstructorMapper;
