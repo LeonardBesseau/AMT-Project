@@ -16,15 +16,14 @@ import org.junit.jupiter.api.Test;
 @QuarkusTestResource(PostgisResource.class)
 class ProductServiceTest {
 
-  @Inject
-  DataSource dataSource;
+  @Inject DataSource dataSource;
 
-  @Inject
-  ProductService productService;
+  @Inject ProductService productService;
 
   @Test
   void get() {
-    PostgisResource.runQuery(dataSource, "sql/init_db.sql","sql/reset_db.sql", "sql/insert_product.sql");
+    PostgisResource.runQuery(
+        dataSource, "sql/init_db.sql", "sql/reset_db.sql", "sql/insert_product.sql");
     Assertions.assertTrue(productService.getProduct("Z").isEmpty());
     Optional<Product> result1 = productService.getProduct("1");
     Assertions.assertTrue(result1.isPresent());
@@ -47,14 +46,12 @@ class ProductServiceTest {
 
   @Test
   void getAll() {
-    PostgisResource.runQuery(dataSource, "sql/init_db.sql","sql/reset_db.sql", "sql/insert_product.sql");
+    PostgisResource.runQuery(
+        dataSource, "sql/init_db.sql", "sql/reset_db.sql", "sql/insert_product.sql");
     List<Product> result1 = productService.getAllProduct();
     Assertions.assertEquals(3, result1.size());
     PostgisResource.runQuery(dataSource, "sql/reset_db.sql");
     List<Product> result2 = productService.getAllProduct();
     Assertions.assertTrue(result2.isEmpty());
-
-
   }
-
 }
