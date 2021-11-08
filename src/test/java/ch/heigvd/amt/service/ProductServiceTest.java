@@ -23,10 +23,9 @@ class ProductServiceTest {
   @Inject ProductService productService;
 
   @BeforeEach
-  void setupEach(){
+  void setupEach() {
     PostgisResource.runQuery(
         dataSource, "sql/init_db.sql", "sql/reset_db.sql", "sql/insert_product.sql");
-
   }
 
   @Test
@@ -63,9 +62,11 @@ class ProductServiceTest {
   @Test
   void getAllWithCategoriesFiltering() {
     List<String> categories = new ArrayList<>();
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      productService.getAllProductForCategories(categories);
-    });
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          productService.getAllProductForCategories(categories);
+        });
 
     categories.add("Z");
     List<Product> result1 = productService.getAllProductForCategories(categories);

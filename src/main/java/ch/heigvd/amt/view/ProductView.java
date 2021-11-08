@@ -4,7 +4,6 @@ import ch.heigvd.amt.services.ProductService;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
-import java.util.ArrayList;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
