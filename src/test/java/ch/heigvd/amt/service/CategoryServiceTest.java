@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 @QuarkusTest
@@ -20,11 +21,16 @@ class CategoryServiceTest {
 
   @Inject CategoryService categoryService;
 
-  @Test
-  void get() {
+  @BeforeEach
+  void setupEach(){
     PostgisResource.runQuery(
         dataSource, "sql/init_db.sql", "sql/reset_db.sql", "sql/insert_product.sql");
-    Assertions.assertTrue(categoryService.getCategory("Z").isEmpty());
+
+  }
+
+  @Test
+  void get() {
+     Assertions.assertTrue(categoryService.getCategory("Z").isEmpty());
     Optional<Category> result1 = categoryService.getCategory("A");
     Assertions.assertTrue(result1.isPresent());
     Category p1 = result1.get();
@@ -33,12 +39,19 @@ class CategoryServiceTest {
 
   @Test
   void getAll() {
-    PostgisResource.runQuery(
-        dataSource, "sql/init_db.sql", "sql/reset_db.sql", "sql/insert_product.sql");
     List<Category> result1 = categoryService.getAllCategory();
     Assertions.assertEquals(2, result1.size());
     PostgisResource.runQuery(dataSource, "sql/reset_db.sql");
     List<Category> result2 = categoryService.getAllCategory();
     Assertions.assertTrue(result2.isEmpty());
+  }
+
+  @Test
+  void delete(){
+    List<Category> result1 = categoryService.getAllCategory();
+    Assertions.assertEquals(2, result1.size());
+    categoryService.deleteCategory("A");
+    result1 = categoryService.getAllCategory();
+    Assertions.assertEquals(1, result1.size());
   }
 }
