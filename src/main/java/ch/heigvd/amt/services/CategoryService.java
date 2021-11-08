@@ -52,7 +52,10 @@ public class CategoryService {
 
   public void deleteCategory(String name) {
     jdbi.useHandle(
-        handle -> handle.createUpdate(ResourceLoader.loadResource("sql/category/delete.sql")).bind("name", name).execute());
+        handle ->
+            handle
+                .createUpdate(ResourceLoader.loadResource("sql/category/delete.sql"))
+                .bind("name", name)
+                .execute());
   }
-
 }

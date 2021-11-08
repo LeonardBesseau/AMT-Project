@@ -22,15 +22,18 @@ class CategoryServiceTest {
   @Inject CategoryService categoryService;
 
   @BeforeEach
-  void setupEach(){
+  void setupEach() {
     PostgisResource.runQuery(
         dataSource, "sql/init_db.sql", "sql/reset_db.sql", "sql/insert_product.sql");
-
   }
 
   @Test
-  void get() {
-     Assertions.assertTrue(categoryService.getCategory("Z").isEmpty());
+  void getElementDoesNotExist() {
+    Assertions.assertTrue(categoryService.getCategory("Z").isEmpty());
+  }
+
+  @Test
+  void getElementExist() {
     Optional<Category> result1 = categoryService.getCategory("A");
     Assertions.assertTrue(result1.isPresent());
     Category p1 = result1.get();
@@ -38,16 +41,20 @@ class CategoryServiceTest {
   }
 
   @Test
-  void getAll() {
+  void getAllWithDataInTable() {
     List<Category> result1 = categoryService.getAllCategory();
     Assertions.assertEquals(2, result1.size());
+  }
+
+  @Test
+  void getAllWithNoDataInTable() {
     PostgisResource.runQuery(dataSource, "sql/reset_db.sql");
     List<Category> result2 = categoryService.getAllCategory();
     Assertions.assertTrue(result2.isEmpty());
   }
 
   @Test
-  void delete(){
+  void delete() {
     List<Category> result1 = categoryService.getAllCategory();
     Assertions.assertEquals(2, result1.size());
     categoryService.deleteCategory("A");
