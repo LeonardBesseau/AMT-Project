@@ -8,6 +8,7 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
 @ApplicationScoped
 public class CategoryService {
@@ -57,5 +58,23 @@ public class CategoryService {
                 .createUpdate(ResourceLoader.loadResource("sql/category/delete.sql"))
                 .bind("name", name)
                 .execute());
+  }
+
+  /**
+   * Add category to the database
+   * @param name the name of the new category
+   * @throws IllegalArgumentException if a duplicate key error is thrown
+   */
+  public void addCategory(String name) {
+    try {
+      jdbi.useHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/category/add.sql"))
+                  .bind("name", name)
+                  .execute());
+    }catch (UnableToExecuteStatementException e){
+      throw new IllegalArgumentException(e);
+    }
   }
 }
