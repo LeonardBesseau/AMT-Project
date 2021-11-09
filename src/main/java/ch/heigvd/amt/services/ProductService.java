@@ -94,7 +94,7 @@ public class ProductService {
       jdbi.useHandle(
           handle ->
               handle
-                  .createUpdate(ResourceLoader.loadResource("sql/product/add.sql"))
+                  .createUpdate(ResourceLoader.loadResource("sql/product/addCategory.sql"))
                   .bind("product_name", productName)
                   .bind("category_name", categoryName)
                   .execute());

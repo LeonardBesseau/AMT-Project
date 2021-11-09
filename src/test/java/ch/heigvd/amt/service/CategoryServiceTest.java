@@ -61,4 +61,11 @@ class CategoryServiceTest {
     result1 = categoryService.getAllCategory();
     Assertions.assertEquals(1, result1.size());
   }
+
+  @Test
+  void add(){
+    List<Category> result1 = categoryService.getAllCategory();
+    Assertions.assertEquals(2, result1.size());
+    categoryService.addCategory("A");
+  }
 }
