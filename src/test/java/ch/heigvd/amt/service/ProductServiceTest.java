@@ -3,6 +3,7 @@ package ch.heigvd.amt.service;
 import ch.heigvd.amt.database.PostgisResource;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.ProductService;
+import ch.heigvd.amt.utils.UpdateResult;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import java.util.ArrayList;
@@ -91,24 +92,27 @@ class ProductServiceTest {
     Product product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertTrue(product.getCategories().isEmpty());
 
-    productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME);
+    Assertions.assertEquals(
+        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(1, product.getCategories().size());
     Assertions.assertEquals(CATEGORY_A_NAME, product.getCategories().get(0).getName());
 
     // Check idempotent
-    productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME);
+    Assertions.assertEquals(
+        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(1, product.getCategories().size());
     Assertions.assertEquals(CATEGORY_A_NAME, product.getCategories().get(0).getName());
 
-    productService.addCategory(PRODUCT_NAME_3, CATEGORY_B_NAME);
+    Assertions.assertEquals(
+        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_B_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(2, product.getCategories().size());
 
-    Assertions.assertThrows(
-        IllegalArgumentException.class, () -> productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
-    Assertions.assertThrows(
-        IllegalArgumentException.class, () -> productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
+    Assertions.assertEquals(
+        UpdateResult.INVALID_REFERENCE, productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
+    Assertions.assertEquals(
+        UpdateResult.INVALID_REFERENCE, productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
   }
 }

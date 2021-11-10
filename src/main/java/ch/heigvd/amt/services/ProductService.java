@@ -3,6 +3,7 @@ package ch.heigvd.amt.services;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.utils.ResourceLoader;
+import ch.heigvd.amt.utils.UpdateResult;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -89,7 +90,15 @@ public class ProductService {
         .findFirst();
   }
 
-  public void addCategory(String productName, String categoryName) {
+  /**
+   * add a category to a product. Does nothing if the category is associated with the product but
+   * will still return SUCCESS
+   *
+   * @param productName the name of the product
+   * @param categoryName the name of the category
+   * @return the result of the operation
+   */
+  public UpdateResult addCategory(String productName, String categoryName) {
     try {
       jdbi.useHandle(
           handle ->
@@ -99,9 +108,9 @@ public class ProductService {
                   .bind("category_name", categoryName)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      // Cannot have a more precise exception to manage the invalid foreign key constraint
-      throw new IllegalArgumentException(e);
+      return UpdateResult.handleUpdateError(e);
     }
+    return UpdateResult.SUCCESS;
   }
 
   /**
