@@ -22,6 +22,7 @@ public class ProductRessource {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public List<Product> getAll() {
+    // TODO add queries for categories filtering
     return productService.getAllProduct();
   }
 }

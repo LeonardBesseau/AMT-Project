@@ -2,12 +2,14 @@ package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.utils.ResourceLoader;
+import ch.heigvd.amt.utils.UpdateResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
 @ApplicationScoped
 public class CategoryService {
@@ -48,5 +50,39 @@ public class CategoryService {
                 .bind("name", name)
                 .mapTo(Category.class)
                 .findOne());
+  }
+
+  /**
+   * Delete a category
+   *
+   * @param name the name of the category to delete
+   */
+  public void deleteCategory(String name) {
+    jdbi.useHandle(
+        handle ->
+            handle
+                .createUpdate(ResourceLoader.loadResource("sql/category/delete.sql"))
+                .bind("name", name)
+                .execute());
+  }
+
+  /**
+   * Add category to the database
+   *
+   * @param name the name of the new category
+   * @return the result of the operation
+   */
+  public UpdateResult addCategory(String name) {
+    try {
+      jdbi.useHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/category/add.sql"))
+                  .bind("name", name)
+                  .execute());
+    } catch (UnableToExecuteStatementException e) {
+      return UpdateResult.handleUpdateError(e);
+    }
+    return UpdateResult.SUCCESS;
   }
 }

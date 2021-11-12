@@ -6,3 +6,4 @@ SELECT name          AS p_name,
        category_name AS c_name
 FROM product
          LEFT JOIN category_product cp ON product.name = cp.product_name
+WHERE category_name IN (<categoryList>)

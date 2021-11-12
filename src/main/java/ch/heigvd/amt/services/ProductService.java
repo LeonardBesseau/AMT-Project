@@ -3,6 +3,7 @@ package ch.heigvd.amt.services;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.utils.ResourceLoader;
+import ch.heigvd.amt.utils.UpdateResult;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,14 +11,18 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.jboss.logging.Logger;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.reflect.ConstructorMapper;
 import org.jdbi.v3.core.result.RowView;
+import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
 @ApplicationScoped
 public class ProductService {
 
   private final Jdbi jdbi;
+
+  private static final Logger logger = Logger.getLogger(ProductService.class);
 
   @Inject
   public ProductService(Jdbi jdbi) {
@@ -25,9 +30,9 @@ public class ProductService {
   }
 
   /**
-   * Get all product from databases
+   * Get all product from database
    *
-   * @return a list of product
+   * @return a list of product present in the database
    */
   public List<Product> getAllProduct() {
     return new ArrayList<>(
@@ -35,6 +40,29 @@ public class ProductService {
                 handle ->
                     handle
                         .createQuery(ResourceLoader.loadResource("sql/product/getAll.sql"))
+                        .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
+                        .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
+                        .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
+            .values());
+  }
+
+  /**
+   * Get all product with selected category from database
+   *
+   * @param categories A list of the categories to filter by
+   * @return a list of product present in the database with the given filter applied
+   */
+  public List<Product> getAllProductForCategories(List<String> categories) {
+    if (categories.isEmpty()) {
+      throw new IllegalArgumentException("Filter cannot be empty");
+    }
+    return new ArrayList<>(
+        jdbi.withHandle(
+                handle ->
+                    handle
+                        .createQuery(
+                            ResourceLoader.loadResource("sql/product/getAllWithCategoryFilter.sql"))
+                        .bindList("categoryList", categories) // even if the list
                         .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
                         .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
                         .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
@@ -62,6 +90,34 @@ public class ProductService {
         .findFirst();
   }
 
+  /**
+   * add a category to a product. Does nothing if the category is associated with the product but
+   * will still return SUCCESS
+   *
+   * @param productName the name of the product
+   * @param categoryName the name of the category
+   * @return the result of the operation
+   */
+  public UpdateResult addCategory(String productName, String categoryName) {
+    try {
+      jdbi.useHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/product/addCategory.sql"))
+                  .bind("product_name", productName)
+                  .bind("category_name", categoryName)
+                  .execute());
+    } catch (UnableToExecuteStatementException e) {
+      return UpdateResult.handleUpdateError(e);
+    }
+    return UpdateResult.SUCCESS;
+  }
+
+  /**
+   * Accumulator function for aggregating multiple categories for the same product
+   *
+   * @return a map of the of all the products with their categories aggregated
+   */
   private BiFunction<LinkedHashMap<String, Product>, RowView, LinkedHashMap<String, Product>>
       accumulateProductRow() {
     return (map, rowView) -> {

@@ -1,9 +1,11 @@
 CREATE TABLE IF NOT EXISTS image
 (
     id   SERIAL PRIMARY KEY,
-    data BYTEA
+    data bytea
 );
-INSERT INTO image VALUES (0, NULL) ON CONFLICT DO NOTHING ;
+INSERT INTO image
+VALUES (0, NULL)
+ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS cart
 (
@@ -30,8 +32,8 @@ CREATE TABLE IF NOT EXISTS category_product
     category_name TEXT,
     product_name  TEXT,
     PRIMARY KEY (category_name, product_name),
-    CONSTRAINT fk_category_name FOREIGN KEY (category_name) REFERENCES category (name),
-    CONSTRAINT fk_product_name FOREIGN KEY (product_name) REFERENCES product (name)
+    CONSTRAINT fk_category_name FOREIGN KEY (category_name) REFERENCES category (name) ON DELETE CASCADE,
+    CONSTRAINT fk_product_name FOREIGN KEY (product_name) REFERENCES product (name) ON DELETE CASCADE
 );
 
 
@@ -42,6 +44,6 @@ CREATE TABLE IF NOT EXISTS cart_product
     product_name TEXT,
     quantity     INTEGER CHECK ( quantity > 0 ),
     PRIMARY KEY (user_id, product_name),
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES cart (user_id),
-    CONSTRAINT fk_product_name FOREIGN KEY (product_name) REFERENCES product (name)
+    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES cart (user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_product_name FOREIGN KEY (product_name) REFERENCES product (name) ON DELETE CASCADE
 );
