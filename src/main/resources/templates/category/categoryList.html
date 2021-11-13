@@ -1,19 +1,8 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="The best site for pastry related shopping">
-  <meta name="author" content="LES BOULANGERS">
-  <title>Admin Panel | E-Shopper</title>
-  <link href="/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/css/font-awesome.min.css" rel="stylesheet">
-  <link href="/css/prettyPhoto.css" rel="stylesheet">
-  <link href="/css/price-range.css" rel="stylesheet">
-  <link href="/css/animate.css" rel="stylesheet">
-  <link href="/css/main.css" rel="stylesheet">
-  <link href="/css/responsive.css" rel="stylesheet">
-</head>
+{#include head}
+ {#title} Admin - Category Management {/title}
+{/include}
 <body>
 <h1>Admin Panel</h1>
 <section>
@@ -27,15 +16,16 @@
             <div class="product-image-wrapper">
               <div class="single-products">
                 <div class="productinfo text-center">
-                  <img src="images/home/product1.jpg" alt="" />
-                  <p>{item.name}</p>
-                  <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Link article</a>
+                  <h1>{item.name}</h1>
+                  <a href="#" class="btn btn-default"><i class="fa"></i>Link with article</a>
+                  <a href="/view/admin/category/delete/{item.name}" class="btn btn-danger" ><i class="fa"></i>Delete category</a>
                 </div>
               </div>
             </div>
           </div>
           {/for}
         </div><!--features_items-->
+        <a href="/view/admin/category/create" class="btn btn-success"><i class="fa"></i>Add category</a>
       </div>
     </div>
   </div>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {#include head}
+  {#title} Admin - Category Creation {/title}
+  {/include}
+</head>
+<body>
+<h1>Add new product</h1>
+<form action="/view/admin/category/create" method="post" class="needs-validation" novalidate>
+  <div class="form-group align-items-center">
+    <div class="col-sm-3 my-1">
+      <label for="name">Name</label>
+      <input type="text" class="form-control mb-2" id="name" name="name"
+             placeholder="Category name">
+
+      {#if category}
+      <div class="alert alert-danger">
+        The category with name {category} already exists.
+      </div>
+      {/if}
+    </div>
+  </div>
+  </div>
+  <div class="col-auto my-1">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+</body>
+</html>
