@@ -1,0 +1,28 @@
+{#insert list}
+    {#for item in items}
+    <div class="col-sm-4">
+      <div class="product-image-wrapper">
+        <div class="single-products">
+          <div class="productinfo text-center">
+            <img src="images/home/product1.jpg" alt="" />
+            <h2>{item.name}</h2>
+            <h3>Price: {item.price}</h3>
+            <h3>Quantity {item.quantity}</h3>
+
+          </div>
+
+          <div class="product-overlay">
+            <div class="overlay-content">
+              <p>{item.description}</p>
+            </div>
+          </div>
+        </div>
+        {#if clientDisplay}
+        <div class="text-center">
+          <a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
+        </div>
+        {/if}
+      </div>
+    </div>
+    {/for}
+{/insert}

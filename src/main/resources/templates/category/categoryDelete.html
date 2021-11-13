@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {#include head}
+  {#title} Admin - Category Suppression {/title}
+  {/include}
+</head>
+<body>
+<h1 class="text-danger">Attention</h1>
+<p class="alert alert-danger text-danger"> The following articles will be impacted and will no longer be associated with this
+  category</p>
+{#include product/productList items=items}
+{/include}
+<div class="text-center">
+<a href="?confirm=true" class="btn btn-danger"><i class="warning"></i>Confirm</a>
+<a href="/view/admin/category" class="btn btn-warning"><i class="warning"></i>Cancel</a>
+</div>
+</body>
+</html>

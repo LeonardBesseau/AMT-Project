@@ -20,7 +20,7 @@ public class ProductView {
   // Inject the template html.
   // We have to specify the path to the template from the template folder
   @Inject
-  @Location("ProductView/productList.html")
+  @Location("product/productListDisplay.html")
   Template productList;
 
   @Inject

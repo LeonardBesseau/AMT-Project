@@ -69,16 +69,16 @@ public class CategoryService {
   /**
    * Add category to the database
    *
-   * @param name the name of the new category
+   * @param category the name of the new category
    * @return the result of the operation
    */
-  public UpdateResult addCategory(String name) {
+  public UpdateResult addCategory(Category category) {
     try {
       jdbi.useHandle(
           handle ->
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/category/add.sql"))
-                  .bind("name", name)
+                  .bind("name", category.getName())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
       return UpdateResult.handleUpdateError(e);
