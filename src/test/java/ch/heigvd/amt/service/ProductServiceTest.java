@@ -1,9 +1,9 @@
 package ch.heigvd.amt.service;
 
 import ch.heigvd.amt.database.PostgisResource;
+import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.ProductService;
-import ch.heigvd.amt.utils.UpdateResult;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import java.util.ArrayList;
