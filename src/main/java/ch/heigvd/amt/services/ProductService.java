@@ -1,9 +1,10 @@
 package ch.heigvd.amt.services;
 
+import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateResultHandler;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.utils.ResourceLoader;
-import ch.heigvd.amt.utils.UpdateResult;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,12 +22,14 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 public class ProductService {
 
   private final Jdbi jdbi;
+  private final UpdateResultHandler updateResultHandler;
 
   private static final Logger logger = Logger.getLogger(ProductService.class);
 
   @Inject
-  public ProductService(Jdbi jdbi) {
+  public ProductService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
     this.jdbi = jdbi;
+    this.updateResultHandler = updateResultHandler;
   }
 
   /**
@@ -108,7 +111,7 @@ public class ProductService {
                   .bind("category_name", categoryName)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return UpdateResult.handleUpdateError(e);
+      return updateResultHandler.handleUpdateError(e);
     }
     return UpdateResult.SUCCESS;
   }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nullable;
+import org.jdbi.v3.core.mapper.Nested;
 
 public class Product {
 
@@ -12,22 +13,22 @@ public class Product {
   private final double price;
   private final String description;
   private final int quantity;
-  private final int imageId;
+  private final Image image;
   private final List<Category> categories;
 
-  @ConstructorProperties({"name", "price", "description", "quantity", "image_id", "category_name"})
+  @ConstructorProperties({"name", "price", "description", "quantity", "image", "category_name"})
   public Product(
       String name,
       double price,
       String description,
       int quantity,
-      int imageId,
+      @Nested("image") Image image,
       @Nullable List<Category> categories) {
     this.name = name;
     this.price = price;
     this.description = description;
     this.quantity = quantity;
-    this.imageId = imageId;
+    this.image = image;
     this.categories = Objects.requireNonNullElseGet(categories, ArrayList::new);
   }
 
@@ -47,8 +48,8 @@ public class Product {
     return quantity;
   }
 
-  public int getImageId() {
-    return imageId;
+  public Image getImage() {
+    return image;
   }
 
   public List<Category> getCategories() {

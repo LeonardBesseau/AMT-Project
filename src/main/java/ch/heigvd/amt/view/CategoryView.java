@@ -1,10 +1,10 @@
 package ch.heigvd.amt.view;
 
+import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.CategoryService;
 import ch.heigvd.amt.services.ProductService;
-import ch.heigvd.amt.utils.UpdateResult;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
