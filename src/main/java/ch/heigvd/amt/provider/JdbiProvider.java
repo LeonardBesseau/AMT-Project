@@ -1,6 +1,7 @@
 package ch.heigvd.amt.provider;
 
 import ch.heigvd.amt.models.Category;
+import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.models.Product;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -20,6 +21,7 @@ public class JdbiProvider {
     jdbi = Jdbi.create(dataSource).installPlugin(new PostgresPlugin());
     jdbi.registerRowMapper(ConstructorMapper.factory(Product.class));
     jdbi.registerRowMapper(ConstructorMapper.factory(Category.class));
+    jdbi.registerRowMapper(ConstructorMapper.factory(Image.class));
   }
 
   /**
