@@ -1,6 +1,6 @@
 package ch.heigvd.amt.view;
 
-import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.CategoryService;
@@ -75,7 +75,7 @@ public class CategoryView {
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object addCategory(@FormParam("name") String category) {
-    if (categoryService.addCategory(new Category(category)) == UpdateResult.SUCCESS) {
+    if (categoryService.addCategory(new Category(category)).getStatus() == UpdateStatus.SUCCESS) {
       return Response.status(301).location(URI.create("/view/admin/category/")).build();
     }
     return categoryAdd.data(CATEGORY, category);

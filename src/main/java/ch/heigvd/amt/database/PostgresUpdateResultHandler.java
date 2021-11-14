@@ -20,11 +20,11 @@ public class PostgresUpdateResultHandler implements UpdateResultHandler {
       if (errorMessage != null && errorMessage.getSQLState() != null) {
         switch (errorMessage.getSQLState()) {
           case "23503":
-            return UpdateResult.INVALID_REFERENCE;
+            return new UpdateResult(UpdateStatus.INVALID_REFERENCE);
           case "23505":
-            return UpdateResult.DUPLICATE;
+            return new UpdateResult(UpdateStatus.DUPLICATE);
           case "23514":
-            return UpdateResult.INVALID_CHECK;
+            return new UpdateResult(UpdateStatus.INVALID_CHECK);
           default:
             break;
         }
