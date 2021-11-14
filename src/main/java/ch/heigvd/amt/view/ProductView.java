@@ -1,6 +1,6 @@
 package ch.heigvd.amt.view;
 
-import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.services.ImageService;
 import ch.heigvd.amt.services.ProductService;
 import io.quarkus.qute.Location;
@@ -72,7 +72,7 @@ public class ProductView {
 
         InputStream inputStream = inputPart.getBody(InputStream.class, null);
         byte[] bytes = IOUtils.toByteArray(inputStream);
-        if (imageService.addImage(bytes) == UpdateResult.SUCCESS) {
+        if (imageService.addImage(bytes).getStatus() == UpdateStatus.SUCCESS) {
           return Response.ok().entity("All files successfully.").build();
         }
         return Response.ok().entity("Error with database").build();

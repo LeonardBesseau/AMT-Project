@@ -2,6 +2,7 @@ package ch.heigvd.amt.service;
 
 import ch.heigvd.amt.database.PostgisResource;
 import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.ProductService;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -93,26 +94,26 @@ class ProductServiceTest {
     Assertions.assertTrue(product.getCategories().isEmpty());
 
     Assertions.assertEquals(
-        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
+        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(1, product.getCategories().size());
     Assertions.assertEquals(CATEGORY_A_NAME, product.getCategories().get(0).getName());
 
     // Check idempotent
     Assertions.assertEquals(
-        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
+        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(1, product.getCategories().size());
     Assertions.assertEquals(CATEGORY_A_NAME, product.getCategories().get(0).getName());
 
     Assertions.assertEquals(
-        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_B_NAME));
+        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_B_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(2, product.getCategories().size());
 
     Assertions.assertEquals(
-        UpdateResult.INVALID_REFERENCE, productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
+        new UpdateResult(UpdateStatus.INVALID_REFERENCE), productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
     Assertions.assertEquals(
-        UpdateResult.INVALID_REFERENCE, productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
+        new UpdateResult(UpdateStatus.INVALID_REFERENCE), productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
   }
 }
