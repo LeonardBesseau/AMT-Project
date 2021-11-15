@@ -17,7 +17,9 @@ import org.json.JSONObject;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
@@ -57,21 +59,12 @@ public class LoginResource {
                     String token = jsonBody.getString("token");
                     String role = jsonBody.getJSONObject("account").getString("role");
 
-                    // Cookie duration : 1 day in milliseconds
-                    int duration = 3600 * 24 * 1000;
-                    Date expirationDate = new Date(System.currentTimeMillis() + duration);
+                    // Cookie duration : 1 day in seconds
+                    int cookieDuration = 3600 * 24;
+                    NewCookie cookieJWT = new NewCookie("jwt_token", token, "", null, null, cookieDuration, false, true);
+                    NewCookie cookieRole = new NewCookie("user_role", role, "", null, null, cookieDuration, false, false);
 
-                    BasicClientCookie cookieJWT = new BasicClientCookie("jwt_token", token);
-                    cookieJWT.setPath("/");
-                    cookieJWT.setSecure(true);
-                    cookieJWT.setAttribute("HttpOnly", "true");
-                    cookieJWT.setExpiryDate(expirationDate);
-
-                    BasicClientCookie cookieRole = new BasicClientCookie("user_role", role);
-                    cookieRole.setPath("/");
-                    cookieRole.setExpiryDate(expirationDate);
-
-                    return Response.status(Response.Status.MOVED_PERMANENTLY).location(URI.create("/view/product")).build();
+                    return Response.status(Response.Status.MOVED_PERMANENTLY).cookie(cookieJWT, cookieRole).location(URI.create("/view/product")).build();
                 case HttpStatus.SC_FORBIDDEN:
                     return login.data(REGISTER_ERROR, null).data(LOGIN_ERROR, "Username or password incorrect.");
                 default:
