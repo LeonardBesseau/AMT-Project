@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {#include head}
+  {#title} Admin - Product Creation {/title}
+  {/include}
+</head>
+<body>
+<h1>Add new product</h1>
+<form method="post" class="needs-validation" novalidate enctype="multipart/form-data">
+  <div class="form-group align-items-center">
+    <div class="col-sm-3 my-1">
+      <label for="name">Name</label>
+      <input type="text" class="form-control mb-2" id="name" name="name"
+             placeholder="Product name" required>
+      {#if missing}
+      <div class="alert alert-danger">
+        The field is necessary.
+      </div>
+      {/if}
+      {#if duplicate}
+      <div class="alert alert-danger">
+        The product with name {duplicate} already exists.
+      </div>
+      {/if}
+    </div>
+    <div class="col-sm-3 my-1">
+    <label for="description">Description</label>
+    <input type="text" class="form-control mb-2" id="description" name="description"
+           placeholder="Description">
+    </div>
+    <div class="col-sm-3 my-2">
+    <label for="price">Price</label>
+    <input type="number" class="form-control mb-2" id="price" name="price">
+    {#if invalidPrice}
+    <div class="alert alert-danger">
+      The price cannot be less than 0
+    </div>
+    {/if}
+    </div>
+    <div class="col-sm-3 my-1">
+    <label for="quantity">Quantity</label>
+    <input type="number" class="form-control mb-2" id="quantity" name="quantity">
+    {#if invalidQuantity}
+    <div class="alert alert-danger">
+      The quantity cannot be less than 0
+    </div>
+    {/if}
+    </div>
+    <div class="col-sm-3 my-1">
+      <label for="image">Image</label>
+      <input type="file" id="image" name="image">
+      {#if imageError}
+      <div class="alert alert-danger">
+        An error occurred with the image
+      </div>
+      {/if}
+    </div>
+  </div>
+  </div>
+  <div class="col-auto my-1">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+</body>
+</html>
