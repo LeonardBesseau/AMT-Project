@@ -1,7 +1,6 @@
 package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.database.UpdateResultHandler;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
@@ -110,6 +109,24 @@ public class ProductService {
                   .createUpdate(ResourceLoader.loadResource("sql/product/addCategory.sql"))
                   .bind("product_name", productName)
                   .bind("category_name", categoryName)
+                  .execute());
+    } catch (UnableToExecuteStatementException e) {
+      return updateResultHandler.handleUpdateError(e);
+    }
+    return UpdateResult.success();
+  }
+
+  public UpdateResult addProduct(Product product) {
+    try {
+      jdbi.useHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/product/add.sql"))
+                  .bind("name", product.getName())
+                  .bind("price", product.getPrice())
+                  .bind("description", product.getDescription())
+                  .bind("quantity", product.getQuantity())
+                  .bind("image_id", product.getImage().getId())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
       return updateResultHandler.handleUpdateError(e);

@@ -69,7 +69,8 @@ class CategoryServiceTest {
     List<Category> result1 = categoryService.getAllCategory();
     Assertions.assertEquals(2, result1.size());
 
-    Assertions.assertEquals(new UpdateResult(UpdateStatus.DUPLICATE), categoryService.addCategory(new Category("A")));
+    Assertions.assertEquals(
+        new UpdateResult(UpdateStatus.DUPLICATE), categoryService.addCategory(new Category("A")));
 
     Assertions.assertEquals(UpdateResult.success(), categoryService.addCategory(new Category("C")));
     List<Category> result2 = categoryService.getAllCategory();

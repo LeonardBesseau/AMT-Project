@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 
 public class Image {
 
+  public static final int DEFAULT_IMAGE_ID = 0;
+
   private final int id;
   private final byte[] data;
 

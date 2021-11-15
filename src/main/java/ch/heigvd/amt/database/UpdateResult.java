@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public class UpdateResult {
 
-  private final static UpdateResult SUCCESS = new UpdateResult(UpdateStatus.SUCCESS);
+  private static final UpdateResult SUCCESS = new UpdateResult(UpdateStatus.SUCCESS);
 
   private final UpdateStatus status;
   private final Integer generatedId;
@@ -50,7 +50,7 @@ public class UpdateResult {
     return result;
   }
 
-  public static UpdateResult success(){
+  public static UpdateResult success() {
     return SUCCESS;
   }
 }

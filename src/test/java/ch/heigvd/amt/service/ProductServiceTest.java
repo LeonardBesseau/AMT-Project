@@ -112,8 +112,10 @@ class ProductServiceTest {
     Assertions.assertEquals(2, product.getCategories().size());
 
     Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.INVALID_REFERENCE), productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
+        new UpdateResult(UpdateStatus.INVALID_REFERENCE),
+        productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
     Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.INVALID_REFERENCE), productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
+        new UpdateResult(UpdateStatus.INVALID_REFERENCE),
+        productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
   }
 }

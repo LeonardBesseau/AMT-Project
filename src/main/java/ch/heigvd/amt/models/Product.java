@@ -10,18 +10,18 @@ import org.jdbi.v3.core.mapper.Nested;
 public class Product {
 
   private final String name;
-  private final double price;
+  private final Double price;
   private final String description;
-  private final int quantity;
+  private final Integer quantity;
   private final Image image;
   private final List<Category> categories;
 
   @ConstructorProperties({"name", "price", "description", "quantity", "image", "category_name"})
   public Product(
       String name,
-      double price,
+      Double price,
       String description,
-      int quantity,
+      Integer quantity,
       @Nested("image") Image image,
       @Nullable List<Category> categories) {
     this.name = name;
@@ -36,7 +36,7 @@ public class Product {
     return name;
   }
 
-  public double getPrice() {
+  public Double getPrice() {
     return price;
   }
 
@@ -44,7 +44,7 @@ public class Product {
     return description;
   }
 
-  public int getQuantity() {
+  public Integer getQuantity() {
     return quantity;
   }
 

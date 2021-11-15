@@ -1,8 +1,8 @@
 package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.database.UpdateResultHandler;
+import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.util.Optional;
@@ -38,18 +38,18 @@ public class ImageService {
 
   public UpdateResult addImage(byte[] data) {
     try {
-      Integer newId = jdbi.withHandle(
-          handle ->
-              handle
-                  .createUpdate(ResourceLoader.loadResource("sql/image/add.sql"))
-                  .bind("data", data)
-                  .executeAndReturnGeneratedKeys().mapTo(int.class).one());
+      Integer newId =
+          jdbi.withHandle(
+              handle ->
+                  handle
+                      .createUpdate(ResourceLoader.loadResource("sql/image/add.sql"))
+                      .bind("data", data)
+                      .executeAndReturnGeneratedKeys()
+                      .mapTo(int.class)
+                      .one());
       return new UpdateResult(UpdateStatus.SUCCESS, newId);
     } catch (UnableToExecuteStatementException e) {
       return updateResultHandler.handleUpdateError(e);
     }
-
   }
-
-
 }
