@@ -73,6 +73,11 @@
 						<form method=POST action="/login/signin">
 							<input type="text" name="username" placeholder="Username"/>
 							<input type="password" name="password" placeholder="Password"/>
+							{#if loginError}
+							<div class="alert alert-danger">
+								{loginError}
+							</div>
+							{/if}
 							<button type="submit" class="btn btn-default">Login</button>
 						</form>
 					</div><!--/login form-->
@@ -87,7 +92,11 @@
 							<input type="text" name="username" placeholder="Username"/>
 							<input type="password" name="password" placeholder="Password"/>
 							<input type="password" name="confirmPassword" placeholder="Confirm password"/>
-							<span>{errorPassword}</span>
+							{#if registerError}
+								<div class="alert alert-danger">
+									{registerError}
+								</div>
+							{/if}
 							<button type="submit" class="btn btn-default">Signup</button>
 						</form>
 					</div><!--/sign up form-->
