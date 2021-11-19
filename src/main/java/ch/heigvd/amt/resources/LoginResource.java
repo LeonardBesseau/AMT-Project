@@ -108,7 +108,7 @@ public class LoginResource {
         jsonInput.put("password", password);
 
         Client client = ClientBuilder.newClient();
-        return client.target(AUTHSERV_ADDR).path(resource).request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).post(Entity.json(jsonInput));
+        return client.target(AUTHSERV_ADDR).path(resource).request(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).post(Entity.json(jsonInput.toString()));
     }
 
     private NewCookie[] createCookies(String ResponseBody) {
