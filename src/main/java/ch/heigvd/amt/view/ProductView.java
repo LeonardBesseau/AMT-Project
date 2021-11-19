@@ -1,5 +1,6 @@
 package ch.heigvd.amt.view;
 
+import ch.heigvd.amt.services.CategoryService;
 import ch.heigvd.amt.services.ProductService;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
@@ -20,11 +21,13 @@ public class ProductView {
   // Inject the template html.
   // We have to specify the path to the template from the template folder
   @Inject
-  @Location("ProductView/productList.html")
+  @Location("ProductView/shop.html")
   Template productList;
+
 
   @Inject
   public ProductView(ProductService productService) {
+
     this.productService = productService;
   }
 
@@ -38,4 +41,7 @@ public class ProductView {
   public TemplateInstance getAll() {
     return productList.data("items", productService.getAllProduct());
   }
+
+
 }
+
