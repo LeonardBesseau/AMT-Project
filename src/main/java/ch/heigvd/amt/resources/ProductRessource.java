@@ -56,8 +56,8 @@ public class ProductRessource {
   Template productAddCategory;
 
   @Inject
-  public ProductRessource(ProductService productService, ImageService imageService,
-      CategoryService categoryService) {
+  public ProductRessource(
+      ProductService productService, ImageService imageService, CategoryService categoryService) {
     this.productService = productService;
     this.imageService = imageService;
     this.categoryService = categoryService;
@@ -79,7 +79,11 @@ public class ProductRessource {
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAllView() {
 
-    return productList.data("items", productService.getAllProduct(), "categories", categoryService.getAllUsedCategory());
+    return productList.data(
+        "items",
+        productService.getAllProduct(),
+        "categories",
+        categoryService.getAllUsedCategory());
   }
 
   @GET
@@ -99,16 +103,21 @@ public class ProductRessource {
   @Path("/admin/view/{id}")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
-  public Object updateCategoryForProduct(@PathParam("id") String name, MultivaluedMap<String, String> input) {
+  public Object updateCategoryForProduct(
+      @PathParam("id") String name, MultivaluedMap<String, String> input) {
     Optional<Product> product = productService.getProduct(name);
     if (product.isPresent()) {
       List<Category> categories = product.get().getCategories();
       // remove deleted category
-      categories.stream().map(Category::getName)
-          .filter(s -> input.get(s) == null).forEach(s -> productService.removeCategory(name, s));
+      categories.stream()
+          .map(Category::getName)
+          .filter(s -> input.get(s) == null)
+          .forEach(s -> productService.removeCategory(name, s));
 
       // add categories (we do not care about duplicates and invalid categories will be ignored)
-      input.values().stream().map(strings -> strings.get(0)).forEach(s -> productService.addCategory(name, s));
+      input.values().stream()
+          .map(strings -> strings.get(0))
+          .forEach(s -> productService.addCategory(name, s));
 
       return Response.status(301).location(URI.create("/product/view/")).build();
     }
@@ -183,9 +192,9 @@ public class ProductRessource {
     }
 
     if (productService
-        .addProduct(
-            new Product(name, price, description, quantity, new Image(imageId, null), null))
-        .getStatus()
+            .addProduct(
+                new Product(name, price, description, quantity, new Image(imageId, null), null))
+            .getStatus()
         == UpdateStatus.DUPLICATE) {
       return productAdd.data(
           "missing",

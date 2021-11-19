@@ -94,10 +94,10 @@ public class ProductService {
   }
 
   /**
-   * add a category to a product. Does nothing if the category is associated with the product but will still return
-   * SUCCESS
+   * add a category to a product. Does nothing if the category is associated with the product but
+   * will still return SUCCESS
    *
-   * @param productName  the name of the product
+   * @param productName the name of the product
    * @param categoryName the name of the category
    * @return the result of the operation
    */
@@ -150,7 +150,7 @@ public class ProductService {
    * @return a map of the of all the products with their categories aggregated
    */
   private BiFunction<LinkedHashMap<String, Product>, RowView, LinkedHashMap<String, Product>>
-  accumulateProductRow() {
+      accumulateProductRow() {
     return (map, rowView) -> {
       Product product =
           map.computeIfAbsent(
