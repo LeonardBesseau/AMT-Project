@@ -1,19 +1,32 @@
-function sort(filterId, tableId, elementsTag) {
-  // Declare variables
-  let input, filter, ul, li, a, i, txtValue;
-  input = document.getElementById(filterId);
-  filter = input.value.toUpperCase();
-  ul = document.getElementById(tableId);
-  li = ul.getElementsByTagName(elementsTag);
-
-  // Loop through all list items, and hide those who don't match the search query
-  for (i = 0; i < li.length; i++) {
-    a = li[i].getElementsByTagName("a")[0];
-    txtValue = a.textContent || a.innerText;
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-      li[i].style.display = "";
-    } else {
-      li[i].style.display = "none";
-    }
+function sort(newFilter){
+  if( typeof this.filters === 'undefined'){
+    this.filters = [];
   }
+  if(this.filters.includes(newFilter)){
+    this.filters = this.filters.filter((item) => {return item !== newFilter});
+    [...document.getElementsByClassName("category-selector-"+newFilter)].forEach((item) =>{
+      item.style.background = "transparent"
+    });
+  }else{
+    this.filters.push(newFilter);
+    [...document.getElementsByClassName("category-selector-"+newFilter)].forEach((item) =>{
+      console.log(item.style.background)
+      item.style.background = "#369a24"
+    });
+  }
+
+  [...document.getElementsByClassName("toFilter")].forEach((item) =>{
+    item.style.display = "none"
+  });
+
+  [...document.getElementsByClassName("toFilter")].filter((item) => {
+    for (let filter of this.filters){
+      if (item.className.indexOf(filter) === -1){
+        return false;
+      }
+    }
+    return true;
+  }).forEach((item) => {
+    item.style.display = "block"
+  });
 }
