@@ -17,7 +17,7 @@
 	<script src="/js/html5shiv.js"></script>
 	<script src="/js/respond.min.js"></script>
 	<![endif]-->
-		<script src="/js/utils.js"></script>
+	<script src="/js/utils.js"></script>
     <link rel="shortcut icon" href="../images/ico/favicon.ico">
     <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../images/ico/apple-touch-icon-144-precomposed.png">
     <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../images/ico/apple-touch-icon-114-precomposed.png">
@@ -81,11 +81,11 @@
 				<div class="col-sm-3">
 					<div class="left-sidebar">
 						<h2>Category</h2>
-						<div class="panel-group category-products" id="accordian"><!--category-productsr-->
+						<div class="panel-group category-products text-center" id="accordian"><!--category-productsr-->
 							{#for category in categories}
 							<div class="panel panel-default">
 								<div class="panel-heading">
-									<h4 class="panel-title"><a href="#">{category.name}</a></h4>
+									<h4 class="panel-title category-selector-{category.name}"><a href="#" onclick="sort('{category.name}')">{category.name}</a></h4>
 								</div>
 							</div>
 							{/for}
@@ -98,7 +98,7 @@
 					<div class="features_items"><!--features_items-->
 						<h2 class="title text-center">Products</h2>
 						{#for item in items}
-						<div class="col-sm-4">
+						<div class="col-sm-4 toFilter {#for category in item.categories} {category.name} {/for}">
 							<div class="product-image-wrapper">
 								<div class="single-products">
 									<div class="productinfo text-center">
