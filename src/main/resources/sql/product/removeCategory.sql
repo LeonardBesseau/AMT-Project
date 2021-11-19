@@ -1,0 +1,1 @@
+DELETE FROM category_product WHERE category_name = :category_name AND product_name = :product_name

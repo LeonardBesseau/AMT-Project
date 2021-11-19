@@ -57,7 +57,7 @@ public class ProductService {
    */
   public List<Product> getAllProductForCategories(List<String> categories) {
     if (categories.isEmpty()) {
-      throw new IllegalArgumentException("Filter cannot be empty");
+      return getAllProduct();
     }
     return new ArrayList<>(
         jdbi.withHandle(
@@ -65,7 +65,7 @@ public class ProductService {
                     handle
                         .createQuery(
                             ResourceLoader.loadResource("sql/product/getAllWithCategoryFilter.sql"))
-                        .bindList("categoryList", categories) // even if the list
+                        .bindList("categoryList", categories)
                         .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
                         .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
                         .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
@@ -94,10 +94,10 @@ public class ProductService {
   }
 
   /**
-   * add a category to a product. Does nothing if the category is associated with the product but
-   * will still return SUCCESS
+   * add a category to a product. Does nothing if the category is associated with the product but will still return
+   * SUCCESS
    *
-   * @param productName the name of the product
+   * @param productName  the name of the product
    * @param categoryName the name of the category
    * @return the result of the operation
    */
@@ -114,6 +114,16 @@ public class ProductService {
       return updateResultHandler.handleUpdateError(e);
     }
     return UpdateResult.success();
+  }
+
+  public void removeCategory(String productName, String categoryName) {
+    jdbi.useHandle(
+        handle ->
+            handle
+                .createUpdate(ResourceLoader.loadResource("sql/product/removeCategory.sql"))
+                .bind("product_name", productName)
+                .bind("category_name", categoryName)
+                .execute());
   }
 
   public UpdateResult addProduct(Product product) {
@@ -140,7 +150,7 @@ public class ProductService {
    * @return a map of the of all the products with their categories aggregated
    */
   private BiFunction<LinkedHashMap<String, Product>, RowView, LinkedHashMap<String, Product>>
-      accumulateProductRow() {
+  accumulateProductRow() {
     return (map, rowView) -> {
       Product product =
           map.computeIfAbsent(

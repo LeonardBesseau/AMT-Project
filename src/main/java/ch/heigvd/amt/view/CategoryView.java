@@ -26,7 +26,7 @@ import javax.ws.rs.core.Response;
 
 @Path("/view/admin/category")
 @ApplicationScoped
-public class CategoryView {
+public class  CategoryView {
 
   private static final String CATEGORY = "category";
   private final CategoryService categoryService;

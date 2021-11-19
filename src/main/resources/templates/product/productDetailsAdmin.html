@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+{#include head}
+{#title} {item.name} {/title}
+{/include}
+</head>
+<body>
+<h1>{item.name}</h1>
+<div>Price: {item.price}</div>
+<div>Price: {item.description}</div>
+<img src="/image/{item.image.id}" alt="image" width="500" height="600"/>
+<form action="/product/admin/view/{item.name}" method="post" class="needs-validation" novalidate>
+{#for category in categories}
+  <input type="checkbox" id="{category.name}" name="{category.name}" value="{category.name}" {#if item.categories.contains(category)}checked{/if}>
+  <label for="{category.name}"> {category.name}</label><br>
+{/for}
+  <div class="col-auto my-1">
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </div>
+</form>
+</body>
+</html>
+

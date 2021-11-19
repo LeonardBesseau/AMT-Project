@@ -1,6 +1,7 @@
 package ch.heigvd.amt.resources;
 
 import ch.heigvd.amt.database.UpdateStatus;
+import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.CategoryService;
@@ -14,13 +15,16 @@ import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.commons.io.IOUtils;
 import org.jboss.logging.Logger;
@@ -32,8 +36,8 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 public class ProductRessource {
 
   private final ProductService productService;
-  private final CategoryService categoryService;
   private final ImageService imageService;
+  private final CategoryService categoryService;
 
   private static final Logger logger = Logger.getLogger(ProductRessource.class);
 
@@ -48,10 +52,15 @@ public class ProductRessource {
   Template productAdd;
 
   @Inject
-  public ProductRessource(ProductService productService, CategoryService categoryService, ImageService imageService) {
+  @Location("product/productDetailsAdmin.html")
+  Template productAddCategory;
+
+  @Inject
+  public ProductRessource(ProductService productService, ImageService imageService,
+      CategoryService categoryService) {
     this.productService = productService;
-    this.categoryService = categoryService;
     this.imageService = imageService;
+    this.categoryService = categoryService;
   }
 
   @GET
@@ -71,6 +80,40 @@ public class ProductRessource {
   public TemplateInstance getAllView() {
 
     return productList.data("items", productService.getAllProduct(), "categories", categoryService.getAllCategory());
+  }
+
+  @GET
+  @Path("/admin/view/{id}")
+  @Produces(MediaType.TEXT_HTML)
+  public TemplateInstance getView(@PathParam("id") String name) {
+    Optional<Product> product = productService.getProduct(name);
+    if (product.isPresent()) {
+      var categories = categoryService.getAllCategory();
+      return productAddCategory.data("item", product.get(), "categories", categories);
+    }
+    // TODO return error
+    return productAddCategory.data("item", null, "categories", null);
+  }
+
+  @POST
+  @Path("/admin/view/{id}")
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Produces(MediaType.TEXT_HTML)
+  public Object updateCategoryForProduct(@PathParam("id") String name, MultivaluedMap<String, String> input) {
+    Optional<Product> product = productService.getProduct(name);
+    if (product.isPresent()) {
+      List<Category> categories = product.get().getCategories();
+      // remove deleted category
+      categories.stream().map(Category::getName)
+          .filter(s -> input.get(s) == null).forEach(s -> productService.removeCategory(name, s));
+
+      // add categories (we do not care about duplicates and invalid categories will be ignored)
+      input.values().stream().map(strings -> strings.get(0)).forEach(s -> productService.addCategory(name, s));
+
+      return Response.status(301).location(URI.create("/product/view/")).build();
+    }
+    // TODO return error
+    return productAddCategory.data("item", null, "categories", null);
   }
 
   @POST
@@ -140,9 +183,9 @@ public class ProductRessource {
     }
 
     if (productService
-            .addProduct(
-                new Product(name, price, description, quantity, new Image(imageId, null), null))
-            .getStatus()
+        .addProduct(
+            new Product(name, price, description, quantity, new Image(imageId, null), null))
+        .getStatus()
         == UpdateStatus.DUPLICATE) {
       return productAdd.data(
           "missing",
