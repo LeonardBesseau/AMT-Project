@@ -3,6 +3,7 @@ package ch.heigvd.amt.resources;
 import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.models.Product;
+import ch.heigvd.amt.services.CategoryService;
 import ch.heigvd.amt.services.ImageService;
 import ch.heigvd.amt.services.ProductService;
 import io.quarkus.qute.Location;
@@ -31,6 +32,7 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 public class ProductRessource {
 
   private final ProductService productService;
+  private final CategoryService categoryService;
   private final ImageService imageService;
 
   private static final Logger logger = Logger.getLogger(ProductRessource.class);
@@ -38,7 +40,7 @@ public class ProductRessource {
   // Inject the template html.
   // We have to specify the path to the template from the template folder
   @Inject
-  @Location("product/productListDisplay.html")
+  @Location("product/shop.html")
   Template productList;
 
   @Inject
@@ -46,8 +48,9 @@ public class ProductRessource {
   Template productAdd;
 
   @Inject
-  public ProductRessource(ProductService productService, ImageService imageService) {
+  public ProductRessource(ProductService productService, CategoryService categoryService, ImageService imageService) {
     this.productService = productService;
+    this.categoryService = categoryService;
     this.imageService = imageService;
   }
 
@@ -66,7 +69,8 @@ public class ProductRessource {
   @Path("/view")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAllView() {
-    return productList.data("items", productService.getAllProduct());
+
+    return productList.data("items", productService.getAllProduct(), "categories", categoryService.getAllCategory());
   }
 
   @POST
