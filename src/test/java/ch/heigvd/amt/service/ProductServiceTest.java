@@ -71,9 +71,8 @@ class ProductServiceTest {
   @Test
   void getAllWithCategoriesFiltering() {
     List<String> categories = new ArrayList<>();
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> productService.getAllProductForCategories(categories));
+    Assertions.assertDoesNotThrow(() -> productService.getAllProductForCategories(categories));
+    Assertions.assertEquals(3, productService.getAllProductForCategories(categories).size());
 
     categories.add(UNKNOWN);
     List<Product> result1 = productService.getAllProductForCategories(categories);
