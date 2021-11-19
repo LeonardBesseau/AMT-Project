@@ -79,7 +79,7 @@ public class ProductRessource {
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAllView() {
 
-    return productList.data("items", productService.getAllProduct(), "categories", categoryService.getAllCategory());
+    return productList.data("items", productService.getAllProduct(), "categories", categoryService.getAllUsedCategory());
   }
 
   @GET

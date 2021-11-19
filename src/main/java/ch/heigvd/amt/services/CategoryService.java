@@ -40,6 +40,16 @@ public class CategoryService {
                     .list()));
   }
 
+  public List<Category> getAllUsedCategory() {
+    return new ArrayList<>(
+        jdbi.withHandle(
+            handle ->
+                handle
+                    .createQuery(ResourceLoader.loadResource("sql/category/getUsedCategory.sql"))
+                    .mapTo(Category.class)
+                    .list()));
+  }
+
   /**
    * Get a product from the database
    *
