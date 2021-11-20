@@ -88,7 +88,7 @@ public class CategoryView {
   public Object deleteCategory(
       @PathParam("id") String category, @QueryParam("confirm") boolean confirm) {
     List<Product> list =
-        productService.getAllProductForCategories(Collections.singletonList(category));
+        productService.getAllProduct(Collections.singletonList(category));
     if (confirm || list.isEmpty()) {
       categoryService.deleteCategory(category);
       return Response.status(301).location(URI.create("/view/admin/category/")).build();

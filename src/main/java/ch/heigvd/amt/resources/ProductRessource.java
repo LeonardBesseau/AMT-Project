@@ -13,6 +13,7 @@ import io.quarkus.qute.TemplateInstance;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,7 +84,24 @@ public class ProductRessource {
         "items",
         productService.getAllProduct(),
         "categories",
-        categoryService.getAllUsedCategory());
+        categoryService.getAllUsedCategory(),
+        "filters", null);
+  }
+
+  @POST
+  @Path("/view")
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Produces(MediaType.TEXT_HTML)
+  public Object getAllViewWithFilter(MultivaluedMap<String, String> input) {
+    List<String> selectedFilter = new ArrayList<>(input.keySet());
+    logger.info(selectedFilter);
+    logger.info(input.values());
+    return productList.data(
+        "items",
+        productService.getAllProduct(selectedFilter),
+        "categories",
+        categoryService.getAllUsedCategory(),
+        "filters", selectedFilter);
   }
 
   @GET
@@ -192,9 +210,9 @@ public class ProductRessource {
     }
 
     if (productService
-            .addProduct(
-                new Product(name, price, description, quantity, new Image(imageId, null), null))
-            .getStatus()
+        .addProduct(
+            new Product(name, price, description, quantity, new Image(imageId, null), null))
+        .getStatus()
         == UpdateStatus.DUPLICATE) {
       return productAdd.data(
           "missing",

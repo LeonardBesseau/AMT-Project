@@ -1,127 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="Les Boulangers" content="">
-    <title>Shop | Les Boulangers</title>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/css/prettyPhoto.css" rel="stylesheet">
-    <link href="/css/price-range.css" rel="stylesheet">
-    <link href="/css/animate.css" rel="stylesheet">
-	<link href="/css/main.css" rel="stylesheet">
-	<link href="/css/responsive.css" rel="stylesheet">
-    <!--[if lt IE 9]>
-	<script src="/js/html5shiv.js"></script>
-	<script src="/js/respond.min.js"></script>
-	<![endif]-->
-    <link rel="shortcut icon" href="../images/ico/favicon.ico">
-    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../images/ico/apple-touch-icon-144-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../images/ico/apple-touch-icon-114-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../images/ico/apple-touch-icon-72-precomposed.png">
-    <link rel="apple-touch-icon-precomposed" href="../images/ico/apple-touch-icon-57-precomposed.png">
-</head><!--/head-->
+  {#include head}
+  {#title} Shop | Les Boulangers {/title}
+  {/include}
+  <link rel="shortcut icon" href="../images/ico/favicon.ico">
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../images/ico/apple-touch-icon-144-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../images/ico/apple-touch-icon-114-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../images/ico/apple-touch-icon-72-precomposed.png">
+  <link rel="apple-touch-icon-precomposed" href="../images/ico/apple-touch-icon-57-precomposed.png">
+</head>
+<!--/head-->
 
 <body>
-	<header id="header"><!--header-->
-		<div class="header-middle"><!--header-middle-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-8">
-						<div class="shop-menu pull-right">
-							<ul class="nav navbar-nav">
-								<li><a href=""><i class="fa fa-user"></i> Account</a></li>
-								<li><a href="../../META-INF/resources/html/checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>
-								<li><a href="../../META-INF/resources/html/cart.html"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-								<li><a href="../../META-INF/resources/html/login.html"><i class="fa fa-lock"></i> Login</a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div><!--/header-middle-->
-	
-		<div class="header-bottom"><!--header-bottom-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-9">
-						<div class="navbar-header">
-							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-								<span class="sr-only">Toggle navigation</span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-							</button>
-						</div>
-						<div class="mainmenu pull-left">
-							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a href="/html/index.html">Home</a></li>
-								<li class="dropdown"><a href="#" class="active">Shop<i class="fa fa-angle-down"></i></a>
-                                    <ul role="menu" class="sub-menu">
-                                        <li><a href="/product/view" class="active">Products</a></li>
-										<li><a href="/html/checkout.html">Checkout</a></li>
-										<li><a href="/html/cart.html">Cart</a></li>
-										<li><a href="/html/login.html">Login</a></li>
-                                    </ul>
-                                </li>
-							</ul>
-						</div>
-					</div>
-				</div>
-				</div>
-			</div>
-	</header>
-	
-	<section>
-		<div class="container">
-			<div class="row">
-				<div class="col-sm-3">
-					<div class="left-sidebar">
-						<h2>Category</h2>
-						<div class="panel-group category-products text-center" id="accordian"><!--category-productsr-->
-							{#for category in categories}
-							<div class="panel panel-default">
-								<div class="panel-heading">
-									<h4 class="panel-title"><a href="#" onclick="sort('{category.name}')">{category.name}</a></h4>
-								</div>
-							</div>
-							{/for}
-						</div><!--/category-products-->
-						
-					</div>
-				</div>
-				
-				<div class="col-sm-9 padding-right">
-					<div class="features_items"><!--features_items-->
-						<h2 class="title text-center">Products</h2>
-						{#for item in items}
-						<div class="col-sm-4 toFilter">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-									<div class="productinfo text-center">
-										<img src="/image/{item.image.id}" alt="" width="250" height="300"/>
-										<h2>{item.price}</h2>
-										<p>{item.name}</p>
-										{#for category in item.categories} <p>{category.name}</p> {/for}
-										<a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
-									</div>
-									<div class="product-overlay">
-										<div class="overlay-content">
-											<h2>{item.price}</h2>
-											<p>{item.name}</p>
-											<a href="#" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						{/for}
-					</div><!--features_items-->
-				</div>
-			</div>
-		</div>
-	</section>
+<header id="header" class="header" style="margin-bottom: 20px">
+  <!--header-->
+  <div class="header-middle">
+    <!--header-middle-->
+    <nav class="navbar-expand-lg navbar-light bg-light">
+      <div class="container container-fluid">
+        <a class="navbar-brand" href="#">Les Boulangers</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a href="" class="nav-link active">
+                <i class="fa fa-user ">
+                </i> Account
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="../../META-INF/resources/html/checkout.html" class="nav-link active">
+                <i class="fa fa-crosshairs">
+                </i>
+                Checkout
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="../../META-INF/resources/html/cart.html" class="nav-link active">
+                <i class="fa fa-shopping-cart">
+                </i>
+                Cart
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="../../META-INF/resources/html/login.html" class="nav-link active">
+                <i class="fa fa-lock">
+                </i> Login
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <!--/header-middle-->
+</header>
+
+<section>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-3">
+        <div class="left-sidebar">
+          <h2>Category</h2>
+          <div class="panel-group category-products text-center" id="accordian">
+            <!--category-productsr-->
+            <form action="/product/view" method="post">
+              {#for category in categories}
+              <input type="checkbox" class="btn-check" id="btn-check-{category.name}" name="{category.name}"  {#if filters && filters.contains(category.name)}checked{/if} autocomplete="off"/>
+              <label class="btn btn-primary" for="btn-check-{category.name}">{category.name}</label>
+              {/for}
+              <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+
+          </div>
+          <!--/category-products-->
+
+        </div>
+      </div>
+
+      <div class="col-sm-9 padding-right">
+        <h2 class="title text-center">Products</h2>
+        <div class="features_items container container-fluid">
+          <!--features_items-->
+          {#if items.isEmpty()}
+          <h1 class="text-danger text-center">No item matches your search</h1>
+          {/if}
+          <div class="row row-cols-3">
+
+            {#for item in items}
+            <div class="col-md-4">
+              <div class="product-image-wrapper">
+                <div class="single-products">
+                  <div class="text-center">
+                    <img src="/image/{item.image.id}" alt="" width="250" height="300"/>
+                    <h2>{item.price}</h2>
+                    <p>{item.name}</p>
+                    {#for category in item.categories} <p>{category.name}</p> {/for}
+                    <a href="#" class="btn btn-default add-to-cart">
+                      <i class="fa fa-shopping-cart">
+                      </i>Add to cart</a>
+                  </div>
+                  <div class="product-overlay">
+                    <div class="overlay-content">
+                      <h2>{item.price}</h2>
+                      <p>{item.name}</p>
+                      <a href="#" class="btn btn-default add-to-cart">
+                        <i class="fa fa-shopping-cart">
+                        </i>Add to cart</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/for}
+          </div>
+        </div>
+        <!--features_items-->
+      </div>
+    </div>
+  </div>
+</section>
 </body>
 </html>

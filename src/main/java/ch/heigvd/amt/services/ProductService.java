@@ -40,7 +40,7 @@ public class ProductService {
    * @return a list of product present in the database
    */
   public List<Product> getAllProduct() {
-    return getAllProductForCategories(Collections.emptyList());
+    return getAllProduct(Collections.emptyList());
   }
 
   /**
@@ -49,7 +49,7 @@ public class ProductService {
    * @param categories A list of the categories to filter by
    * @return a list of product present in the database with the given filter applied
    */
-  public List<Product> getAllProductForCategories(List<String> categories) {
+  public List<Product> getAllProduct(List<String> categories) {
     return new ArrayList<>(jdbi.withHandle(
             handle ->
                 handle
