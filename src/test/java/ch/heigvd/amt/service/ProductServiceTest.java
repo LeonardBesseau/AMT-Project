@@ -78,13 +78,23 @@ class ProductServiceTest {
     List<Product> result1 = productService.getAllProduct(categories);
     Assertions.assertTrue(result1.isEmpty());
 
+    // Check intersection with one invalid
     categories.add(CATEGORY_B_NAME);
     List<Product> result2 = productService.getAllProduct(categories);
-    Assertions.assertEquals(1, result2.size());
+    Assertions.assertEquals(0, result2.size());
 
-    categories.add(CATEGORY_A_NAME);
+    categories.remove(UNKNOWN);
     List<Product> result3 = productService.getAllProduct(categories);
-    Assertions.assertEquals(2, result3.size());
+    Assertions.assertEquals(1, result3.size());
+
+    // Check intersection with both valid
+    categories.add(CATEGORY_A_NAME);
+    List<Product> result4 = productService.getAllProduct(categories);
+    Assertions.assertEquals(1, result4.size());
+
+    categories.remove(CATEGORY_B_NAME);
+    List<Product> result5 = productService.getAllProduct(categories);
+    Assertions.assertEquals(2, result5.size());
   }
 
   @Test

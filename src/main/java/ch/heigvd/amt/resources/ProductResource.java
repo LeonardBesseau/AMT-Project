@@ -87,10 +87,11 @@ public class ProductResource {
         productService.getAllProduct(),
         "categories",
         categoryService.getAllUsedCategory(),
-        "filters", null,
-        "admin", false);
+        "filters",
+        null,
+        "admin",
+        false);
   }
-
 
   @POST
   @Path("/view")
@@ -103,8 +104,10 @@ public class ProductResource {
         productService.getAllProduct(selectedFilter),
         "categories",
         categoryService.getAllUsedCategory(),
-        "filters", selectedFilter,
-        "admin", false);
+        "filters",
+        selectedFilter,
+        "admin",
+        false);
   }
 
   @GET
@@ -117,8 +120,10 @@ public class ProductResource {
         productService.getAllProduct(),
         "categories",
         categoryService.getAllUsedCategory(),
-        "filters", null,
-        "admin", true);
+        "filters",
+        null,
+        "admin",
+        true);
   }
 
   @POST
@@ -132,8 +137,10 @@ public class ProductResource {
         productService.getAllProduct(selectedFilter),
         "categories",
         categoryService.getAllUsedCategory(),
-        "filters", selectedFilter,
-        "admin", true);
+        "filters",
+        selectedFilter,
+        "admin",
+        true);
   }
 
   @GET
@@ -148,8 +155,7 @@ public class ProductResource {
           "categories", categories,
           "invalidPrice", false,
           "invalidQuantity", false,
-          "imageError", false
-      );
+          "imageError", false);
     }
     // TODO return error
     return productAdminDetails.data(
@@ -164,7 +170,8 @@ public class ProductResource {
   @Path("/admin/view/{id}")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
-  public Object updateProduct(@MultipartForm MultipartFormDataInput input, @PathParam("id") String name)
+  public Object updateProduct(
+      @MultipartForm MultipartFormDataInput input, @PathParam("id") String name)
       throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
     boolean isPriceInvalid = false;
@@ -216,10 +223,15 @@ public class ProductResource {
     }
 
     if (productService
-        .updateProduct(
-            new Product(name, price, null, quantity, imageId == Image.DEFAULT_IMAGE_ID ? null :
-                new Image(imageId, null), null))
-        .getStatus()
+            .updateProduct(
+                new Product(
+                    name,
+                    price,
+                    null,
+                    quantity,
+                    imageId == Image.DEFAULT_IMAGE_ID ? null : new Image(imageId, null),
+                    null))
+            .getStatus()
         != UpdateStatus.SUCCESS) {
       return Response.status(400);
     }
@@ -337,9 +349,9 @@ public class ProductResource {
     }
 
     if (productService
-        .addProduct(
-            new Product(name, price, description, quantity, new Image(imageId, null), null))
-        .getStatus()
+            .addProduct(
+                new Product(name, price, description, quantity, new Image(imageId, null), null))
+            .getStatus()
         == UpdateStatus.DUPLICATE) {
       return productAdd.data(
           "missing",

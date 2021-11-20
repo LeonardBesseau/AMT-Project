@@ -20,9 +20,7 @@ public class AdminResource {
   @GET
   @Path("/view")
   @Produces(MediaType.TEXT_HTML)
-  public Object getAdminPanel(){
+  public Object getAdminPanel() {
     return adminMainPage.instance();
   }
-
-
 }

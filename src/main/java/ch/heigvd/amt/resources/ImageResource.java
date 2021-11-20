@@ -31,7 +31,6 @@ public class ImageResource {
   @Location("defaultImageManagement.html")
   Template defaultImageManagement;
 
-
   @Inject
   public ImageResource(ImageService imageService) {
     this.imageService = imageService;
@@ -51,10 +50,9 @@ public class ImageResource {
   @GET
   @Path("/view/default")
   @Produces(MediaType.TEXT_HTML)
-  public Object getDefaultManagement(){
+  public Object getDefaultManagement() {
     return defaultImageManagement.data("imageError", null);
   }
-
 
   @POST
   @Path("/view/default")
