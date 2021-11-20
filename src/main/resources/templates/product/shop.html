@@ -63,14 +63,28 @@
               <div class="product-image-wrapper">
                 <div class="single-products">
                   <div class="text-center">
-                    <img src="/image/{item.image.id}" alt="" width="250" height="300"/>
+                    <div class="container">
+                      <img src="/image/{item.image.id}" alt="" width="250" height="300"/>
+                      {#if item.quantity == 0}
+                      {#include watermark}
+                      {#watermark} Out of stock {/watermark}
+                      {/include}
+                      {/if}
+
+                    </div>
+
+                    {#if item.price and item.price > 0}
                     <h2>{item.price} .-</h2>
+                    {/if}
                     <p>{item.name}</p>
 
                     {#if !admin}
+                    {#if item.price and item.price > 0 and item.quantity > 0}
                     <a href="#" class="btn btn-default add-to-cart">
                       <i class="fa fa-shopping-cart">
-                      </i>Add to cart</a>
+                      </i>Add to cart
+                    </a>
+                    {/if}
                     {#else}
                     <a href="/product/admin/view/{item.name}" class="btn btn-default add-to-cart">
                       <i class="fa fa-tools">
