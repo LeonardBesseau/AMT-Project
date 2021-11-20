@@ -50,16 +50,17 @@ public class ProductService {
    * @return a list of product present in the database with the given filter applied
    */
   public List<Product> getAllProduct(List<String> categories) {
-    return new ArrayList<>(jdbi.withHandle(
-            handle ->
-                handle
-                    .createQuery(
-                        ResourceLoader.loadResource("sql/product/getAllWithCategoryFilter.sql"))
-                    .bindArray("categoryList", String.class, categories)
-                    .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
-                    .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
-                    .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
-        .values());
+    return new ArrayList<>(
+        jdbi.withHandle(
+                handle ->
+                    handle
+                        .createQuery(
+                            ResourceLoader.loadResource("sql/product/getAllWithCategoryFilter.sql"))
+                        .bindArray("categoryList", String.class, categories)
+                        .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
+                        .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
+                        .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
+            .values());
   }
 
   /**
@@ -84,10 +85,10 @@ public class ProductService {
   }
 
   /**
-   * add a category to a product. Does nothing if the category is associated with the product but will still return
-   * SUCCESS
+   * add a category to a product. Does nothing if the category is associated with the product but
+   * will still return SUCCESS
    *
-   * @param productName  the name of the product
+   * @param productName the name of the product
    * @param categoryName the name of the category
    * @return the result of the operation
    */
@@ -136,7 +137,7 @@ public class ProductService {
 
   public UpdateResult updateProduct(Product product) {
     String toUpdate = "price=:price, quantity=:quantity";
-    if (product.getImage() == null){
+    if (product.getImage() == null) {
       try {
         jdbi.useHandle(
             handle ->
@@ -150,13 +151,13 @@ public class ProductService {
       } catch (UnableToExecuteStatementException e) {
         return updateResultHandler.handleUpdateError(e);
       }
-    }else{
+    } else {
       try {
         jdbi.useHandle(
             handle ->
                 handle
                     .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
-                    .define("list", toUpdate+", image_id=:image_id")
+                    .define("list", toUpdate + ", image_id=:image_id")
                     .bind("name", product.getName())
                     .bind("price", product.getPrice())
                     .bind("quantity", product.getQuantity())
@@ -175,15 +176,16 @@ public class ProductService {
    * @return a map of the of all the products with their categories aggregated
    */
   private BiFunction<LinkedHashMap<String, Product>, RowView, LinkedHashMap<String, Product>>
-  accumulateProductRow() {
+      accumulateProductRow() {
     return (map, rowView) -> {
       Product product =
           map.computeIfAbsent(
               rowView.getColumn("p_name", String.class), id -> rowView.getRow(Product.class));
 
       if (rowView.getColumn("c_name", String.class) != null) {
-        product.getCategories().addAll(rowView.getColumn("c_name", new GenericType<List<Category>>() {
-        }));
+        product
+            .getCategories()
+            .addAll(rowView.getColumn("c_name", new GenericType<List<Category>>() {}));
       }
 
       return map;

@@ -88,8 +88,7 @@ public class CategoryResource {
   @Produces(MediaType.TEXT_HTML)
   public Object deleteCategory(
       @PathParam("id") String category, @QueryParam("confirm") boolean confirm) {
-    List<Product> list =
-        productService.getAllProduct(Collections.singletonList(category));
+    List<Product> list = productService.getAllProduct(Collections.singletonList(category));
     if (confirm || list.isEmpty()) {
       categoryService.deleteCategory(category);
       return Response.status(301).location(URI.create("/category/admin/view/")).build();
