@@ -68,7 +68,7 @@
           <h2>Category</h2>
           <div class="panel-group category-products text-center" id="accordian">
             <!--category-productsr-->
-            <form action="/product/view" method="post">
+            <form method="post">
               {#for category in categories}
               <input type="checkbox" class="btn-check" id="btn-check-{category.name}" name="{category.name}"  {#if filters && filters.contains(category.name)}checked{/if} autocomplete="off"/>
               <label class="btn btn-primary" for="btn-check-{category.name}">{category.name}</label>

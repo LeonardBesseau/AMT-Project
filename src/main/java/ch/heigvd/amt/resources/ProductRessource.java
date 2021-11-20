@@ -144,7 +144,7 @@ public class ProductRessource {
   }
 
   @POST
-  @Path("/view/create")
+  @Path("/admin/view/create")
   @Consumes({MediaType.MULTIPART_FORM_DATA})
   @Produces(MediaType.TEXT_HTML)
   public Object addProduct(@MultipartForm MultipartFormDataInput input) throws IOException {
@@ -231,7 +231,7 @@ public class ProductRessource {
   }
 
   @GET
-  @Path("/view/create")
+  @Path("admin/view/create")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance createProductView() {
     return productAdd.data(
@@ -248,7 +248,7 @@ public class ProductRessource {
   }
 
   @POST
-  @Path("/view/addImage")
+  @Path("/admin/view/addImage")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object addImage(@MultipartForm MultipartFormDataInput input) {

@@ -1,4 +1,4 @@
-package ch.heigvd.amt.view;
+package ch.heigvd.amt.resources;
 
 import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Category;
@@ -24,9 +24,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/view/admin/category")
+@Path("/category")
 @ApplicationScoped
-public class CategoryView {
+public class CategoryResource {
 
   private static final String CATEGORY = "category";
   private final CategoryService categoryService;
@@ -47,7 +47,7 @@ public class CategoryView {
   Template categoryDelete;
 
   @Inject
-  public CategoryView(CategoryService categoryService, ProductService productService) {
+  public CategoryResource(CategoryService categoryService, ProductService productService) {
     this.categoryService = categoryService;
     this.productService = productService;
   }
@@ -58,32 +58,33 @@ public class CategoryView {
    * @return a html page with the list of all products
    */
   @GET
+  @Path("/admin/view/")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAll() {
     return productList.data("items", categoryService.getAllCategory());
   }
 
   @GET
-  @Path("/create")
+  @Path("/admin/view/create")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getFormAdd() {
     return categoryAdd.data(CATEGORY, null);
   }
 
   @POST
-  @Path("/create")
+  @Path("/admin/create")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object addCategory(@FormParam("name") String category) {
     if (categoryService.addCategory(new Category(category)).getStatus() == UpdateStatus.SUCCESS) {
-      return Response.status(301).location(URI.create("/view/admin/category/")).build();
+      return Response.status(301).location(URI.create("/category/admin/view/")).build();
     }
     return categoryAdd.data(CATEGORY, category);
   }
 
   // Form allows only GET or POST so we can't use a delete here
   @GET
-  @Path("/delete/{id}")
+  @Path("/admin/delete/{id}")
   @Produces(MediaType.TEXT_HTML)
   public Object deleteCategory(
       @PathParam("id") String category, @QueryParam("confirm") boolean confirm) {
@@ -91,7 +92,7 @@ public class CategoryView {
         productService.getAllProduct(Collections.singletonList(category));
     if (confirm || list.isEmpty()) {
       categoryService.deleteCategory(category);
-      return Response.status(301).location(URI.create("/view/admin/category/")).build();
+      return Response.status(301).location(URI.create("/category/admin/view/")).build();
     }
     return categoryDelete.data("items", list, "clientDisplay", false);
   }
