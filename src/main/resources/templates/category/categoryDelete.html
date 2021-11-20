@@ -6,7 +6,10 @@
   {/include}
 </head>
 <body>
-<h1 class="text-danger">Attention</h1>
+<header id="header" class="header" style="margin-bottom: 20px">
+  {#include adminHeader}{/include}
+</header>
+<h1 class="text-danger ">Attention</h1>
 <p class="alert alert-danger text-danger"> The following articles will be impacted and will no longer be associated with this
   category</p>
 {#include product/productList items=items}

@@ -14,50 +14,12 @@
 
 <body>
 <header id="header" class="header" style="margin-bottom: 20px">
-  <!--header-->
-  <div class="header-middle">
-    <!--header-middle-->
-    <nav class="navbar-expand-lg navbar-light bg-light">
-      <div class="container container-fluid">
-        <a class="navbar-brand" href="#">Les Boulangers</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a href="" class="nav-link active">
-                <i class="fa fa-user ">
-                </i> Account
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="../../META-INF/resources/html/checkout.html" class="nav-link active">
-                <i class="fa fa-crosshairs">
-                </i>
-                Checkout
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="../../META-INF/resources/html/cart.html" class="nav-link active">
-                <i class="fa fa-shopping-cart">
-                </i>
-                Cart
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="../../META-INF/resources/html/login.html" class="nav-link active">
-                <i class="fa fa-lock">
-                </i> Login
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  </div>
-  <!--/header-middle-->
+  {#if admin}
+    {#include adminHeader}{/include}
+  {#else}
+  {#include userHeader}{/include}
+  {/if}
+
 </header>
 
 <section>
@@ -70,12 +32,13 @@
             <!--category-productsr-->
             <form method="post">
               {#for category in categories}
-              <input type="checkbox" class="btn-check" id="btn-check-{category.name}" name="{category.name}"  {#if filters && filters.contains(category.name)}checked{/if} autocomplete="off"/>
+              <input type="checkbox" class="btn-check" id="btn-check-{category.name}" name="{category.name}"
+                     autocomplete="off"
+                     {#if filters && filters.contains(category.name)} checked {/if} />
               <label class="btn btn-primary" for="btn-check-{category.name}">{category.name}</label>
               {/for}
               <button type="submit" class="btn btn-primary">Filter</button>
             </form>
-
           </div>
           <!--/category-products-->
 
@@ -83,36 +46,57 @@
       </div>
 
       <div class="col-sm-9 padding-right">
+        {#if admin}
+        <a href="/product/admin/view/create" class="btn btn-success"><i class="fa"></i>Add product</a>
+        {/if}
         <h2 class="title text-center">Products</h2>
         <div class="features_items container container-fluid">
           <!--features_items-->
           {#if items.isEmpty()}
           <h1 class="text-danger text-center">No item matches your search</h1>
           {/if}
-          <div class="row row-cols-3">
 
+
+          <div class="row row-cols-3">
             {#for item in items}
             <div class="col-md-4">
               <div class="product-image-wrapper">
                 <div class="single-products">
                   <div class="text-center">
                     <img src="/image/{item.image.id}" alt="" width="250" height="300"/>
-                    <h2>{item.price}</h2>
+                    <h2>{item.price} .-</h2>
                     <p>{item.name}</p>
-                    {#for category in item.categories} <p>{category.name}</p> {/for}
+
+                    {#if !admin}
                     <a href="#" class="btn btn-default add-to-cart">
                       <i class="fa fa-shopping-cart">
                       </i>Add to cart</a>
+                    {#else}
+                    <a href="/product/admin/view/{item.name}" class="btn btn-default add-to-cart">
+                      <i class="fa fa-tools">
+                      </i>Modify</a>
+                    {/if}
+
                   </div>
+                  {#if !admin}
                   <div class="product-overlay">
-                    <div class="overlay-content">
-                      <h2>{item.price}</h2>
-                      <p>{item.name}</p>
+                    <div class="overlay-content text-center">
+                      {#if !item.categories.isEmpty()}
+                      <h3>Categories</h3>
+                      <div class="row row-cols-3">
+                        {#for category in item.categories}
+                        <p class="col-sm-4">{category.name}</p>
+                        {/for}
+                      </div>
+                      {/if}
+                      <h3>Description</h3>
+                      <p>{item.description}</p>
                       <a href="#" class="btn btn-default add-to-cart">
                         <i class="fa fa-shopping-cart">
                         </i>Add to cart</a>
                     </div>
                   </div>
+                  {/if}
                 </div>
               </div>
             </div>

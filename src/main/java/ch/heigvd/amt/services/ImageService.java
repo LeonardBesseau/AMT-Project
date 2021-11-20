@@ -5,10 +5,14 @@ import ch.heigvd.amt.database.UpdateResultHandler;
 import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.utils.ResourceLoader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import org.apache.commons.io.IOUtils;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
@@ -50,6 +54,61 @@ public class ImageService {
       return new UpdateResult(UpdateStatus.SUCCESS, newId);
     } catch (UnableToExecuteStatementException e) {
       return updateResultHandler.handleUpdateError(e);
+    }
+  }
+
+  public UpdateResult updateImage(byte[] data, int id) {
+    try {
+      jdbi.useHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/image/update.sql"))
+                  .bind("data", data)
+                  .bind("id", id)
+                  .execute());
+      return new UpdateResult(UpdateStatus.SUCCESS);
+    } catch (UnableToExecuteStatementException e) {
+      return updateResultHandler.handleUpdateError(e);
+    }
+  }
+
+  public int manageImage(InputPart inputPart, int id) {
+    // TODO do we remove the part for managing multiple files at once ?
+    // TODO add image treatment to set size.
+    try {
+      InputStream inputStream = inputPart.getBody(InputStream.class, null);
+      byte[] bytes = IOUtils.toByteArray(inputStream);
+      if (bytes.length == 0) {
+        return -1;
+      }
+      var res = updateImage(bytes, id);
+      if (res.getStatus() == UpdateStatus.SUCCESS) {
+        return id;
+      }
+      return -1;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return -1;
+    }
+  }
+
+  public int manageImage(InputPart inputPart) {
+    // TODO do we remove the part for managing multiple files at once ?
+    // TODO add image treatment to set size.
+    try {
+      InputStream inputStream = inputPart.getBody(InputStream.class, null);
+      byte[] bytes = IOUtils.toByteArray(inputStream);
+      if (bytes.length == 0) {
+        return Image.DEFAULT_IMAGE_ID;
+      }
+      var res = addImage(bytes);
+      if (res.getStatus() == UpdateStatus.SUCCESS) {
+        return res.getGeneratedId();
+      }
+      return -1;
+    } catch (IOException e) {
+      e.printStackTrace();
+      return -1;
     }
   }
 }

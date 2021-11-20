@@ -5,19 +5,73 @@
 {/include}
 </head>
 <body>
-<h1>{item.name}</h1>
-<div>Price: {item.price}</div>
-<div>Price: {item.description}</div>
-<img src="/image/{item.image.id}" alt="image" width="500" height="600"/>
-<form action="/product/admin/view/{item.name}" method="post" class="needs-validation" novalidate>
-{#for category in categories}
-  <input type="checkbox" id="{category.name}" name="{category.name}" value="{category.name}" {#if item.categories.contains(category)}checked{/if}>
-  <label for="{category.name}"> {category.name}</label><br>
-{/for}
-  <div class="col-auto my-1">
-    <button type="submit" class="btn btn-primary">Submit</button>
+<header id="header" class="header" style="margin-bottom: 20px">
+  {#include adminHeader}{/include}
+</header>
+<section>
+  <div class="container">
+    <h1>Product Edit</h1>
+    <div class="row">
+      <div class="col-lg">
+        <div class="container container-form">
+          <form action="/product/admin/view/{item.name}" method="post" class="needs-validation" novalidate
+                enctype="multipart/form-data">
+            <p>Name: {item.name}</p>
+            <label for="price"> Price</label><br>
+            <input type="number" id="price" name="price" value="{item.price}" min="0" class="form-control mb-2">
+
+            {#if invalidPrice}
+            <div class="alert alert-danger">
+              The price cannot be less than 0
+            </div>
+            {/if}
+            <label for="quantity"> Quantity</label><br>
+            <input type="number" id="quantity" name="quantity" value="{item.quantity}" min="0" class="form-control">
+
+            {#if invalidQuantity}
+            <div class="alert alert-danger">
+              The quantity cannot be less than 0
+            </div>
+            {/if}
+            <p>Description: {item.description}</p>
+            <label for="image">Image</label>
+            <input type="file" id="image" name="image">
+            {#if imageError}
+            <div class="alert alert-danger">
+              An error occurred with the image
+            </div>
+            {/if}
+            <div class="col-auto my-1">
+              <button type="submit" class="btn btn-primary">Update details</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+      <div class="col-md">
+        <img src="/image/{item.image.id}" alt="image" width="250" height="300"/>
+      </div>
+    </div>
+
+
+    <div>
+      <h1>Update category</h1>
+      <div class="container container-form">
+        <form action="/product/admin/view/{item.name}/category" method="post" class="needs-validation" novalidate>
+          {#for category in categories}
+          <input type="checkbox" id="{category.name}" name="{category.name}" value="{category.name}"
+                 {#if item.categories.contains(category)}checked{/if}>
+          <label for="{category.name}"> {category.name}</label><br>
+          {/for}
+          <div class="col-auto my-1">
+            <button type="submit" class="btn btn-primary">Update categories</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-</form>
+
+</section>
 </body>
 </html>
 
