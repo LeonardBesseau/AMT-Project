@@ -71,19 +71,19 @@ class ProductServiceTest {
   @Test
   void getAllWithCategoriesFiltering() {
     List<String> categories = new ArrayList<>();
-    Assertions.assertDoesNotThrow(() -> productService.getAllProductForCategories(categories));
-    Assertions.assertEquals(3, productService.getAllProductForCategories(categories).size());
+    Assertions.assertDoesNotThrow(() -> productService.getAllProduct(categories));
+    Assertions.assertEquals(3, productService.getAllProduct(categories).size());
 
     categories.add(UNKNOWN);
-    List<Product> result1 = productService.getAllProductForCategories(categories);
+    List<Product> result1 = productService.getAllProduct(categories);
     Assertions.assertTrue(result1.isEmpty());
 
     categories.add(CATEGORY_B_NAME);
-    List<Product> result2 = productService.getAllProductForCategories(categories);
+    List<Product> result2 = productService.getAllProduct(categories);
     Assertions.assertEquals(1, result2.size());
 
     categories.add(CATEGORY_A_NAME);
-    List<Product> result3 = productService.getAllProductForCategories(categories);
+    List<Product> result3 = productService.getAllProduct(categories);
     Assertions.assertEquals(2, result3.size());
   }
 
