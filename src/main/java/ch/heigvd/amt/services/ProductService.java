@@ -134,6 +134,41 @@ public class ProductService {
     return UpdateResult.success();
   }
 
+  public UpdateResult updateProduct(Product product) {
+    String toUpdate = "price=:price, quantity=:quantity";
+    if (product.getImage() == null){
+      try {
+        jdbi.useHandle(
+            handle ->
+                handle
+                    .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
+                    .define("list", toUpdate)
+                    .bind("name", product.getName())
+                    .bind("price", product.getPrice())
+                    .bind("quantity", product.getQuantity())
+                    .execute());
+      } catch (UnableToExecuteStatementException e) {
+        return updateResultHandler.handleUpdateError(e);
+      }
+    }else{
+      try {
+        jdbi.useHandle(
+            handle ->
+                handle
+                    .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
+                    .define("list", toUpdate+", image_id=:image_id")
+                    .bind("name", product.getName())
+                    .bind("price", product.getPrice())
+                    .bind("quantity", product.getQuantity())
+                    .bind("image_id", product.getImage().getId())
+                    .execute());
+      } catch (UnableToExecuteStatementException e) {
+        return updateResultHandler.handleUpdateError(e);
+      }
+    }
+    return UpdateResult.success();
+  }
+
   /**
    * Accumulator function for aggregating multiple categories for the same product
    *

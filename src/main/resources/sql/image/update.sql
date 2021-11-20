@@ -1,0 +1,1 @@
+UPDATE image SET data=:data WHERE id = :id;

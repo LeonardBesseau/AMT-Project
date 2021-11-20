@@ -11,7 +11,6 @@ import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,20 +26,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import org.apache.commons.io.IOUtils;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 @Path("/product")
-public class ProductRessource {
+public class ProductResource {
 
   private final ProductService productService;
   private final ImageService imageService;
   private final CategoryService categoryService;
 
-  private static final Logger logger = Logger.getLogger(ProductRessource.class);
+  private static final Logger logger = Logger.getLogger(ProductResource.class);
 
   // Inject the template html.
   // We have to specify the path to the template from the template folder
@@ -54,10 +52,14 @@ public class ProductRessource {
 
   @Inject
   @Location("product/productDetailsAdmin.html")
+  Template productAdminDetails;
+
+  @Inject
+  @Location("product/productDetailsAdmin.html")
   Template productAddCategory;
 
   @Inject
-  public ProductRessource(
+  public ProductResource(
       ProductService productService, ImageService imageService, CategoryService categoryService) {
     this.productService = productService;
     this.imageService = imageService;
@@ -85,8 +87,10 @@ public class ProductRessource {
         productService.getAllProduct(),
         "categories",
         categoryService.getAllUsedCategory(),
-        "filters", null);
+        "filters", null,
+        "admin", false);
   }
+
 
   @POST
   @Path("/view")
@@ -94,31 +98,137 @@ public class ProductRessource {
   @Produces(MediaType.TEXT_HTML)
   public Object getAllViewWithFilter(MultivaluedMap<String, String> input) {
     List<String> selectedFilter = new ArrayList<>(input.keySet());
-    logger.info(selectedFilter);
-    logger.info(input.values());
     return productList.data(
         "items",
         productService.getAllProduct(selectedFilter),
         "categories",
         categoryService.getAllUsedCategory(),
-        "filters", selectedFilter);
+        "filters", selectedFilter,
+        "admin", false);
+  }
+
+  @GET
+  @Path("/admin/view")
+  @Produces(MediaType.TEXT_HTML)
+  public TemplateInstance getAdminView() {
+
+    return productList.data(
+        "items",
+        productService.getAllProduct(),
+        "categories",
+        categoryService.getAllUsedCategory(),
+        "filters", null,
+        "admin", true);
+  }
+
+  @POST
+  @Path("/admin/view")
+  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Produces(MediaType.TEXT_HTML)
+  public Object getAdminViewWithFilter(MultivaluedMap<String, String> input) {
+    List<String> selectedFilter = new ArrayList<>(input.keySet());
+    return productList.data(
+        "items",
+        productService.getAllProduct(selectedFilter),
+        "categories",
+        categoryService.getAllUsedCategory(),
+        "filters", selectedFilter,
+        "admin", true);
   }
 
   @GET
   @Path("/admin/view/{id}")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getView(@PathParam("id") String name) {
+  public TemplateInstance getDetails(@PathParam("id") String name) {
     Optional<Product> product = productService.getProduct(name);
     if (product.isPresent()) {
       var categories = categoryService.getAllCategory();
-      return productAddCategory.data("item", product.get(), "categories", categories);
+      return productAdminDetails.data(
+          "item", product.get(),
+          "categories", categories,
+          "invalidPrice", false,
+          "invalidQuantity", false,
+          "imageError", false
+      );
     }
     // TODO return error
-    return productAddCategory.data("item", null, "categories", null);
+    return productAdminDetails.data(
+        "item", null,
+        "categories", null,
+        "invalidPrice", false,
+        "invalidQuantity", false,
+        "imageError", false);
   }
 
   @POST
   @Path("/admin/view/{id}")
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
+  @Produces(MediaType.TEXT_HTML)
+  public Object updateProduct(@MultipartForm MultipartFormDataInput input, @PathParam("id") String name)
+      throws IOException {
+    Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
+    boolean isPriceInvalid = false;
+    boolean isQuantityInvalid = false;
+    boolean imageError = false;
+
+    Double price = null;
+    Integer quantity = null;
+    int imageId = Image.DEFAULT_IMAGE_ID;
+
+    String res = uploadForm.get("price").get(0).getBodyAsString();
+    if (!res.isEmpty()) {
+      try {
+        price = Double.parseDouble(res);
+        if (price < 0) {
+          isPriceInvalid = true;
+        }
+      } catch (NumberFormatException e) {
+        isPriceInvalid = true;
+      }
+    }
+
+    res = uploadForm.get("quantity").get(0).getBodyAsString();
+    try {
+      quantity = Integer.parseInt(res);
+      if (quantity < 0) {
+        isQuantityInvalid = true;
+      }
+    } catch (NumberFormatException e) {
+      isQuantityInvalid = true;
+    }
+
+    List<InputPart> inputParts = uploadForm.get("image");
+    if (!inputParts.isEmpty()) {
+      imageId = imageService.manageImage(inputParts.get(0));
+      if (imageId < 0) {
+        imageError = true;
+      }
+    }
+
+    if (imageError || isQuantityInvalid || isPriceInvalid) {
+      return productAdminDetails.data(
+          "invalidPrice",
+          isPriceInvalid,
+          "invalidQuantity",
+          isQuantityInvalid,
+          "imageError",
+          imageError);
+    }
+
+    if (productService
+        .updateProduct(
+            new Product(name, price, null, quantity, imageId == Image.DEFAULT_IMAGE_ID ? null :
+                new Image(imageId, null), null))
+        .getStatus()
+        != UpdateStatus.SUCCESS) {
+      return Response.status(400);
+    }
+
+    return Response.status(301).location(URI.create("/product/admin/view/")).build();
+  }
+
+  @POST
+  @Path("/admin/view/{id}/category")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object updateCategoryForProduct(
@@ -137,15 +247,32 @@ public class ProductRessource {
           .map(strings -> strings.get(0))
           .forEach(s -> productService.addCategory(name, s));
 
-      return Response.status(301).location(URI.create("/product/view/")).build();
+      return Response.status(301).location(URI.create("/product/admin/view/")).build();
     }
     // TODO return error
-    return productAddCategory.data("item", null, "categories", null);
+    return productAdminDetails.data("item", null, "categories", null);
+  }
+
+  @GET
+  @Path("admin/view/create")
+  @Produces(MediaType.TEXT_HTML)
+  public TemplateInstance createProductView() {
+    return productAdd.data(
+        "missing",
+        null,
+        "duplicate",
+        null,
+        "invalidPrice",
+        null,
+        "invalidQuantity",
+        null,
+        "imageError",
+        null);
   }
 
   @POST
   @Path("/admin/view/create")
-  @Consumes({MediaType.MULTIPART_FORM_DATA})
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object addProduct(@MultipartForm MultipartFormDataInput input) throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
@@ -189,7 +316,7 @@ public class ProductRessource {
 
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
-      imageId = manageImage(inputParts.get(0));
+      imageId = imageService.manageImage(inputParts.get(0));
       if (imageId < 0) {
         imageError = true;
       }
@@ -227,59 +354,6 @@ public class ProductRessource {
           null);
     }
 
-    return Response.status(301).location(URI.create("/product/view/")).build();
-  }
-
-  @GET
-  @Path("admin/view/create")
-  @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance createProductView() {
-    return productAdd.data(
-        "missing",
-        null,
-        "duplicate",
-        null,
-        "invalidPrice",
-        null,
-        "invalidQuantity",
-        null,
-        "imageError",
-        null);
-  }
-
-  @POST
-  @Path("/admin/view/addImage")
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @Produces(MediaType.TEXT_HTML)
-  public Object addImage(@MultipartForm MultipartFormDataInput input) {
-    Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
-
-    List<InputPart> inputParts = uploadForm.get("file");
-    logger.debug("inputParts size: " + inputParts.size());
-    for (InputPart inputPart : inputParts) {
-      if (manageImage(inputPart) < 0) {
-        return Response.ok().entity("File uploaded").build();
-      } else {
-        return Response.ok().entity("File non-uploaded").build();
-      }
-    }
-    return Response.ok().entity("No file uploaded").build();
-  }
-
-  private int manageImage(InputPart inputPart) {
-    // TODO do we remove the part for managing multiple files at once ?
-    // TODO add image treatment to set size.
-    try {
-      InputStream inputStream = inputPart.getBody(InputStream.class, null);
-      byte[] bytes = IOUtils.toByteArray(inputStream);
-      var res = imageService.addImage(bytes);
-      if (res.getStatus() == UpdateStatus.SUCCESS) {
-        return res.getGeneratedId();
-      }
-      return -1;
-    } catch (IOException e) {
-      e.printStackTrace();
-      return -1;
-    }
+    return Response.status(301).location(URI.create("/product/admin/view/")).build();
   }
 }
