@@ -41,7 +41,6 @@
             </form>
           </div>
           <!--/category-products-->
-
         </div>
       </div>
 
@@ -56,7 +55,6 @@
           <h1 class="text-danger text-center">No item matches your search</h1>
           {/if}
 
-
           <div class="row row-cols-3">
             {#for item in items}
             <div class="col-md-4">
@@ -70,9 +68,7 @@
                       {#watermark} Out of stock {/watermark}
                       {/include}
                       {/if}
-
                     </div>
-
                     {#if item.price and item.price > 0}
                     <h2>{item.price} .-</h2>
                     {/if}
@@ -84,9 +80,10 @@
                       <i class="fa fa-shopping-cart">
                       </i>Add to cart
                     </a>
-                    <a href="#" class="btn btn-default">
-                      <i class="fa fa-shopping-cart">
-                      </i>Add to cart
+                    <a href="/product/view/{item.name}" class="btn btn-default">
+                      <i class="fa fa-book">
+                      </i>
+                      Details
                     </a>
                     {/if}
                     {#else}
@@ -94,27 +91,7 @@
                       <i class="fa fa-tools">
                       </i>Modify</a>
                     {/if}
-
                   </div>
-                  {#if !admin}
-                  <div class="product-overlay">
-                    <div class="overlay-content text-center">
-                      {#if !item.categories.isEmpty()}
-                      <h3>Categories</h3>
-                      <div class="row row-cols-3">
-                        {#for category in item.categories}
-                        <p class="col-sm-4">{category.name}</p>
-                        {/for}
-                      </div>
-                      {/if}
-                      <h3>Description</h3>
-                      <p>{item.description}</p>
-                      <a href="#" class="btn btn-default add-to-cart">
-                        <i class="fa fa-shopping-cart">
-                        </i>Add to cart</a>
-                    </div>
-                  </div>
-                  {/if}
                 </div>
               </div>
             </div>
