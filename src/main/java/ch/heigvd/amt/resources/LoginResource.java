@@ -41,15 +41,10 @@ public class LoginResource {
         if (jwtToken != null && userRole != null) {
 
             String[] chunks = jwtToken.toString().split("\\.");
-            Base64.Decoder decoder = Base64.getDecoder();
-            //String payload = new String(decoder.decode(chunks[1]));
-            JSONObject payload = new JSONObject(new String(decoder.decode(chunks[1])));
-            payload.getString("sub");
-            payload.getString("role");
-
-            return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null, LOGGED, payload.getString("role") + " : " + payload.getString("sub"));
+            JSONObject payload = new JSONObject(new String(Base64.getDecoder().decode(chunks[1])));
+            return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null,
+                    LOGGED, payload.getString("role") + " : " + payload.getString("sub"));
         }
-
         return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null, LOGGED, null);
     }
 
