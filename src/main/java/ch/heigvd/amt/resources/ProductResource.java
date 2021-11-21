@@ -56,8 +56,8 @@ public class ProductResource {
   Template productAdminDetails;
 
   @Inject
-  @Location("product/productDetailsAdmin.html")
-  Template productAddCategory;
+  @Location("product/product-details.html")
+  Template productDetails;
 
   @Inject
   public ProductResource(
@@ -90,6 +90,20 @@ public class ProductResource {
         categoryService.getAllUsedCategory(),
         "filters",
         null,
+        "admin",
+        false);
+  }
+
+  @GET
+  @Path("/view/{id}")
+  @Produces(MediaType.TEXT_HTML)
+  public Object getAllView(@PathParam("id") String name) {
+    Optional<Product> product = productService.getProduct(name);
+    if (product.isEmpty()) {
+      return Response.status(Status.NOT_FOUND);
+    }
+    return productDetails.data(
+        "item", product.get(),
         "admin",
         false);
   }
@@ -224,15 +238,15 @@ public class ProductResource {
     }
 
     if (productService
-            .updateProduct(
-                new Product(
-                    name,
-                    price,
-                    null,
-                    quantity,
-                    imageId == Image.DEFAULT_IMAGE_ID ? null : new Image(imageId, null),
-                    null))
-            .getStatus()
+        .updateProduct(
+            new Product(
+                name,
+                price,
+                null,
+                quantity,
+                imageId == Image.DEFAULT_IMAGE_ID ? null : new Image(imageId, null),
+                null))
+        .getStatus()
         != UpdateStatus.SUCCESS) {
       return Response.status(Status.BAD_REQUEST);
     }
@@ -350,9 +364,9 @@ public class ProductResource {
     }
 
     if (productService
-            .addProduct(
-                new Product(name, price, description, quantity, new Image(imageId, null), null))
-            .getStatus()
+        .addProduct(
+            new Product(name, price, description, quantity, new Image(imageId, null), null))
+        .getStatus()
         == UpdateStatus.DUPLICATE) {
       return productAdd.data(
           "missing",
