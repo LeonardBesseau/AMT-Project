@@ -1,93 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  {#include head}
-  {#title} {item.name} {/title}
-  {/include}
-  <link href="/css/prettyPhoto.css" rel="stylesheet">
-  <link href="/css/price-range.css" rel="stylesheet">
-  <link href="/css/animate.css" rel="stylesheet">
-  <link href="/css/main.css" rel="stylesheet">
-  <link href="/css/responsive.css" rel="stylesheet">
+    {#include head}
+    {#title} {item.name} {/title}
+    {/include}
+    <link href="/css/prettyPhoto.css" rel="stylesheet">
+    <link href="/css/price-range.css" rel="stylesheet">
+    <link href="/css/animate.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
+    <link href="/css/responsive.css" rel="stylesheet">
 </head><!--/head-->
 
 <body>
-<div class="header-middle"><!--header-middle-->
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-8">
-        <div class="shop-menu pull-right">
-          <ul class="nav navbar-nav">
-            <li><a href="#"><i class="fa fa-user"></i> Account</a></li>
-            <li><a href="/html/checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li>
-            <li><a href="/html/cart.html"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-            <li><a href="/html/login.html"><i class="fa fa-lock"></i> Login</a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div><!--/header-middle-->
+<header id="header" class="header" style="margin-bottom: 20px">
+    {#if admin}
+    {#include adminHeader}{/include}
+    {#else}
+    {#include userHeader}{/include}
+    {/if}
 
-<div class="header-bottom"><!--header-bottom-->
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-9">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-        </div>
-        <div class="mainmenu pull-left">
-          <ul class="nav navbar-nav collapse navbar-collapse">
-            <li><a href="../../META-INF/resources/html/index.html" class="active">Home</a></li>
-            <li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
-              <ul role="menu" class="sub-menu">
-                <li><a href="../product/view">Products</a></li>
-                <li><a href="/html/checkout.html">Checkout</a></li>
-                <li><a href="/html/cart.html">Cart</a></li>
-                <li><a href="/html/login.html">Login</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div><!--/header-bottom-->
+</header>
 
 <section>
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-9 padding-right">
-        <div class="product-details"><!--product-details-->
-          <div class="col-sm-5">
-            <div class="view-product">
-              <img src="../../META-INF/resources/images/product-details/1.jpg" alt=""/>
-            </div>
-          </div>
-          <div class="col-sm-7">
-            <div class="product-information"><!--/product-information-->
-              <img src="/image/{item.image.id}" alt=""/>
-              <h2>{item.name}</h2>
-              <span>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-9 padding-right">
+                <div class="product-details"><!--product-details-->
+                    <div class="col-sm-5">
+                        <div class="view-product">
+                            <img src="../../META-INF/resources/images/product-details/1.jpg" alt=""/>
+                        </div>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="product-information"><!--/product-information-->
+                            <img src="/image/{item.image.id}" alt=""/>
+                            <h2>{item.name}</h2>
+                            <p>{item.description}</p>
+                            <span>
 									<span>{item.price}</span>
 									<label>Quantity:</label>
-									<input type="text" value="{item.quantity}"/>
+									<input type="text" value="0"/>
 									<button type="button" class="btn btn-default cart">
 										<i class="fa fa-shopping-cart"></i>
 										Add to cart
 									</button>
 								</span>
-            </div><!--/product-information-->
-          </div>
-        </div><!--/product-details-->
-      </div>
+                        </div><!--/product-information-->
+                    </div>
+                </div><!--/product-details-->
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
 </body>
