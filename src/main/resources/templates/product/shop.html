@@ -37,7 +37,7 @@
                      {#if filters && filters.contains(category.name)} checked {/if} />
               <label class="btn btn-primary" for="btn-check-{category.name}">{category.name}</label>
               {/for}
-              <button type="submit" class="btn btn-primary">Filter</button>
+              <button type="submit" class="btn btn-warning">Filter</button>
             </form>
           </div>
           <!--/category-products-->
@@ -81,6 +81,10 @@
                     {#if !admin}
                     {#if item.price and item.price > 0 and item.quantity > 0}
                     <a href="#" class="btn btn-default add-to-cart">
+                      <i class="fa fa-shopping-cart">
+                      </i>Add to cart
+                    </a>
+                    <a href="#" class="btn btn-default">
                       <i class="fa fa-shopping-cart">
                       </i>Add to cart
                     </a>

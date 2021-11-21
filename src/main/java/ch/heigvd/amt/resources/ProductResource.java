@@ -26,6 +26,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -233,10 +234,10 @@ public class ProductResource {
                     null))
             .getStatus()
         != UpdateStatus.SUCCESS) {
-      return Response.status(400);
+      return Response.status(Status.BAD_REQUEST);
     }
 
-    return Response.status(301).location(URI.create("/product/admin/view/")).build();
+    return Response.status(Status.MOVED_PERMANENTLY).location(URI.create("/product/admin/view/")).build();
   }
 
   @POST
