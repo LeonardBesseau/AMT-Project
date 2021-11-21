@@ -27,6 +27,6 @@ public class CartRessource {
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getCart() {
     // #TODO(check for session and get specific member cart)
-    return cart.data("isMember", false);
+    return cart.data("isMember", false, "admin", false);
   }
 }
