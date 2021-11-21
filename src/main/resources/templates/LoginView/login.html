@@ -1,73 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>Login | E-Shopper</title>
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/font-awesome.min.css" rel="stylesheet">
-    <link href="/css/prettyPhoto.css" rel="stylesheet">
-    <link href="/css/price-range.css" rel="stylesheet">
-    <link href="/css/animate.css" rel="stylesheet">
-	<link href="/css/main.css" rel="stylesheet">
-	<link href="/css/responsive.css" rel="stylesheet">
+	{#include head}
+	{#title} Login | Les Boulangers {/title}
+	{/include}
     <!--[if lt IE 9]>
     <script src="/js/html5shiv.js"></script>
     <![endif]-->
 </head><!--/head-->
 
 <body>
-	<header id="header"><!--header-->
-		<div class="header-middle"><!--header-middle-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="logo pull-left">
-							<a href="index.html"><img src="/images/home/logo.png" alt="" /></a>
-						</div>
-					</div>
-					<div class="col-sm-8">
-						<div class="shop-menu pull-right">
-							<ul class="nav navbar-nav">
-								<li><a href=""><i class="fa fa-user"></i> Account</a></li>
-								<li><a href="cart.html"><i class="fa fa-shopping-cart"></i> Cart</a></li>
-								{#if logged}
-									<li><a href="login.html" class="active"><i class="fa fa-lock"></i>{logged}</a></li>
-								{#else}
-									<li><a href="login.html" class="active"><i class="fa fa-lock"></i>Login</a></li>
-								{/if}
-							</ul>
-						</div>
-					</div>
-				</div>
+<div class="header-middle">
+	<!--header-middle-->
+	<nav class="navbar-expand-lg navbar-light bg-light">
+		<div class="container container-fluid">
+			<a class="navbar-brand" href="/product/view">Les Boulangers</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+							aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item">
+						<a href="/cart/view" class="nav-link active">
+							<i class="fa fa-shopping-cart">
+							</i>
+							Cart
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="/product/view" class="nav-link active">
+							<i class="fa fa-list">
+							</i>
+							Products
+						</a>
+					</li>
+				</ul>
 			</div>
-		</div><!--/header-middle-->
-	
-		<div class="header-bottom"><!--header-bottom-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-9">
-						<div class="mainmenu pull-left">
-							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a href="index.html">Home</a></li>
-								<li class="dropdown"><a href="#">Shop<i class="fa fa-angle-down"></i></a>
-                                    <ul role="menu" class="sub-menu">
-                                        <li><a href="shop.html">Products</a></li>
-										<li><a href="product-details.html">Product Details</a></li>
-										<li><a href="cart.html">Cart</a></li> 
-										<li><a href="login.html" class="active">Login</a></li> 
-                                    </ul>
-                                </li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div><!--/header-bottom-->
-	</header><!--/header-->
-	
+		</div>
+	</nav>
+</div>
+
 	<section id="form"><!--form-->
 		<div class="container">
 			<div class="row">
@@ -113,21 +86,6 @@
 			</div>
 		</div>
 	</section><!--/form-->
-
-	<footer id="footer"><!--Footer-->
-		<div class="footer-top">
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-2">
-						<div class="companyinfo">
-							<h2><span>e</span>-shopper</h2>
-							<p>Projet du cours AMT 2021-2022</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</footer><!--/Footer-->
 
     <script src="/js/jquery.js"></script>
 	<script src="/js/price-range.js"></script>

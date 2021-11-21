@@ -92,6 +92,6 @@ public class CategoryResource {
       categoryService.deleteCategory(category);
       return Response.status(301).location(URI.create("/category/admin/view/")).build();
     }
-    return categoryDelete.data("items", list, "clientDisplay", false);
+    return categoryDelete.data("items", list, "category", category, "clientDisplay", false);
   }
 }
