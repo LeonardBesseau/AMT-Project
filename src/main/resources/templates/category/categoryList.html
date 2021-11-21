@@ -9,7 +9,7 @@
 </header>
 <section>
   <div class="container">
-    <a href="create" class="btn btn-success"><i class="fa"></i>Add category</a>
+    <a href="/category/admin/view/create" class="btn btn-success"><i class="fa"></i>Add category</a>
     <div class="features_items"><!--features_items-->
       <h2 class="title text-center">Existing Category</h2>
       <div class="row row-cols-3">
@@ -18,9 +18,10 @@
           <div class="product-image-wrapper">
             <div class="single-products">
               <div class="text-center">
-                <h1>{item.name}</h1>
-                <a href="/category/admin/delete/{item.name}" class="btn btn-danger"><i class="fa"></i>Delete
-                  category</a>
+                <form action="/category/admin/delete/{item.name}" method="post">
+                  <h1>{item.name}</h1>
+                  <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
               </div>
             </div>
           </div>
