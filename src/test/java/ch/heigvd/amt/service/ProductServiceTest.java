@@ -1,9 +1,10 @@
 package ch.heigvd.amt.service;
 
 import ch.heigvd.amt.database.PostgisResource;
+import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.ProductService;
-import ch.heigvd.amt.utils.UpdateResult;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import java.util.ArrayList;
@@ -70,21 +71,30 @@ class ProductServiceTest {
   @Test
   void getAllWithCategoriesFiltering() {
     List<String> categories = new ArrayList<>();
-    Assertions.assertThrows(
-        IllegalArgumentException.class,
-        () -> productService.getAllProductForCategories(categories));
+    Assertions.assertDoesNotThrow(() -> productService.getAllProduct(categories));
+    Assertions.assertEquals(3, productService.getAllProduct(categories).size());
 
     categories.add(UNKNOWN);
-    List<Product> result1 = productService.getAllProductForCategories(categories);
+    List<Product> result1 = productService.getAllProduct(categories);
     Assertions.assertTrue(result1.isEmpty());
 
+    // Check intersection with one invalid
     categories.add(CATEGORY_B_NAME);
-    List<Product> result2 = productService.getAllProductForCategories(categories);
-    Assertions.assertEquals(1, result2.size());
+    List<Product> result2 = productService.getAllProduct(categories);
+    Assertions.assertEquals(0, result2.size());
 
+    categories.remove(UNKNOWN);
+    List<Product> result3 = productService.getAllProduct(categories);
+    Assertions.assertEquals(1, result3.size());
+
+    // Check intersection with both valid
     categories.add(CATEGORY_A_NAME);
-    List<Product> result3 = productService.getAllProductForCategories(categories);
-    Assertions.assertEquals(2, result3.size());
+    List<Product> result4 = productService.getAllProduct(categories);
+    Assertions.assertEquals(1, result4.size());
+
+    categories.remove(CATEGORY_B_NAME);
+    List<Product> result5 = productService.getAllProduct(categories);
+    Assertions.assertEquals(2, result5.size());
   }
 
   @Test
@@ -93,26 +103,28 @@ class ProductServiceTest {
     Assertions.assertTrue(product.getCategories().isEmpty());
 
     Assertions.assertEquals(
-        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
+        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(1, product.getCategories().size());
     Assertions.assertEquals(CATEGORY_A_NAME, product.getCategories().get(0).getName());
 
     // Check idempotent
     Assertions.assertEquals(
-        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
+        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(1, product.getCategories().size());
     Assertions.assertEquals(CATEGORY_A_NAME, product.getCategories().get(0).getName());
 
     Assertions.assertEquals(
-        UpdateResult.SUCCESS, productService.addCategory(PRODUCT_NAME_3, CATEGORY_B_NAME));
+        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_B_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(2, product.getCategories().size());
 
     Assertions.assertEquals(
-        UpdateResult.INVALID_REFERENCE, productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
+        new UpdateResult(UpdateStatus.INVALID_REFERENCE),
+        productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
     Assertions.assertEquals(
-        UpdateResult.INVALID_REFERENCE, productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
+        new UpdateResult(UpdateStatus.INVALID_REFERENCE),
+        productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
   }
 }

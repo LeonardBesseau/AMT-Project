@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {#include head}
+  {#title} {item.name} {/title}
+  {/include}
+  <link href="/css/prettyPhoto.css" rel="stylesheet">
+  <link href="/css/price-range.css" rel="stylesheet">
+  <link href="/css/animate.css" rel="stylesheet">
+  <link href="/css/main.css" rel="stylesheet">
+  <link href="/css/responsive.css" rel="stylesheet">
+</head><!--/head-->
+
+<body>
+<header id="header" class="header" style="margin-bottom: 20px">
+  {#if admin}
+  {#include adminHeader}{/include}
+  {#else}
+  {#include userHeader}{/include}
+  {/if}
+</header>
+
+<section>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-9 padding-right">
+        <div class="product-details"><!--product-details-->
+          <div class="col-sm-5">
+            <div class="view-product">
+              <img src="/image/{item.image.id}" alt=""/>
+            </div>
+          </div>
+          <div class="col-sm-7">
+            <div class="product-information"><!--/product-information-->
+              <h2>{item.name}</h2>
+              <p>{item.description}</p>
+              <span>
+									<span>{item.price} CHF</span>
+									<label>Quantity:</label>
+									<input type="text" value="0"/>
+									<button type="button" class="btn btn-default cart">
+										<i class="fa fa-shopping-cart"></i>
+										Add to cart
+									</button>
+								</span>
+            </div><!--/product-information-->
+          </div>
+        </div><!--/product-details-->
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

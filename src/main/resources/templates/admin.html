@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {#include head}
+  {#title} Admin - Main Panel {/title}
+  {/include}
+</head>
+<body>
+<header id="header" class="header" style="margin-bottom: 20px">
+  {#include adminHeader}{/include}
+</header>
+<section>
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-3">
+        <a href="/category/admin/view/" class="btn btn-secondary">Category management</a>
+      </div>
+      <div class="col-sm-3">
+        <a href="/product/admin/view/" class="btn btn-secondary">Products management</a>
+      </div>
+      <div class="col-sm-3">
+        <a class="btn btn-secondary" href="/image/view/default/">Default image management</a>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

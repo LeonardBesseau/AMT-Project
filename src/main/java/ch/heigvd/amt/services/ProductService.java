@@ -1,10 +1,12 @@
 package ch.heigvd.amt.services;
 
+import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateResultHandler;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.utils.ResourceLoader;
-import ch.heigvd.amt.utils.UpdateResult;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +15,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import org.jboss.logging.Logger;
 import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.generic.GenericType;
 import org.jdbi.v3.core.mapper.reflect.ConstructorMapper;
 import org.jdbi.v3.core.result.RowView;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
@@ -21,12 +24,14 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 public class ProductService {
 
   private final Jdbi jdbi;
+  private final UpdateResultHandler updateResultHandler;
 
   private static final Logger logger = Logger.getLogger(ProductService.class);
 
   @Inject
-  public ProductService(Jdbi jdbi) {
+  public ProductService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
     this.jdbi = jdbi;
+    this.updateResultHandler = updateResultHandler;
   }
 
   /**
@@ -35,15 +40,7 @@ public class ProductService {
    * @return a list of product present in the database
    */
   public List<Product> getAllProduct() {
-    return new ArrayList<>(
-        jdbi.withHandle(
-                handle ->
-                    handle
-                        .createQuery(ResourceLoader.loadResource("sql/product/getAll.sql"))
-                        .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
-                        .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
-                        .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
-            .values());
+    return getAllProduct(Collections.emptyList());
   }
 
   /**
@@ -52,17 +49,14 @@ public class ProductService {
    * @param categories A list of the categories to filter by
    * @return a list of product present in the database with the given filter applied
    */
-  public List<Product> getAllProductForCategories(List<String> categories) {
-    if (categories.isEmpty()) {
-      throw new IllegalArgumentException("Filter cannot be empty");
-    }
+  public List<Product> getAllProduct(List<String> categories) {
     return new ArrayList<>(
         jdbi.withHandle(
                 handle ->
                     handle
                         .createQuery(
                             ResourceLoader.loadResource("sql/product/getAllWithCategoryFilter.sql"))
-                        .bindList("categoryList", categories) // even if the list
+                        .bindArray("categoryList", String.class, categories)
                         .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
                         .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
                         .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
@@ -108,9 +102,72 @@ public class ProductService {
                   .bind("category_name", categoryName)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return UpdateResult.handleUpdateError(e);
+      return updateResultHandler.handleUpdateError(e);
     }
-    return UpdateResult.SUCCESS;
+    return UpdateResult.success();
+  }
+
+  public void removeCategory(String productName, String categoryName) {
+    jdbi.useHandle(
+        handle ->
+            handle
+                .createUpdate(ResourceLoader.loadResource("sql/product/removeCategory.sql"))
+                .bind("product_name", productName)
+                .bind("category_name", categoryName)
+                .execute());
+  }
+
+  public UpdateResult addProduct(Product product) {
+    try {
+      jdbi.useHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/product/add.sql"))
+                  .bind("name", product.getName())
+                  .bind("price", product.getPrice())
+                  .bind("description", product.getDescription())
+                  .bind("quantity", product.getQuantity())
+                  .bind("image_id", product.getImage().getId())
+                  .execute());
+    } catch (UnableToExecuteStatementException e) {
+      return updateResultHandler.handleUpdateError(e);
+    }
+    return UpdateResult.success();
+  }
+
+  public UpdateResult updateProduct(Product product) {
+    String toUpdate = "price=:price, quantity=:quantity";
+    if (product.getImage() == null) {
+      try {
+        jdbi.useHandle(
+            handle ->
+                handle
+                    .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
+                    .define("list", toUpdate)
+                    .bind("name", product.getName())
+                    .bind("price", product.getPrice())
+                    .bind("quantity", product.getQuantity())
+                    .execute());
+      } catch (UnableToExecuteStatementException e) {
+        return updateResultHandler.handleUpdateError(e);
+      }
+    } else {
+      try {
+        jdbi.useHandle(
+            handle ->
+                handle
+                    .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
+                    .define("list", toUpdate + ", image_id=:image_id")
+                    .bind("name", product.getName())
+                    .bind("price", product.getPrice())
+                    .bind("quantity", product.getQuantity())
+                    .bind("image_id", product.getImage().getId())
+                    .execute());
+      } catch (UnableToExecuteStatementException e) {
+        return updateResultHandler.handleUpdateError(e);
+      }
+    }
+    return UpdateResult.success();
   }
 
   /**
@@ -126,7 +183,9 @@ public class ProductService {
               rowView.getColumn("p_name", String.class), id -> rowView.getRow(Product.class));
 
       if (rowView.getColumn("c_name", String.class) != null) {
-        product.getCategories().add(rowView.getRow(Category.class));
+        product
+            .getCategories()
+            .addAll(rowView.getColumn("c_name", new GenericType<List<Category>>() {}));
       }
 
       return map;

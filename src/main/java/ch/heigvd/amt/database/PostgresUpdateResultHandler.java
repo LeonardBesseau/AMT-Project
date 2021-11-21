@@ -1,5 +1,6 @@
-package ch.heigvd.amt.utils;
+package ch.heigvd.amt.database;
 
+import javax.inject.Singleton;
 import org.jdbi.v3.core.statement.StatementException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
@@ -9,31 +10,21 @@ import org.postgresql.util.ServerErrorMessage;
  * @see <a href="https://www.postgresql.org/docs/current/errcodes-appendix.html">Error code for
  *     postgresql</a>
  */
-public enum UpdateResult {
-  SUCCESS,
-  DUPLICATE,
-  INVALID_REFERENCE,
-  INVALID_CHECK;
+@Singleton
+public class PostgresUpdateResultHandler implements UpdateResultHandler {
 
-  /**
-   * Handle a SQL Statement error if it is an Integrity Constraint error. Rethrows it otherwise
-   *
-   * @param e the error to handle
-   * @return an UpdateResult corresponding to the error
-   * @throws StatementException if the error cannot be handled
-   */
-  public static UpdateResult handleUpdateError(StatementException e) {
+  public UpdateResult handleUpdateError(StatementException e) {
     if (e.getCause() instanceof PSQLException) {
       PSQLException sqlException = (PSQLException) e.getCause();
       ServerErrorMessage errorMessage = sqlException.getServerErrorMessage();
       if (errorMessage != null && errorMessage.getSQLState() != null) {
         switch (errorMessage.getSQLState()) {
           case "23503":
-            return INVALID_REFERENCE;
+            return new UpdateResult(UpdateStatus.INVALID_REFERENCE);
           case "23505":
-            return DUPLICATE;
+            return new UpdateResult(UpdateStatus.DUPLICATE);
           case "23514":
-            return INVALID_CHECK;
+            return new UpdateResult(UpdateStatus.INVALID_CHECK);
           default:
             break;
         }

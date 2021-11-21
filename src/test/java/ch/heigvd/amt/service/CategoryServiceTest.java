@@ -1,9 +1,10 @@
 package ch.heigvd.amt.service;
 
 import ch.heigvd.amt.database.PostgisResource;
+import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.services.CategoryService;
-import ch.heigvd.amt.utils.UpdateResult;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import java.util.List;
@@ -68,9 +69,10 @@ class CategoryServiceTest {
     List<Category> result1 = categoryService.getAllCategory();
     Assertions.assertEquals(2, result1.size());
 
-    Assertions.assertEquals(UpdateResult.DUPLICATE, categoryService.addCategory("A"));
+    Assertions.assertEquals(
+        new UpdateResult(UpdateStatus.DUPLICATE), categoryService.addCategory(new Category("A")));
 
-    Assertions.assertEquals(UpdateResult.SUCCESS, categoryService.addCategory("C"));
+    Assertions.assertEquals(UpdateResult.success(), categoryService.addCategory(new Category("C")));
     List<Category> result2 = categoryService.getAllCategory();
     Assertions.assertEquals(3, result2.size());
   }

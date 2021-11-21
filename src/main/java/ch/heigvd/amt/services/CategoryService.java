@@ -1,8 +1,9 @@
 package ch.heigvd.amt.services;
 
+import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateResultHandler;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.utils.ResourceLoader;
-import ch.heigvd.amt.utils.UpdateResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,9 +17,12 @@ public class CategoryService {
 
   private final Jdbi jdbi;
 
+  private final UpdateResultHandler updateResultHandler;
+
   @Inject
-  public CategoryService(Jdbi jdbi) {
+  public CategoryService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
     this.jdbi = jdbi;
+    this.updateResultHandler = updateResultHandler;
   }
 
   /**
@@ -32,6 +36,16 @@ public class CategoryService {
             handle ->
                 handle
                     .createQuery(ResourceLoader.loadResource("sql/category/getAll.sql"))
+                    .mapTo(Category.class)
+                    .list()));
+  }
+
+  public List<Category> getAllUsedCategory() {
+    return new ArrayList<>(
+        jdbi.withHandle(
+            handle ->
+                handle
+                    .createQuery(ResourceLoader.loadResource("sql/category/getUsedCategory.sql"))
                     .mapTo(Category.class)
                     .list()));
   }
@@ -69,20 +83,20 @@ public class CategoryService {
   /**
    * Add category to the database
    *
-   * @param name the name of the new category
+   * @param category the name of the new category
    * @return the result of the operation
    */
-  public UpdateResult addCategory(String name) {
+  public UpdateResult addCategory(Category category) {
     try {
       jdbi.useHandle(
           handle ->
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/category/add.sql"))
-                  .bind("name", name)
+                  .bind("name", category.getName())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return UpdateResult.handleUpdateError(e);
+      return updateResultHandler.handleUpdateError(e);
     }
-    return UpdateResult.SUCCESS;
+    return UpdateResult.success();
   }
 }
