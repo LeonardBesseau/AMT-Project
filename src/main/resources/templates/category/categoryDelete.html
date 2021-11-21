@@ -15,8 +15,11 @@
 {#include product/productList items=items}
 {/include}
 <div class="text-center">
-<a href="?confirm=true" class="btn btn-danger"><i class="warning"></i>Confirm</a>
-<a href="/category/admin/view" class="btn btn-warning"><i class="warning"></i>Cancel</a>
+  <form action="/category/admin/delete/{item.name}?confirm=true" method="post">
+    <button type="submit" class="btn btn-danger"><i class="warning">Confirm</i></button>
+    <a href="/category/admin/view" class="btn btn-warning"><i class="warning"></i>Cancel</a>
+  </form>
+
 </div>
 </body>
 </html>

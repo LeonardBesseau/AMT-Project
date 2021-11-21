@@ -82,8 +82,8 @@ public class CategoryResource {
     return categoryAdd.data(CATEGORY, category);
   }
 
-  // Form allows only GET or POST so we can't use a delete here
-  @GET
+
+  @POST
   @Path("/admin/delete/{id}")
   @Produces(MediaType.TEXT_HTML)
   public Object deleteCategory(
