@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.quarkus.logging.Log;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
-import io.quarkus.qute.TemplateInstance;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
@@ -21,6 +20,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 @Path("/login")
 public class LoginResource {
@@ -28,7 +28,6 @@ public class LoginResource {
   private static final String REGISTER_ERROR = "registerError";
   private static final String REGISTER_SUCCESS = "registerSuccess";
   private static final String LOGIN_ERROR = "loginError";
-  private static final String LOGGED = "logged";
   private static final String AUTHSERV_ADDR = "http://localhost:8082";
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -40,33 +39,26 @@ public class LoginResource {
   @GET
   @Path("/view")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getLoginPage(
+  public Object getLoginPage(
       @CookieParam("jwt_token") NewCookie jwtToken, @CookieParam("user_role") NewCookie userRole) {
 
     try {
       if (jwtToken != null && userRole != null) {
 
-        String[] userInfo = getUserInfo(jwtToken);
-
-        // Only for demonstration purpose, when merged in dev, need to redirect to the main page if
-        // already connected
-        // /product/admin/view or /product/view
-        return login.data(
-            REGISTER_SUCCESS,
-            null,
-            REGISTER_ERROR,
-            null,
-            LOGIN_ERROR,
-            null,
-            LOGGED,
-            userInfo[1] + " : " + userInfo[0]);
+        String resource = "/product/view";
+        if (getUserInfo(jwtToken)[1].equals("admin")) {
+          resource = "/product/admin/view";
+        }
+        return Response.status(Response.Status.MOVED_PERMANENTLY)
+            .cookie(jwtToken, userRole)
+            .location(URI.create(resource))
+            .build();
       }
-      return login.data(
-          REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null, LOGGED, null);
+      return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null);
     } catch (JsonProcessingException e) {
       Log.error("JsonProcessingException occured");
+      return Response.status(Status.INTERNAL_SERVER_ERROR);
     }
-    return null;
   }
 
   @POST
@@ -99,14 +91,12 @@ public class LoginResource {
               REGISTER_ERROR,
               null,
               LOGIN_ERROR,
-              OBJECT_MAPPER.readTree(body).get("error").asText(),
-              LOGGED,
-              null);
+              OBJECT_MAPPER.readTree(body).get("error").asText());
       }
     } catch (IOException e) {
       Log.error("IOException occured");
+      return Response.status(Status.INTERNAL_SERVER_ERROR);
     }
-    return null;
   }
 
   @POST
@@ -120,14 +110,7 @@ public class LoginResource {
 
     if (!password.equals(confirmPassword)) {
       return login.data(
-          REGISTER_SUCCESS,
-          null,
-          REGISTER_ERROR,
-          "Passwords do not match",
-          LOGIN_ERROR,
-          null,
-          LOGGED,
-          null);
+          REGISTER_SUCCESS, null, REGISTER_ERROR, "Passwords do not match", LOGIN_ERROR, null);
     }
 
     try {
@@ -137,14 +120,7 @@ public class LoginResource {
       switch (response.getStatusInfo().getStatusCode()) {
         case 201:
           return login.data(
-              REGISTER_SUCCESS,
-              "Account created",
-              REGISTER_ERROR,
-              null,
-              LOGIN_ERROR,
-              null,
-              LOGGED,
-              null);
+              REGISTER_SUCCESS, "Account created", REGISTER_ERROR, null, LOGIN_ERROR, null);
         case 409:
           return login.data(
               REGISTER_SUCCESS,
@@ -152,8 +128,6 @@ public class LoginResource {
               REGISTER_ERROR,
               OBJECT_MAPPER.readTree(body).get("error").asText(),
               LOGIN_ERROR,
-              null,
-              LOGGED,
               null);
         case 422:
           return login.data(
@@ -162,14 +136,14 @@ public class LoginResource {
               REGISTER_ERROR,
               OBJECT_MAPPER.readTree(body).get("errors").get(0).get("message").asText(),
               LOGIN_ERROR,
-              null,
-              LOGGED,
               null);
+        default:
+          return Response.status(Status.NOT_ACCEPTABLE);
       }
     } catch (IOException e) {
       Log.error("IOException occured");
+      return Response.status(Status.INTERNAL_SERVER_ERROR);
     }
-    return null;
   }
 
   private Response sendToAuthServ(String resource, String username, String password)
@@ -206,7 +180,7 @@ public class LoginResource {
     return new NewCookie[] {cookieJWT, cookieRole};
   }
 
-  private String[] getUserInfo(NewCookie jwtToken) throws JsonProcessingException {
+  public static String[] getUserInfo(NewCookie jwtToken) throws JsonProcessingException {
 
     Objects.requireNonNull(jwtToken);
 
