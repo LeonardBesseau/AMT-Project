@@ -82,7 +82,6 @@ public class CategoryResource {
     return categoryAdd.data(CATEGORY, category);
   }
 
-
   @POST
   @Path("/admin/delete/{id}")
   @Produces(MediaType.TEXT_HTML)
