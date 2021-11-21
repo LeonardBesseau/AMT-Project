@@ -15,7 +15,6 @@
     <version.quarkus-plugin>2.4.2.Final</version.quarkus-plugin>
     <version.jdbi>3.23.0</version.jdbi>
     <version.testcontainers>1.16.2</version.testcontainers>
-    <version.junit>5.8.1</version.junit>
     <version.surefire-plugin>3.0.0-M5</version.surefire-plugin>
     <version.spotless>2.12.2</version.spotless>
   </properties>
@@ -86,19 +85,6 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>${version.junit}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>${version.junit}</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
