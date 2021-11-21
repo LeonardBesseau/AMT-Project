@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -23,6 +24,7 @@ import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 @Path("/image")
+@ApplicationScoped
 public class ImageResource {
 
   private final ImageService imageService;
