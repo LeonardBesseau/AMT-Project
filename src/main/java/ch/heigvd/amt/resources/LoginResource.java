@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
 import java.util.Objects;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
@@ -23,12 +24,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 @Path("/login")
+@ApplicationScoped
 public class LoginResource {
 
   private static final String REGISTER_ERROR = "registerError";
   private static final String REGISTER_SUCCESS = "registerSuccess";
   private static final String LOGIN_ERROR = "loginError";
-  private static final String AUTHSERV_ADDR = "http://localhost:8082";
+  private static final String AUTHSERV_ADDR = "http://10.0.1.92:8080";
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
