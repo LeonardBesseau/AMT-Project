@@ -17,14 +17,17 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Base64;
 import java.util.Objects;
 
 @Path("/login")
 public class LoginResource {
 
-    private static final String REGISTER_ERROR = "registerError";
-    private static final String LOGIN_ERROR    = "loginError";
-    private static final String AUTHSERV_ADDR  = "http://localhost:8082";
+    private static final String REGISTER_ERROR   = "registerError";
+    private static final String REGISTER_SUCCESS = "registerSuccess";
+    private static final String LOGIN_ERROR      = "loginError";
+    private static final String LOGGED           = "logged";
+    private static final String AUTHSERV_ADDR    = "http://localhost:8082";
 
     @Inject
     @Location("LoginView/login.html")
@@ -33,8 +36,21 @@ public class LoginResource {
     @GET
     @Path("/view")
     @Produces(MediaType.TEXT_HTML)
-    public TemplateInstance getLoginPage() {
-        return login.data(REGISTER_ERROR, null).data(LOGIN_ERROR, null);
+    public TemplateInstance getLoginPage(@CookieParam("jwt_token") NewCookie jwtToken, @CookieParam("user_role") NewCookie userRole) {
+
+        if (jwtToken != null && userRole != null) {
+
+            String[] chunks = jwtToken.toString().split("\\.");
+            Base64.Decoder decoder = Base64.getDecoder();
+            //String payload = new String(decoder.decode(chunks[1]));
+            JSONObject payload = new JSONObject(new String(decoder.decode(chunks[1])));
+            payload.getString("sub");
+            payload.getString("role");
+
+            return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null, LOGGED, payload.getString("role") + " : " + payload.getString("sub"));
+        }
+
+        return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null, LOGGED, null);
     }
 
     @POST
@@ -47,14 +63,13 @@ public class LoginResource {
             Response response = sendToAuthServ("/auth/login", username, password);
             String body = response.readEntity(String.class);
 
+            // we keep the switch structure if we have to add codes that produce different behaviours
             switch(response.getStatusInfo().getStatusCode()){
                 case 200:
                     NewCookie[] cookies = createCookies(body);
                     return Response.status(Response.Status.MOVED_PERMANENTLY).cookie(cookies[0], cookies[1]).location(URI.create("/view/product")).build();
-                case 403:
-                    return login.data(REGISTER_ERROR, null, LOGIN_ERROR, "Username or password incorrect.");
-                default:
-                    return login.data(REGISTER_ERROR, null, LOGIN_ERROR, "Unknown error.");
+                default: // currently 403
+                    return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, new JSONObject(body).getString("error"), LOGGED, null);
             }
         }
         catch (IOException e) {
@@ -71,7 +86,7 @@ public class LoginResource {
                                      @FormParam("confirmPassword") String confirmPassword) {
 
         if (!password.equals(confirmPassword)) {
-            return login.data(REGISTER_ERROR, "Passwords do not match.", LOGIN_ERROR, null);
+            return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, "Passwords do not match", LOGIN_ERROR, null, LOGGED, null);
         }
 
         try {
@@ -80,19 +95,17 @@ public class LoginResource {
 
             switch(response.getStatusInfo().getStatusCode()) {
                 case 201:
-                    NewCookie[] cookies = createCookies(body);
-                    return Response.status(Response.Status.CREATED).cookie(cookies[0], cookies[1]).entity("Account created").build();
+                    return login.data(REGISTER_SUCCESS, "Account created", REGISTER_ERROR, null, LOGIN_ERROR, null, LOGGED, null);
                 case 409:
-                    return login.data(REGISTER_ERROR, "Passwords do not match.", LOGIN_ERROR, null);
+                    return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, new JSONObject(body).getString("error"), LOGIN_ERROR, null, LOGGED, null);
                 case 422:
-                    break;
-                default:
+                    return login.data(REGISTER_SUCCESS, null,
+                            REGISTER_ERROR, new JSONObject(body).getJSONArray("errors").getJSONObject(0).getString("message"),
+                            LOGIN_ERROR, null, LOGGED, null);
             }
-
-            String result = response.readEntity(String.class);
         }
         catch (IOException e) {
-
+            Log.error("IOException occured");
         }
         return null;
     }
@@ -112,6 +125,8 @@ public class LoginResource {
     }
 
     private NewCookie[] createCookies(String ResponseBody) {
+
+        Objects.requireNonNull(ResponseBody);
 
         JSONObject jsonBody = new JSONObject(ResponseBody);
         String token = jsonBody.getString("token");
