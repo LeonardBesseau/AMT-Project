@@ -1664,7 +1664,7 @@ h2.title {
 
 
 .cart_delete a {
-  background: #F0F0E9;
+  background: #A9A9A9;
   color: #FFFFFF;
   padding: 5px 7px;
   font-size: 16px
@@ -2517,4 +2517,29 @@ h2.title {
   color: #FE980F;
 }
 
+.cart_quantity_up {
+  cursor: default;
+}
 
+.cart_quantity_down {
+  cursor: default;
+}
+
+.cart_quantity_delete {
+  cursor: default;
+}
+
+.cart_delete {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cart_delete_all {
+  margin-right: 10px;
+}
+
+.cart_delete_all_p {
+  font-size: larger;
+}
