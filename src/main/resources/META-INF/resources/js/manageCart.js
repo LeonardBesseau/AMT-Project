@@ -78,12 +78,12 @@ function changeProductQuantity(productName, productQuantity) {
           quantityLayout.value = Number(quantityLayout.value) + productQuantity;
 
           // Update view to the new total price
-          const price = Number(articleLayout.getElementsByClassName(
+          const price = parseFloat(articleLayout.getElementsByClassName(
               PRODUCT_PRICE_CLASSNAME)[0].innerHTML);
           const totalLayout = articleLayout.getElementsByClassName(
               PRODUCT_TOTAL_CLASSNAME)[0];
           totalLayout.innerHTML = (Number(quantityLayout.value)
-              * price).toString()
+              * price).toString() + " CHF"
         } else {
           // Filter the cart with product.quantity <= 0
           cart = cart.filter((product) => {
@@ -120,20 +120,20 @@ function retrieveCart() {
           "  <h4><a href=\"\">" + name + "</a></h4>\n" +
           " </td>" +
           " <td class=\"cart_price\">\n" +
-          "  <p class=\"cart_price_input\">" + product.price + "</p>\n" +
+          "  <p class=\"cart_price_input\">" + product.price + " CHF</p>\n" +
           " </td>\n" +
           " <td class=\"cart_quantity\">\n" +
           "  <div class=\"cart_quantity_button\">\n" +
           "   <a class=\"cart_quantity_up\" onclick=\"changeProductQuantity(\'"
-          + name + "\', 1)\"> + </a>\n" +
+          + name + "\', -1)\"> - </a>\n" +
           "   <input class=\"cart_quantity_input\" type=\"text\" name=\"quantity\" value=\""
           + quantity + "\" autocomplete=\"off\" size=\"2\">\n" +
           "   <a class=\"cart_quantity_down\" onclick=\"changeProductQuantity(\'"
-          + name + "\', -1)\"> - </a>\n" +
+          + name + "\', 1)\"> + </a>\n" +
           "  </div>\n" +
           " </td>\n" +
           " <td class=\"cart_total\">\n" +
-          "  <p class=\"cart_total_price\">" + total + "</p>\n" +
+          "  <p class=\"cart_total_price\">" + total + " CHF</p>\n" +
           " </td>\n" +
           " <td class=\"cart_delete\">\n" +
           "  <a class=\"cart_quantity_delete\" onclick=\"removeProduct(\'"
