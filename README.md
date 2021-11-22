@@ -15,7 +15,7 @@ Lancer le serveur avec `java -jar target/quarkus-app/quarkus-run.jar`
 
 ## Installation
 Cloner le repository. Pour lancer la base de donnée en local, effectuer un `docker-compose up` dans le dossier `docker`. 
-Pour compiler l'application, utiliser `mvn compile quarkus:dev:`.
+Pour compiler l'application, utiliser `mvn compile quarkus:dev:`. Il faut également indiquer les informations de connexions pour la base de donnée dans le fichier `config/application.properties`. L'utilisateur et le mot de passe par défaut est `amt`.
 
 
 ## Contribution
