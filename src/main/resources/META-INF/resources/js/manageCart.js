@@ -30,7 +30,7 @@ function storeProduct(productName, productPrice, imageId, quantity = 1) {
     name: productName,
     price: productPrice,
     imageId: imageId,
-    quantity: 1
+    quantity: quantity
   };
   if (cart === null) {
     // Add new cart with product
@@ -78,7 +78,7 @@ function changeProductQuantity(productName, productQuantity) {
           quantityLayout.value = Number(quantityLayout.value) + productQuantity;
 
           // Update view to the new total price
-          const price = parseInt(articleLayout.getElementsByClassName(
+          const price = Number(articleLayout.getElementsByClassName(
               PRODUCT_PRICE_CLASSNAME)[0].innerHTML);
           const totalLayout = articleLayout.getElementsByClassName(
               PRODUCT_TOTAL_CLASSNAME)[0];
