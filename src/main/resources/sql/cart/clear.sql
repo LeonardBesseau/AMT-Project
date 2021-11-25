@@ -1,1 +1,1 @@
-DELETE FROM cart_product WHERE user_id = :id;
+DELETE FROM cart_product WHERE user_name = :username;

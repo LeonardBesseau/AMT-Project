@@ -909,7 +909,7 @@
 											"width": 110.525390625,
 											"height": 13,
 											"underline": true,
-											"text": "user_id: NUMERIC",
+											"text": "user_name: TEXT",
 											"horizontalAlignment": 0
 										}
 									],
@@ -2298,9 +2298,9 @@
 							"_parent": {
 								"$ref": "AAAAAAF88MEeb2+89iA="
 							},
-							"name": "user_id",
+							"name": "user_name",
 							"isStatic": true,
-							"type": "NUMERIC"
+							"type": "TEXT"
 						}
 					]
 				},

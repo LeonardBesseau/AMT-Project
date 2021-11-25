@@ -1,1 +1,1 @@
-INSERT INTO cart VALUES (:id)
+INSERT INTO cart VALUES (:username)

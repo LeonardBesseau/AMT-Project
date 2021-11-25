@@ -1,8 +1,8 @@
 INSERT INTO cart
-VALUES (1);
+VALUES ('test');
 
 INSERT INTO cart_product
-VALUES (1, '1', 1);
+VALUES ('test', '1', 1);
 
 INSERT INTO cart_product
-VALUES (1, '2', 2);
+VALUES ('test', '2', 2);

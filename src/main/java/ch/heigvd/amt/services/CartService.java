@@ -26,15 +26,16 @@ public class CartService {
     }
 
     /**
-     * Get all product from a specific cart
+     * Get all products of a specific user cart
      *
-     * @return a list of product
+     * @param username name of the user
+     * @return a list of products
      */
-    public List<CartProduct> getAllProduct(int userId) {
+    public List<CartProduct> getAllProduct(String username) {
         return new ArrayList<>(
                 jdbi.withHandle(handle -> handle
                         .createQuery(ResourceLoader.loadResource("sql/cart/getAllProduct.sql"))
-                        .bind("id", userId)
+                        .bind("username", username)
                         .mapTo(CartProduct.class)
                         .list()));
     }
@@ -42,15 +43,15 @@ public class CartService {
     /**
      * Add a product to the cart of a specific user
      *
-     * @param userId      id of the user
+     * @param username    name of the user
      * @param cartProduct cartProduct to add
      * @return the result of the operation
      */
-    public UpdateResult addProduct(int userId, CartProduct cartProduct) {
+    public UpdateResult addProduct(String username, CartProduct cartProduct) {
         try {
             jdbi.useHandle(handle -> handle
                     .createUpdate(ResourceLoader.loadResource("sql/cart/addProduct.sql"))
-                    .bind("id", userId)
+                    .bind("username", username)
                     .bind("name", cartProduct.getName())
                     .bind("quantity", cartProduct.getQuantity())
                     .execute());
@@ -63,17 +64,17 @@ public class CartService {
     /**
      * Update the quantity of a product in the cart specific to the user
      *
-     * @param userId      id of the user
+     * @param username    name of the user
      * @param name        name of the product
      * @param newQuantity the new quantity to put
      * @return the result of the operation
      */
-    public UpdateResult updateProductQuantity(int userId, String name, int newQuantity) {
+    public UpdateResult updateProductQuantity(String username, String name, int newQuantity) {
         if (newQuantity > 1) {
             try {
                 jdbi.useHandle(handle -> handle
                         .createUpdate(ResourceLoader.loadResource("sql/cart/updateProductQuantity.sql"))
-                        .bind("id", userId)
+                        .bind("username", username)
                         .bind("name", name)
                         .bind("quantity", newQuantity)
                         .execute());
@@ -89,13 +90,13 @@ public class CartService {
     /**
      * Delete a product from the cart of a secific user
      *
-     * @param userId id of the user
-     * @param name   name of the product
+     * @param username name of the user
+     * @param name     name of the product
      */
-    public void deleteProduct(int userId, String name) {
+    public void deleteProduct(String username, String name) {
         jdbi.useHandle(handle -> handle
                 .createUpdate(ResourceLoader.loadResource("sql/cart/deleteProduct.sql"))
-                .bind("id", userId)
+                .bind("username", username)
                 .bind("name", name)
                 .execute());
     }
@@ -103,38 +104,38 @@ public class CartService {
     /**
      * Clear the cart specific to the user
      *
-     * @param userId id of the user
+     * @param username name of the user
      */
-    public void clear(int userId) {
+    public void clear(String username) {
         jdbi.useHandle(handle -> handle
                 .createUpdate(ResourceLoader.loadResource("sql/cart/clear.sql"))
-                .bind("id", userId)
+                .bind("username", username)
                 .execute());
     }
 
     /**
      * Delete the cart specific to the user
      *
-     * @param userId id of the user
+     * @param username name of the user
      */
-    public void delete(int userId) {
+    public void delete(String username) {
         jdbi.useHandle(handle -> handle
                 .createUpdate(ResourceLoader.loadResource("sql/cart/delete.sql"))
-                .bind("id", userId)
+                .bind("username", username)
                 .execute());
     }
 
     /**
      * Add a cart specific to the user
      *
-     * @param userId id of the user
+     * @param username name of the user
      * @return the result of the operation
      */
-    public UpdateResult add(int userId) {
+    public UpdateResult add(String username) {
         try {
             jdbi.useHandle(handle -> handle
                     .createUpdate(ResourceLoader.loadResource("sql/cart/add.sql"))
-                    .bind("id", userId)
+                    .bind("username", username)
                     .execute());
         } catch (UnableToExecuteStatementException e) {
             return updateResultHandler.handleUpdateError(e);
