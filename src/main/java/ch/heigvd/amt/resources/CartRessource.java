@@ -6,6 +6,7 @@ import ch.heigvd.amt.services.CartService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.quarkus.logging.Log;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -17,8 +18,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 @Path("/cart")
 @ApplicationScoped
@@ -44,10 +48,23 @@ public class CartRessource {
     @GET
     @Path("/view")
     @Produces(MediaType.TEXT_HTML)
-    public TemplateInstance getCart() {
+    public TemplateInstance getCart(@CookieParam("jwt_token") NewCookie jwtToken) {
 
-        // #TODO(check for session and get specific member cart)
-        return cart.data("isMember", false, "admin", false);
+        String username = "Visitor";
+        boolean isMember = false;
+        List<CartProduct> products = null;
+        try {
+            if (jwtToken != null) {
+                username = getUsernameFromJWT(jwtToken);
+                products = cartService.getAllProduct(username);
+                isMember = true;
+            }
+        } catch (JsonProcessingException e) {
+            Log.error("An error occurred while parsing the jwt token");
+        }
+
+        return cart.data("admin", false, "member", isMember,
+                "username", username, "products", products);
     }
 
     @POST
@@ -58,17 +75,19 @@ public class CartRessource {
                                @FormParam("product_name") String productName,
                                @FormParam("product_quantity") Integer productQuantity) {
 
-        // Get the username from the jwt token
+        // Try to get the username from jwt
         String username;
         try {
-            String[] chunks = jwtToken.toString().split("\\.");
-            JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
-            username = payload.get("sub").asText();
+            username = getUsernameFromJWT(jwtToken);
+        } catch (NullPointerException e) {
+            Log.error("Jwt token is null");
+            return Response.status(Status.UNAUTHORIZED).build();
         } catch (JsonProcessingException e) {
+            Log.error("An error occurred while parsing the jwt token");
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
 
-        // Add to the cart or update quantity if it already exists
+        // Add product or update the quantity if it already exists
         CartProduct product = new CartProduct(productName, null, null, productQuantity);
         UpdateResult status = cartService.addProduct(username, product);
         if (status == UpdateResult.success()) {
@@ -77,5 +96,62 @@ public class CartRessource {
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @POST
+    @Path("/product/{name}")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.TEXT_HTML)
+    public Response updateProduct(@CookieParam("jwt_token") NewCookie jwtToken,
+                                  @PathParam("name") String productName,
+                                  @FormParam("product_quantity") Integer productQuantity) {
+
+        // Try to get the username from jwt
+        String username;
+        try {
+            username = getUsernameFromJWT(jwtToken);
+        } catch (NullPointerException e) {
+            Log.error("Jwt token is null");
+            return Response.status(Status.UNAUTHORIZED).build();
+        } catch (JsonProcessingException e) {
+            Log.error("An error occurred while parsing the jwt token");
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        // Update the quantity
+        if (productQuantity > 0) {
+            UpdateResult status = cartService.updateProductQuantity(username, productName, productQuantity);
+            if (status != UpdateResult.success()) {
+                return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+            }
+        } else {
+            // Delete product if quantity is 0 or below
+            cartService.deleteProduct(username, productName);
+            URI uri = null;
+            try {
+              uri = new URI("/cart/view");
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            return Response.seeOther(uri).build();
+        }
+        return Response.status(Status.RESET_CONTENT).build();
+    }
+
+
+    /**
+     * Get the username from the JWT token
+     *
+     * @param jwtToken JWT token
+     * @return username or null if a parsing error occured
+     * @throws JsonProcessingException -
+     * @throws NullPointerException    -
+     */
+    private String getUsernameFromJWT(NewCookie jwtToken) throws JsonProcessingException, NullPointerException {
+        Objects.requireNonNull(jwtToken);
+        String[] chunks = jwtToken.toString().split("\\.");
+        JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
+        return payload.get("sub").asText();
+    }
+
 
 }

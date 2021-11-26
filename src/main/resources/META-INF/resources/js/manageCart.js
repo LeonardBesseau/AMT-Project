@@ -113,7 +113,7 @@ function retrieveCart() {
       document.getElementById("cart_list").innerHTML +=
           "<tr class=\"cart_article\" id=\"" + name + "\">\n" +
           " <td class=\"cart_product\">\n" +
-          "  <img src=\"/image/" + product.imageId
+          "  <img class=\"cart_product_image\" src=\"/image/" + product.imageId
           + "\" alt=\"Oups missing image\">\n" +
           " </td>\n" +
           " <td class=\"cart_description\">\n" +
@@ -124,11 +124,11 @@ function retrieveCart() {
           " </td>\n" +
           " <td class=\"cart_quantity\">\n" +
           "  <div class=\"cart_quantity_button\">\n" +
-          "   <a class=\"cart_quantity_up\" onclick=\"changeProductQuantity(\'"
+          "   <a class=\"cart_quantity_down\" onclick=\"changeProductQuantity(\'"
           + name + "\', -1)\"> - </a>\n" +
           "   <input class=\"cart_quantity_input\" type=\"text\" name=\"quantity\" value=\""
-          + quantity + "\" autocomplete=\"off\" size=\"2\">\n" +
-          "   <a class=\"cart_quantity_down\" onclick=\"changeProductQuantity(\'"
+          + quantity + "\" disabled autocomplete=\"off\" size=\"2\">\n" +
+          "   <a class=\"cart_quantity_up\" onclick=\"changeProductQuantity(\'"
           + name + "\', 1)\"> + </a>\n" +
           "  </div>\n" +
           " </td>\n" +

@@ -2523,3 +2523,12 @@ h2.title {
 .form-add-to-cart {
   display: inline;
 }
+
+.cart_product_image {
+  height: 170px;
+  width: 170px;
+}
+
+.cart_quantity_down,.cart_quantity_up {
+  cursor:pointer;
+}

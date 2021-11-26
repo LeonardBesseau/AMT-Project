@@ -37,6 +37,8 @@ public class CartProduct {
         return image_id;
     }
 
+    public Double getTotal() {return quantity * price;}
+
     @Override
     public String toString() {
         return "Product{"

@@ -70,7 +70,7 @@ public class CartService {
      * @return the result of the operation
      */
     public UpdateResult updateProductQuantity(String username, String name, int newQuantity) {
-        if (newQuantity > 1) {
+        if (newQuantity > 0) {
             try {
                 jdbi.useHandle(handle -> handle
                         .createUpdate(ResourceLoader.loadResource("sql/cart/updateProductQuantity.sql"))
