@@ -941,7 +941,7 @@ h2.title {
 
 
 
-.add-to-cart {
+.add-to-cart, .show-details {
   background:#F5F5ED;
   border: 0 none;
   border-radius: 0;
@@ -951,7 +951,7 @@ h2.title {
   margin-bottom: 25px;
 }
 
-.add-to-cart:hover {
+.add-to-cart:hover, .show-details:hover {
   background: #FE980F;
   border: 0 none;
   border-radius: 0;
@@ -962,11 +962,11 @@ h2.title {
   margin-bottom: 10px;
 }
 
-.add-to-cart i{
+.add-to-cart i, .show-details i {
 	margin-right:5px;
 }
 
-.add-to-cart:hover {
+.add-to-cart:hover, .show-details:hover {
   background: #FE980F;
   color: #FFFFFF;
 }
@@ -2520,4 +2520,6 @@ h2.title {
   color: #FE980F;
 }
 
-
+.form-add-to-cart {
+  display: inline;
+}

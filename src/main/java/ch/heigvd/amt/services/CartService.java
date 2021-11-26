@@ -41,7 +41,7 @@ public class CartService {
     }
 
     /**
-     * Add a product to the cart of a specific user
+     * Add a product to the cart of a specific user, update the quantity if it already exists
      *
      * @param username    name of the user
      * @param cartProduct cartProduct to add
