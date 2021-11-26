@@ -32,6 +32,7 @@ public class ImageService {
 
   /**
    * Get an image
+   *
    * @param imageId the id of the image
    * @return the image
    */
@@ -47,6 +48,7 @@ public class ImageService {
 
   /**
    * Add an image to the database
+   *
    * @param data the data of the image
    * @return The result of the operation with the generated id set if successful
    */
@@ -69,6 +71,7 @@ public class ImageService {
 
   /**
    * Modify the image data
+   *
    * @param data a byte array of the image data
    * @param id the id of the image
    * @return the status of the operation

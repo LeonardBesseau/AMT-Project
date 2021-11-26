@@ -2,6 +2,7 @@ package ch.heigvd.amt.database;
 
 import java.util.Objects;
 
+/** Wrapper around database update result (based on error code) */
 public class UpdateResult {
 
   private static final UpdateResult SUCCESS = new UpdateResult(UpdateStatus.SUCCESS);

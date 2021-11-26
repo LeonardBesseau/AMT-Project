@@ -107,6 +107,12 @@ public class ProductService {
     return UpdateResult.success();
   }
 
+  /**
+   * Delete a category
+   *
+   * @param productName
+   * @param categoryName
+   */
   public void removeCategory(String productName, String categoryName) {
     jdbi.useHandle(
         handle ->

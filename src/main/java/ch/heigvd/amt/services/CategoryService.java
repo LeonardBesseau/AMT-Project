@@ -42,6 +42,7 @@ public class CategoryService {
 
   /**
    * Get all categories who are link to at least one product
+   *
    * @return a list of category
    */
   public List<Category> getAllUsedCategory() {
