@@ -1652,25 +1652,36 @@ h2.title {
   
 }
 
-
-.cart_delete  {
-  display: block;
+.cart_clear  {
+  width: 300px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   margin-right: -12px;
   overflow: hidden;
+  margin-bottom: 15px;
 }
 
+.cart_clear_all {
+  margin-right: 5px;
+}
 
-.cart_delete a {
-  background:#F0F0E9;
+.cart_clear_all_p {
+  margin-bottom: 0;
+  font-size: larger;
+}
+
+.cart_delete a, .cart_clear a {
+  background:#C0C0C0;
   color: #FFFFFF;
   padding: 5px 7px;
-  font-size: 16px
+  font-size: 16px;
 }
 
-.cart_delete a:hover {
-  background:#FE980F
+.cart_delete a:hover, .cart_clear a:hover {
+  background:#FE980F;
+  cursor: pointer;
 }
-
 
 .bg h2.title {
   margin-right:0;
@@ -2265,7 +2276,6 @@ h2.title {
   background:#FE980F
 }
 
-
 .media-list .btn-primary, 
 .commnets .btn-primary {
   background:#FC9A11;
@@ -2529,6 +2539,24 @@ h2.title {
   width: 170px;
 }
 
-.cart_quantity_down,.cart_quantity_up {
-  cursor:pointer;
+
+
+#cart_list {
+  vertical-align: middle;
+}
+
+#cart_list td {
+  border-style: none;
+}
+
+#cart_list a {
+  text-decoration: none;
+}
+
+#cart_info {
+  overflow-x: hidden;
+}
+
+.cart_quantity_down:hover, .cart_quantity_up:hover, .cart_delete:hover {
+  cursor: pointer;
 }

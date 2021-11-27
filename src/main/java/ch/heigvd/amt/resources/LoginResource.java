@@ -32,7 +32,7 @@ public class LoginResource {
     private static final String REGISTER_ERROR = "registerError";
     private static final String REGISTER_SUCCESS = "registerSuccess";
     private static final String LOGIN_ERROR = "loginError";
-    private static final String AUTHSERV_ADDR = "http://localhost:8082";
+    private static final String AUTHSERV_ADDR = "http://10.0.1.92:8080";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private final CartService cartService;
