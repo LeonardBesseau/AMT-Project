@@ -50,10 +50,6 @@ public class CartServiceTest {
 
   @Test
   void addProductExist() {
-    // Check for duplicate
-    Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.DUPLICATE), cartService.addProduct(USERNAME, PRODUCT_1));
-
     // Add the product
     Assertions.assertEquals(
         UpdateResult.success(),
