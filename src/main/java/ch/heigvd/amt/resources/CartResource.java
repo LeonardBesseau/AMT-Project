@@ -26,7 +26,7 @@ import java.util.Objects;
 
 @Path("/cart")
 @ApplicationScoped
-public class CartRessource {
+public class CartResource {
 
     private final CartService cartService;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -36,7 +36,7 @@ public class CartRessource {
     Template cart;
 
     @Inject
-    CartRessource(CartService cartService) {
+    CartResource(CartService cartService) {
         this.cartService = cartService;
     }
 
@@ -53,14 +53,11 @@ public class CartRessource {
         String username = "Visitor";
         boolean isMember = false;
         List<CartProduct> products = null;
-        try {
-            if (jwtToken != null) {
-                username = getUsernameFromJWT(jwtToken);
-                products = cartService.getAllProduct(username);
-                isMember = true;
-            }
-        } catch (JsonProcessingException e) {
-            Log.error("An error occurred while parsing the jwt token");
+
+        if (jwtToken != null) {
+            username = getUsernameFromJWT(jwtToken);
+            products = cartService.getAllProduct(username);
+            isMember = true;
         }
 
         return cart.data("admin", false, "member", isMember,
@@ -70,20 +67,19 @@ public class CartRessource {
     @POST
     @Path("/product")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response addProduct(@CookieParam("jwt_token") NewCookie jwtToken,
                                @FormParam("product_name") String productName,
                                @FormParam("product_quantity") Integer productQuantity) {
 
-        // Try to get the username from jwt
-        String username;
-        try {
-            username = getUsernameFromJWT(jwtToken);
-        } catch (NullPointerException e) {
-            Log.error("Jwt token is null");
+        // Check if logged in
+        if (jwtToken == null) {
             return Response.status(Status.UNAUTHORIZED).build();
-        } catch (JsonProcessingException e) {
-            Log.error("An error occurred while parsing the jwt token");
+        }
+
+        // Try to get the username from jwt
+        String username = getUsernameFromJWT(jwtToken);
+        if (username == null) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
 
@@ -100,20 +96,19 @@ public class CartRessource {
     @POST
     @Path("/product/{name}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.TEXT_HTML)
+    @Produces(MediaType.TEXT_PLAIN)
     public Response updateProduct(@CookieParam("jwt_token") NewCookie jwtToken,
                                   @PathParam("name") String productName,
                                   @FormParam("product_quantity") Integer productQuantity) {
 
-        // Try to get the username from jwt
-        String username;
-        try {
-            username = getUsernameFromJWT(jwtToken);
-        } catch (NullPointerException e) {
-            Log.error("Jwt token is null");
+        // Check if logged in
+        if (jwtToken == null) {
             return Response.status(Status.UNAUTHORIZED).build();
-        } catch (JsonProcessingException e) {
-            Log.error("An error occurred while parsing the jwt token");
+        }
+
+        // Try to get the username from jwt
+        String username = getUsernameFromJWT(jwtToken);
+        if (username == null) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
         }
 
@@ -124,34 +119,76 @@ public class CartRessource {
                 return Response.status(Status.INTERNAL_SERVER_ERROR).build();
             }
         } else {
-            // Delete product if quantity is 0 or below
+            // Delete product if quantity is 0 or below and refresh page
             cartService.deleteProduct(username, productName);
             URI uri = null;
             try {
-              uri = new URI("/cart/view");
+                uri = new URI("/cart/view");
             } catch (URISyntaxException e) {
                 e.printStackTrace();
             }
             return Response.seeOther(uri).build();
         }
-        return Response.status(Status.RESET_CONTENT).build();
+        return Response.status(Status.NO_CONTENT).build();
     }
 
+    @DELETE
+    @Path("/product/{name}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response deleteProduct(@CookieParam("jwt_token") NewCookie jwtToken,
+                                  @PathParam("name") String productName) {
+
+        // Check if logged in
+        if (jwtToken == null) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+
+        // Try to get the username from jwt
+        String username = getUsernameFromJWT(jwtToken);
+        if (username == null) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        cartService.deleteProduct(username, productName);
+        return Response.ok().build();
+    }
+
+    @DELETE
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response clearCart(@CookieParam("jwt_token") NewCookie jwtToken) {
+
+        // Check if logged in
+        if (jwtToken == null) {
+            return Response.status(Status.UNAUTHORIZED).build();
+        }
+
+        // Try to get the username from jwt
+        String username = getUsernameFromJWT(jwtToken);
+        if (username == null) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        cartService.clear(username);
+        return Response.ok().build();
+    }
 
     /**
      * Get the username from the JWT token
      *
      * @param jwtToken JWT token
-     * @return username or null if a parsing error occured
-     * @throws JsonProcessingException -
-     * @throws NullPointerException    -
+     * @return username or null if a parsing error occurred
+     * @throws NullPointerException - if the jwtToken is null
      */
-    private String getUsernameFromJWT(NewCookie jwtToken) throws JsonProcessingException, NullPointerException {
+    private String getUsernameFromJWT(NewCookie jwtToken) throws NullPointerException {
         Objects.requireNonNull(jwtToken);
-        String[] chunks = jwtToken.toString().split("\\.");
-        JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
-        return payload.get("sub").asText();
+        String username = null;
+        try {
+            String[] chunks = jwtToken.toString().split("\\.");
+            JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
+            username = payload.get("sub").asText();
+        } catch (JsonProcessingException e) {
+            Log.error("An error occurred while parsing the jwt token");
+        }
+        return username;
     }
-
-
 }

@@ -36,7 +36,11 @@
     <div class="container">
         <!--Clear button-->
         <div class="cart_delete">
+            {#if member}
+            <a class="cart_delete_all" onclick=sendDelete('/cart')><i class="fa fa-times"></i></a>
+            {#else}
             <a class="cart_delete_all" onclick=clearCart()><i class="fa fa-times"></i></a>
+            {/if}
             <p class="cart_delete_all_p">Delete cart</p>
         </div>
         <!--Product table-->
@@ -61,7 +65,7 @@
                         <img class="cart_product_image" src="/image/{product.imageId}" alt="Oups missing image">
                     </td>
                     <td class="cart_description">
-                        <h4><a href="\"> {product.name} </a></h4>
+                        <h4><a href="/product/view/{product.name}"> {product.name} </a></h4>
                     </td>
                     <td class="cart_price">
                         <p id="{product.name}_price" class="cart_price_input">{product.price} CHF</p>
@@ -78,8 +82,9 @@
                         <p id="{product.name}_total" class="cart_total_price">{product.getTotal()} CHF</p>
                     </td>
                     <td class="cart_delete">
-                        <a class="cart_quantity_delete" onclick="">
-                            <i class="fa fa-times"></i></a>
+                        <a class="cart_quantity_delete" onclick="sendDelete('/cart/product/{product.name}')">
+                            <i class="fa fa-times"></i>
+                        </a>
                     </td>
                 </tr>
                 {/for}
@@ -101,6 +106,12 @@
 
         // Send form
         document.getElementById(productName + "_form").submit();
+    }
+
+    function sendDelete(url) {
+        fetch(url, {
+            method: 'DELETE',
+        }).then(() => location.reload());
     }
 </script>
 <script type="text/javascript" src="/js/manageCart.js"></script>

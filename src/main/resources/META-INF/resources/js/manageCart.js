@@ -117,7 +117,7 @@ function retrieveCart() {
           + "\" alt=\"Oups missing image\">\n" +
           " </td>\n" +
           " <td class=\"cart_description\">\n" +
-          "  <h4><a href=\"\">" + name + "</a></h4>\n" +
+          "  <h4><a href=\"/product/view/" + product.name + "\">" + name + "</a></h4>\n" +
           " </td>" +
           " <td class=\"cart_price\">\n" +
           "  <p class=\"cart_price_input\">" + product.price + " CHF</p>\n" +
