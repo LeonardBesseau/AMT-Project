@@ -91,8 +91,12 @@ public class ImageService {
     }
   }
 
+  /**
+   * @param inputPart
+   * @param id
+   * @return
+   */
   public int manageImage(InputPart inputPart, int id) {
-    // TODO do we remove the part for managing multiple files at once ?
     // TODO add image treatment to set size.
     try {
       InputStream inputStream = inputPart.getBody(InputStream.class, null);
@@ -112,8 +116,6 @@ public class ImageService {
   }
 
   public int manageImage(InputPart inputPart) {
-    // TODO do we remove the part for managing multiple files at once ?
-    // TODO add image treatment to set size.
     try {
       InputStream inputStream = inputPart.getBody(InputStream.class, null);
       byte[] bytes = IOUtils.toByteArray(inputStream);
