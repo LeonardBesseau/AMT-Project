@@ -73,6 +73,7 @@ public class ImageService {
   }
 
   public int manageImage(InputPart inputPart, int id) {
+    // TODO DPO - Faites en sorte de virer les TODO lors d'une livraison ^^
     // TODO do we remove the part for managing multiple files at once ?
     // TODO add image treatment to set size.
     try {

@@ -15,6 +15,9 @@ import org.jdbi.v3.postgres.PostgresPlugin;
 @Singleton
 public class JdbiProvider {
 
+  // TODO DPO: C'est intéressant d'utiliser JDBI. Je connaissais pas et je suis aller me renseigner. Merci. J'utilise JDBC en
+  //  général avec un ORM comme hibernate pour faciliter les requêtes. Je n'ai pas vu dans le wiki pourquoi vous avez
+  //  choisi cette technologie. ça m'intéresse dans discuter durant la prochaine review.
   private final Jdbi jdbi;
 
   @Inject

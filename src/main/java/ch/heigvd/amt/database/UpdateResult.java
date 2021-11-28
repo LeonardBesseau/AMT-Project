@@ -2,6 +2,7 @@ package ch.heigvd.amt.database;
 
 import java.util.Objects;
 
+// TODO DPO - Vous avez entendu parler de lombok ? Je vous le conseille pour simplifier vos POJOs https://projectlombok.org/
 public class UpdateResult {
 
   private static final UpdateResult SUCCESS = new UpdateResult(UpdateStatus.SUCCESS);

@@ -12,10 +12,13 @@ public class Application {
   private static final Logger logger = Logger.getLogger(Application.class);
 
   public static void main(String[] args) {
+    // TODO DPO: Ah ben je comprends maintenant pourquoi ça fonctionnait pas en local chez moi...dur
     Jdbi jdbi = Jdbi.create("jdbc:postgresql://localhost:5432/amt?user=amt&password=amt");
     jdbi.installPlugin(new PostgresPlugin());
+    // TODO DPO: Il manque pas l'objet image ? (accessoirement le code est pas le même dans la classe provider...)
     jdbi.registerRowMapper(ConstructorMapper.factory(Product.class));
     jdbi.registerRowMapper(ConstructorMapper.factory(Category.class));
+    // TODO DPO - Hello to you too
     logger.info("HELLO\n");
   }
 }

@@ -30,6 +30,7 @@ public class LoginResource {
   private static final String REGISTER_ERROR = "registerError";
   private static final String REGISTER_SUCCESS = "registerSuccess";
   private static final String LOGIN_ERROR = "loginError";
+  // TODO DPO - ahahah un petit code en dur pour la route. Je vous invite à le mettre dans un fichier properties
   private static final String AUTHSERV_ADDR = "http://10.0.1.92:8080";
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();

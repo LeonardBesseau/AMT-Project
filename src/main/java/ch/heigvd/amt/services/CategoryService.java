@@ -30,6 +30,11 @@ public class CategoryService {
    *
    * @return a list of product
    */
+  // TODO DPO: L'ensemble du code est vraiment propre. La classe ! Pour aller un peu dans le détail, vous pouvez
+  //  refactorer la partie commençant par 'jbi.withHandle(...)' et placez le tout dans une méthode publique utilisable par
+  //  l'ensemble des services. Les services devraient être des composants qui ne discutent pas avec la base de données,
+  //  mais plutôt appel un système ou une méthode qui le fait à leur place (voir le commentaire du dessus si ça peut
+  //  vous mettre sur la piste).
   public List<Category> getAllCategory() {
     return new ArrayList<>(
         jdbi.withHandle(
