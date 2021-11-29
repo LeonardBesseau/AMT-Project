@@ -12,20 +12,13 @@ import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.jboss.logging.Logger;
@@ -83,8 +76,10 @@ public class ProductResource {
   @GET
   @Path("/view")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getAllView() {
+  public TemplateInstance getAllView(@CookieParam("jwt_token") NewCookie jwtToken) {
 
+    // Check if it's a member (we assume that admins can access this page too)
+    boolean isMember = jwtToken != null;
     return productList.data(
         "items",
         productService.getAllProduct(),
@@ -93,18 +88,22 @@ public class ProductResource {
         "filters",
         null,
         "admin",
-        false);
+        false,
+        "member",
+        isMember);
   }
 
   @GET
   @Path("/view/{id}")
   @Produces(MediaType.TEXT_HTML)
-  public Object getAllView(@PathParam("id") String name) {
+  public Object getAllView(
+      @PathParam("id") String name, @CookieParam("jwt_token") NewCookie jwtToken) {
+    boolean isMember = jwtToken != null;
     Optional<Product> product = productService.getProduct(name);
     if (product.isEmpty()) {
       return Response.status(Status.NOT_FOUND);
     }
-    return productDetails.data("item", product.get(), "admin", false);
+    return productDetails.data("item", product.get(), "admin", false, "member", isMember);
   }
 
   @POST
