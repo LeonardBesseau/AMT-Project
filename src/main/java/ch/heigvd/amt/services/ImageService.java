@@ -30,6 +30,12 @@ public class ImageService {
     this.updateResultHandler = updateResultHandler;
   }
 
+  /**
+   * Get an image
+   *
+   * @param imageId the id of the image
+   * @return the image
+   */
   public Optional<Image> getImage(int imageId) {
     return jdbi.withHandle(
         handle ->
@@ -40,6 +46,12 @@ public class ImageService {
                 .findOne());
   }
 
+  /**
+   * Add an image to the database
+   *
+   * @param data the data of the image
+   * @return The result of the operation with the generated id set if successful
+   */
   public UpdateResult addImage(byte[] data) {
     try {
       Integer newId =
@@ -57,6 +69,13 @@ public class ImageService {
     }
   }
 
+  /**
+   * Modify the image data
+   *
+   * @param data a byte array of the image data
+   * @param id the id of the image
+   * @return the status of the operation
+   */
   public UpdateResult updateImage(byte[] data, int id) {
     try {
       jdbi.useHandle(
@@ -72,8 +91,12 @@ public class ImageService {
     }
   }
 
+  /**
+   * @param inputPart
+   * @param id
+   * @return
+   */
   public int manageImage(InputPart inputPart, int id) {
-    // TODO do we remove the part for managing multiple files at once ?
     // TODO add image treatment to set size.
     try {
       InputStream inputStream = inputPart.getBody(InputStream.class, null);
@@ -93,8 +116,6 @@ public class ImageService {
   }
 
   public int manageImage(InputPart inputPart) {
-    // TODO do we remove the part for managing multiple files at once ?
-    // TODO add image treatment to set size.
     try {
       InputStream inputStream = inputPart.getBody(InputStream.class, null);
       byte[] bytes = IOUtils.toByteArray(inputStream);

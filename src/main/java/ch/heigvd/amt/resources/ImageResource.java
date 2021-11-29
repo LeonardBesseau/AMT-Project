@@ -23,6 +23,7 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
+/** Manages images related route */
 @Path("/image")
 @ApplicationScoped
 public class ImageResource {
@@ -38,17 +39,28 @@ public class ImageResource {
     this.imageService = imageService;
   }
 
+  /**
+   * Get the image data
+   *
+   * @param id the id of the image
+   * @return A response containing the image data. 404 if not found
+   */
   @GET
   @Path("/{id}")
-  @Produces("image/png")
+  @Produces("image/png") // TODO check if can be improved
   public Response get(@PathParam("id") int id) {
-    Optional<Image> a = imageService.getImage(id);
-    if (a.isEmpty()) {
+    Optional<Image> image = imageService.getImage(id);
+    if (image.isEmpty()) {
       return Response.status(404).build();
     }
-    return Response.ok(new ByteArrayInputStream(a.get().getData())).build();
+    return Response.ok(new ByteArrayInputStream(image.get().getData())).build();
   }
 
+  /**
+   * Get the form to modify the default image
+   *
+   * @return an html view of the form
+   */
   @GET
   @Path("/view/default")
   @Produces(MediaType.TEXT_HTML)
@@ -56,6 +68,12 @@ public class ImageResource {
     return defaultImageManagement.data("imageError", null);
   }
 
+  /**
+   * Manages the upload of the default image
+   *
+   * @param input a form containing the image
+   * @return a response indicating the state if failed. Redirects to the product view otherwise.
+   */
   @POST
   @Path("/view/default")
   @Consumes(MediaType.MULTIPART_FORM_DATA)

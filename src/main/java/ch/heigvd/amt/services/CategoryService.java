@@ -26,9 +26,9 @@ public class CategoryService {
   }
 
   /**
-   * Get all product from databases
+   * Get all category from databases
    *
-   * @return a list of product
+   * @return a list of category
    */
   public List<Category> getAllCategory() {
     return new ArrayList<>(
@@ -40,6 +40,11 @@ public class CategoryService {
                     .list()));
   }
 
+  /**
+   * Get all categories who are link to at least one product
+   *
+   * @return a list of category
+   */
   public List<Category> getAllUsedCategory() {
     return new ArrayList<>(
         jdbi.withHandle(

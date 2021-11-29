@@ -13,6 +13,7 @@ import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.mapper.reflect.ConstructorMapper;
 import org.jdbi.v3.postgres.PostgresPlugin;
 
+/** Manage db connection lifetime */
 @Singleton
 public class JdbiProvider {
 

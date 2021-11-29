@@ -26,10 +26,22 @@ import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
+/** Manages product related route */
 @Path("/product")
 @ApplicationScoped
 public class ProductResource {
 
+  private static final String LIST_KEY = "items";
+  private static final String CATEGORIES_LIST_KEY = "categories";
+  private static final String FILTERS_LIST_KEY = "filters";
+  private static final String ADMIN_KEY = "admin";
+  public static final String ITEM_KEY = "item";
+  public static final String INVALID_PRICE_KEY = "invalidPrice";
+  public static final String INVALID_QUANTITY_KEY = "invalidQuantity";
+  public static final String IMAGE_ERROR = "imageError";
+  public static final String PRODUCTS_ADMIN_VIEW_URL = "/product/admin/view/";
+  public static final String MISSING_KEY = "missing";
+  public static final String DUPLICATE_KEY = "duplicate";
   private final ProductService productService;
   private final ImageService imageService;
   private final CategoryService categoryService;
@@ -62,6 +74,11 @@ public class ProductResource {
     this.categoryService = categoryService;
   }
 
+  /**
+   * Get product list as JSON
+   *
+   * @return a list of product
+   */
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   public List<Product> getAll() {
@@ -81,18 +98,24 @@ public class ProductResource {
     // Check if it's a member (we assume that admins can access this page too)
     boolean isMember = jwtToken != null;
     return productList.data(
-        "items",
+        LIST_KEY,
         productService.getAllProduct(),
-        "categories",
+        CATEGORIES_LIST_KEY,
         categoryService.getAllUsedCategory(),
-        "filters",
+        FILTERS_LIST_KEY,
         null,
-        "admin",
+        ADMIN_KEY,
         false,
         "member",
         isMember);
   }
 
+  /**
+   * Get the details of a product for a user
+   *
+   * @param name the identifier of the product
+   * @return 404 if not exist. A view
+   */
   @GET
   @Path("/view/{id}")
   @Produces(MediaType.TEXT_HTML)
@@ -103,9 +126,15 @@ public class ProductResource {
     if (product.isEmpty()) {
       return Response.status(Status.NOT_FOUND);
     }
-    return productDetails.data("item", product.get(), "admin", false, "member", isMember);
+    return productDetails.data(ITEM_KEY, product.get(), ADMIN_KEY, false, "member", isMember);
   }
 
+  /**
+   * Manage the filter for the view
+   *
+   * @param input the filter to apply
+   * @return the updated view
+   */
   @POST
   @Path("/view")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -113,32 +142,43 @@ public class ProductResource {
   public Object getAllViewWithFilter(MultivaluedMap<String, String> input) {
     List<String> selectedFilter = new ArrayList<>(input.keySet());
     return productList.data(
-        "items",
+        LIST_KEY,
         productService.getAllProduct(selectedFilter),
-        "categories",
+        CATEGORIES_LIST_KEY,
         categoryService.getAllUsedCategory(),
-        "filters",
+        FILTERS_LIST_KEY,
         selectedFilter,
-        "admin",
+        ADMIN_KEY,
         false);
   }
 
+  /**
+   * Get the view with the list of all products
+   *
+   * @return a html page with the list of all products
+   */
   @GET
   @Path("/admin/view")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAdminView() {
 
     return productList.data(
-        "items",
+        LIST_KEY,
         productService.getAllProduct(),
-        "categories",
+        CATEGORIES_LIST_KEY,
         categoryService.getAllUsedCategory(),
-        "filters",
+        FILTERS_LIST_KEY,
         null,
-        "admin",
+        ADMIN_KEY,
         true);
   }
 
+  /**
+   * Manage the filter for the view
+   *
+   * @param input the filter to apply
+   * @return the updated view
+   */
   @POST
   @Path("/admin/view")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -146,39 +186,47 @@ public class ProductResource {
   public Object getAdminViewWithFilter(MultivaluedMap<String, String> input) {
     List<String> selectedFilter = new ArrayList<>(input.keySet());
     return productList.data(
-        "items",
+        LIST_KEY,
         productService.getAllProduct(selectedFilter),
-        "categories",
+        CATEGORIES_LIST_KEY,
         categoryService.getAllUsedCategory(),
-        "filters",
+        FILTERS_LIST_KEY,
         selectedFilter,
-        "admin",
+        ADMIN_KEY,
         true);
   }
 
+  /**
+   * Get the form view to modify a product
+   *
+   * @param name the identifier of the product
+   * @return the form
+   */
   @GET
   @Path("/admin/view/{id}")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getDetails(@PathParam("id") String name) {
+  public Object getDetails(@PathParam("id") String name) {
     Optional<Product> product = productService.getProduct(name);
     if (product.isPresent()) {
       var categories = categoryService.getAllCategory();
       return productAdminDetails.data(
-          "item", product.get(),
-          "categories", categories,
-          "invalidPrice", false,
-          "invalidQuantity", false,
-          "imageError", false);
+          ITEM_KEY, product.get(),
+          CATEGORIES_LIST_KEY, categories,
+          INVALID_PRICE_KEY, false,
+          INVALID_QUANTITY_KEY, false,
+          IMAGE_ERROR, false);
     }
-    // TODO return error
-    return productAdminDetails.data(
-        "item", null,
-        "categories", null,
-        "invalidPrice", false,
-        "invalidQuantity", false,
-        "imageError", false);
+    return Response.status(Status.BAD_REQUEST);
   }
 
+  /**
+   * Manage the form update for a product about its details
+   *
+   * @param input the form data
+   * @param name the identifier of the object
+   * @return the form with error indication. Redirects otherwise
+   * @throws IOException if an error occurs while managing the image
+   */
   @POST
   @Path("/admin/view/{id}")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -227,11 +275,11 @@ public class ProductResource {
 
     if (imageError || isQuantityInvalid || isPriceInvalid) {
       return productAdminDetails.data(
-          "invalidPrice",
+          INVALID_PRICE_KEY,
           isPriceInvalid,
-          "invalidQuantity",
+          INVALID_QUANTITY_KEY,
           isQuantityInvalid,
-          "imageError",
+          IMAGE_ERROR,
           imageError);
     }
 
@@ -250,10 +298,17 @@ public class ProductResource {
     }
 
     return Response.status(Status.MOVED_PERMANENTLY)
-        .location(URI.create("/product/admin/view/"))
+        .location(URI.create(PRODUCTS_ADMIN_VIEW_URL))
         .build();
   }
 
+  /**
+   * Manage the form update for a product about its categories
+   *
+   * @param name the identifier of the product
+   * @param input the category to be associated with the product
+   * @return reidrects when successful.
+   */
   @POST
   @Path("/admin/view/{id}/category")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -274,29 +329,40 @@ public class ProductResource {
           .map(strings -> strings.get(0))
           .forEach(s -> productService.addCategory(name, s));
 
-      return Response.status(301).location(URI.create("/product/admin/view/")).build();
+      return Response.status(301).location(URI.create(PRODUCTS_ADMIN_VIEW_URL)).build();
     }
-    // TODO return error
-    return productAdminDetails.data("item", null, "categories", null);
+    return Response.status(Status.BAD_REQUEST);
   }
 
+  /**
+   * Get the product creation form
+   *
+   * @return the form
+   */
   @GET
   @Path("admin/view/create")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance createProductView() {
     return productAdd.data(
-        "missing",
+        MISSING_KEY,
         null,
-        "duplicate",
+        DUPLICATE_KEY,
         null,
-        "invalidPrice",
+        INVALID_PRICE_KEY,
         null,
-        "invalidQuantity",
+        INVALID_QUANTITY_KEY,
         null,
-        "imageError",
+        IMAGE_ERROR,
         null);
   }
 
+  /**
+   * Manage the product form creation
+   *
+   * @param input the form data
+   * @return the form with the error indicated. Redirects otherwise
+   * @throws IOException if an error occurs while managing the image
+   */
   @POST
   @Path("/admin/view/create")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -351,15 +417,15 @@ public class ProductResource {
 
     if (imageError || isQuantityInvalid || isPriceInvalid || isNameMissing) {
       return productAdd.data(
-          "missing",
+          MISSING_KEY,
           isNameMissing,
-          "duplicate",
+          DUPLICATE_KEY,
           null,
-          "invalidPrice",
+          INVALID_PRICE_KEY,
           isPriceInvalid,
-          "invalidQuantity",
+          INVALID_QUANTITY_KEY,
           isQuantityInvalid,
-          "imageError",
+          IMAGE_ERROR,
           imageError);
     }
 
@@ -369,18 +435,18 @@ public class ProductResource {
             .getStatus()
         == UpdateStatus.DUPLICATE) {
       return productAdd.data(
-          "missing",
+          MISSING_KEY,
           null,
-          "duplicate",
+          DUPLICATE_KEY,
           name,
-          "invalidPrice",
+          INVALID_PRICE_KEY,
           null,
-          "invalidQuantity",
+          INVALID_QUANTITY_KEY,
           null,
-          "imageError",
+          IMAGE_ERROR,
           null);
     }
 
-    return Response.status(301).location(URI.create("/product/admin/view/")).build();
+    return Response.status(301).location(URI.create(PRODUCTS_ADMIN_VIEW_URL)).build();
   }
 }

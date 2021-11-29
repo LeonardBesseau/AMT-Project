@@ -23,6 +23,15 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 @ApplicationScoped
 public class ProductService {
 
+  public static final String CATEGORY_LIST = "categoryList";
+  public static final String NAME = "name";
+  public static final String PRODUCT_NAME = "product_name";
+  public static final String CATEGORY_NAME = "category_name";
+  public static final String PRICE = "price";
+  public static final String DESCRIPTION = "description";
+  public static final String QUANTITY = "quantity";
+  public static final String IMAGE_ID = "image_id";
+  public static final String LIST = "list";
   private final Jdbi jdbi;
   private final UpdateResultHandler updateResultHandler;
 
@@ -56,7 +65,7 @@ public class ProductService {
                     handle
                         .createQuery(
                             ResourceLoader.loadResource("sql/product/getAllWithCategoryFilter.sql"))
-                        .bindArray("categoryList", String.class, categories)
+                        .bindArray(CATEGORY_LIST, String.class, categories)
                         .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
                         .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
                         .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
@@ -75,7 +84,7 @@ public class ProductService {
             handle ->
                 handle
                     .createQuery(ResourceLoader.loadResource("sql/product/get.sql"))
-                    .bind("name", name)
+                    .bind(NAME, name)
                     .registerRowMapper(ConstructorMapper.factory(Product.class, "p"))
                     .registerRowMapper(ConstructorMapper.factory(Category.class, "c"))
                     .reduceRows(new LinkedHashMap<>(), accumulateProductRow()))
@@ -98,8 +107,8 @@ public class ProductService {
           handle ->
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/product/addCategory.sql"))
-                  .bind("product_name", productName)
-                  .bind("category_name", categoryName)
+                  .bind(PRODUCT_NAME, productName)
+                  .bind(CATEGORY_NAME, categoryName)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
       return updateResultHandler.handleUpdateError(e);
@@ -107,27 +116,39 @@ public class ProductService {
     return UpdateResult.success();
   }
 
+  /**
+   * Delete a category from a product
+   *
+   * @param productName the identifier of the product
+   * @param categoryName the identifier of the category
+   */
   public void removeCategory(String productName, String categoryName) {
     jdbi.useHandle(
         handle ->
             handle
                 .createUpdate(ResourceLoader.loadResource("sql/product/removeCategory.sql"))
-                .bind("product_name", productName)
-                .bind("category_name", categoryName)
+                .bind(PRODUCT_NAME, productName)
+                .bind(CATEGORY_NAME, categoryName)
                 .execute());
   }
 
+  /**
+   * Create a new product
+   *
+   * @param product the identifier of the product
+   * @return the status of the operation
+   */
   public UpdateResult addProduct(Product product) {
     try {
       jdbi.useHandle(
           handle ->
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/product/add.sql"))
-                  .bind("name", product.getName())
-                  .bind("price", product.getPrice())
-                  .bind("description", product.getDescription())
-                  .bind("quantity", product.getQuantity())
-                  .bind("image_id", product.getImage().getId())
+                  .bind(NAME, product.getName())
+                  .bind(PRICE, product.getPrice())
+                  .bind(DESCRIPTION, product.getDescription())
+                  .bind(QUANTITY, product.getQuantity())
+                  .bind(IMAGE_ID, product.getImage().getId())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
       return updateResultHandler.handleUpdateError(e);
@@ -135,6 +156,12 @@ public class ProductService {
     return UpdateResult.success();
   }
 
+  /**
+   * Update a product
+   *
+   * @param product the product with updated data
+   * @return the status of the operation
+   */
   public UpdateResult updateProduct(Product product) {
     String toUpdate = "price=:price, quantity=:quantity";
     if (product.getImage() == null) {
@@ -143,10 +170,10 @@ public class ProductService {
             handle ->
                 handle
                     .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
-                    .define("list", toUpdate)
-                    .bind("name", product.getName())
-                    .bind("price", product.getPrice())
-                    .bind("quantity", product.getQuantity())
+                    .define(LIST, toUpdate)
+                    .bind(NAME, product.getName())
+                    .bind(PRICE, product.getPrice())
+                    .bind(QUANTITY, product.getQuantity())
                     .execute());
       } catch (UnableToExecuteStatementException e) {
         return updateResultHandler.handleUpdateError(e);
@@ -157,11 +184,11 @@ public class ProductService {
             handle ->
                 handle
                     .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
-                    .define("list", toUpdate + ", image_id=:image_id")
-                    .bind("name", product.getName())
-                    .bind("price", product.getPrice())
-                    .bind("quantity", product.getQuantity())
-                    .bind("image_id", product.getImage().getId())
+                    .define(LIST, toUpdate + ", image_id=:image_id")
+                    .bind(NAME, product.getName())
+                    .bind(PRICE, product.getPrice())
+                    .bind(QUANTITY, product.getQuantity())
+                    .bind(IMAGE_ID, product.getImage().getId())
                     .execute());
       } catch (UnableToExecuteStatementException e) {
         return updateResultHandler.handleUpdateError(e);
@@ -187,7 +214,6 @@ public class ProductService {
             .getCategories()
             .addAll(rowView.getColumn("c_name", new GenericType<List<Category>>() {}));
       }
-
       return map;
     };
   }
