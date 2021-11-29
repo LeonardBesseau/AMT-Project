@@ -1,23 +1,25 @@
-# Les boulangers
-Projet pour le cours d'AMT à la HEIG-VD
+# Les Boulangers
+Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargés de créer un site web de e-commerce décomposé en microservices.
 
 ## Description
-Boutique en ligne de boulangerie et pâtisserie.
+Nous avons choisi de créer une boutique en ligne de boulangerie et pâtisserie.
 
 ## Pré-requis
-- Postgresql (v13 ou supérieur)
-- Java 11
-- Docker et docker-compose (optionnel)
+- [Postgresql](https://www.postgresql.org/download/) (v13 ou supérieure)
+- [Java 11](https://adoptopenjdk.net/installation.html)
+- [Docker](https://docs.docker.com/get-docker/) et [docker-compose](https://docs.docker.com/compose/install/) (optionnels)
 
 ## Déploiement
-Télécharger la release et l'extraire. Ajouter les données de connexion à la base de données dans le fichier `config/application.properties` (il peut être nécessaire de le créer).
-Lancer le serveur avec `java -jar target/quarkus-app/quarkus-run.jar`
+- Télécharger la release et l'extraire. Ajouter les données de connexion à la base de données dans le fichier `config/application.properties` (il peut être nécessaire de le créer).
+- Lancer le serveur avec `java -jar target/quarkus-app/quarkus-run.jar`
 
 
 ## Installation
+Les étapes ci-dessous permettent de mettre en place l'environnement de développement en local afin de travailler sur le projet :
+
 1. Cloner le repository. 
 
-2. Mettre en place de la base de données
+2. Mettre en place la base de données
 
    - Standalone
 
