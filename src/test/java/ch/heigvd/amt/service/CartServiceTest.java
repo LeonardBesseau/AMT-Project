@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 @QuarkusTest
 @QuarkusTestResource(PostgisResource.class)
-public class CartServiceTest {
+class CartServiceTest {
 
   private static final String USERNAME = "test";
   private static final CartProduct PRODUCT_1 = new CartProduct("1", null, null, 1);

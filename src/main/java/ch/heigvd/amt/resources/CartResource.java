@@ -3,7 +3,6 @@ package ch.heigvd.amt.resources;
 import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.services.CartService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
@@ -22,8 +21,8 @@ import javax.ws.rs.core.Response.Status;
 @ApplicationScoped
 public class CartResource {
 
+  public static final String LOGIN_VIEW_URL = "/login/view";
   private final CartService cartService;
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   @Inject
   @Location("CartView/cart.html")
@@ -69,7 +68,7 @@ public class CartResource {
 
     // Check if logged in
     if (jwtToken == null) {
-      return redirectTo("/login/view");
+      return redirectTo(LOGIN_VIEW_URL);
     }
 
     // Try to get the username from jwt
@@ -99,7 +98,7 @@ public class CartResource {
 
     // Check if logged in
     if (jwtToken == null) {
-      return redirectTo("/login/view");
+      return redirectTo(LOGIN_VIEW_URL);
     }
 
     // Try to get the username from jwt
@@ -131,7 +130,7 @@ public class CartResource {
 
     // Check if logged in
     if (jwtToken == null) {
-      return redirectTo("/login/view");
+      return redirectTo(LOGIN_VIEW_URL);
     }
 
     // Try to get the username from jwt
@@ -150,7 +149,7 @@ public class CartResource {
 
     // Check if logged in
     if (jwtToken == null) {
-      return redirectTo("/login/view");
+      return redirectTo(LOGIN_VIEW_URL);
     }
 
     // Try to get the username from jwt
