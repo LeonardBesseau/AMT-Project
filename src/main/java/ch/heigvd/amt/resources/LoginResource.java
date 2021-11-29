@@ -25,12 +25,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 /** Class allowing to serve the login page and to treat the requests which are made on it */
 @Path("/login")
 @ApplicationScoped
 public class LoginResource {
-
 
   // names of Qute templates
   private static final String REGISTER_ERROR =
@@ -40,15 +40,21 @@ public class LoginResource {
   private static final String LOGIN_ERROR =
       "loginError"; // used to display the errors about registration on the login page
 
-  private static final String AUTHSERV_ADDR =
-      "http://10.0.1.92:8080"; // authentication server address, will go in a config file in the
+  @ConfigProperty(name = "auth.server.url")
+  String AUTHSERV_ADDR; // authentication server address, will go in a config file in the
   // future
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // used to parse JSON object
   private final CartService cartService;
+
   @Inject
   @Location("LoginView/login.html")
   Template login;
+
+  @Inject
+  LoginResource(CartService cartService) {
+    this.cartService = cartService;
+  }
 
   /**
    * Method allowing to display the login page if the cookies are not already set
@@ -58,22 +64,16 @@ public class LoginResource {
    * @return either a Response to go to the home page if the cookies are already set, or the
    *     template of the login page
    */
-  @Inject
-  LoginResource(CartService cartService) {
-    this.cartService = cartService;
-  }
-
   @GET
   @Path("/view")
   @Produces(MediaType.TEXT_HTML)
   public Object getLoginPage(
       @CookieParam("jwt_token") NewCookie jwtToken, @CookieParam("user_role") NewCookie userRole) {
 
-
     if (jwtToken != null && userRole != null) {
       String resource = "/product/view";
       String[] userInfo = getUserInfo(jwtToken);
-      if (userInfo == null) {
+      if (userInfo.length == 0) {
         // Parsing error
         return Response.status(Status.INTERNAL_SERVER_ERROR);
       }
@@ -232,17 +232,17 @@ public class LoginResource {
    * Method allowing to create the cookies according to the response body of the authentication
    * server
    *
-   * @param ResponseBody body of the response
+   * @param responseBody body of the response
    * @return array of the JWT token cookie and the user role cookie
    * @throws JsonProcessingException if an error occurred when parsing the JSON object of the
    *     response
    */
-  private NewCookie[] createCookies(String ResponseBody) throws JsonProcessingException {
+  private NewCookie[] createCookies(String responseBody) throws JsonProcessingException {
 
-    Objects.requireNonNull(ResponseBody);
+    Objects.requireNonNull(responseBody);
 
     // Parsing the response
-    JsonNode jsonBody = OBJECT_MAPPER.readTree(ResponseBody);
+    JsonNode jsonBody = OBJECT_MAPPER.readTree(responseBody);
     String token = jsonBody.get("token").asText();
     String role = jsonBody.get("account").get("role").asText();
 
@@ -260,17 +260,17 @@ public class LoginResource {
    * @throws JsonProcessingException if an error occurred when parsing the JSON object of the JWT
    *     token
    */
-
   public static String[] getUserInfo(Cookie jwtToken) {
 
     Objects.requireNonNull(jwtToken);
-    String[] userInfo = null;
+    String[] userInfo;
     try {
       String[] chunks = jwtToken.toString().split("\\.");
       JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
       userInfo = new String[] {payload.get("sub").asText(), payload.get("role").asText()};
     } catch (JsonProcessingException e) {
       Log.error("An error occurred while parsing the jwt token");
+      throw new IllegalArgumentException("The jwt is invalid", e);
     }
     return userInfo;
   }

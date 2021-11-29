@@ -14,6 +14,7 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 @ApplicationScoped
 public class CartService {
 
+  public static final String USERNAME = "username";
   private final Jdbi jdbi;
   private final UpdateResultHandler updateResultHandler;
 
@@ -35,7 +36,7 @@ public class CartService {
             handle ->
                 handle
                     .createQuery(ResourceLoader.loadResource("sql/cart/getAllProduct.sql"))
-                    .bind("username", username)
+                    .bind(USERNAME, username)
                     .mapTo(CartProduct.class)
                     .list()));
   }
@@ -53,7 +54,7 @@ public class CartService {
           handle ->
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/cart/addProduct.sql"))
-                  .bind("username", username)
+                  .bind(USERNAME, username)
                   .bind("name", cartProduct.getName())
                   .bind("quantity", cartProduct.getQuantity())
                   .execute());
@@ -77,7 +78,7 @@ public class CartService {
           handle ->
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/cart/updateProductQuantity.sql"))
-                  .bind("username", username)
+                  .bind(USERNAME, username)
                   .bind("name", name)
                   .bind("quantity", newQuantity)
                   .execute());
@@ -98,7 +99,7 @@ public class CartService {
         handle ->
             handle
                 .createUpdate(ResourceLoader.loadResource("sql/cart/deleteProduct.sql"))
-                .bind("username", username)
+                .bind(USERNAME, username)
                 .bind("name", name)
                 .execute());
   }
@@ -113,7 +114,7 @@ public class CartService {
         handle ->
             handle
                 .createUpdate(ResourceLoader.loadResource("sql/cart/clear.sql"))
-                .bind("username", username)
+                .bind(USERNAME, username)
                 .execute());
   }
 
@@ -127,7 +128,7 @@ public class CartService {
         handle ->
             handle
                 .createUpdate(ResourceLoader.loadResource("sql/cart/delete.sql"))
-                .bind("username", username)
+                .bind(USERNAME, username)
                 .execute());
   }
 
@@ -143,7 +144,7 @@ public class CartService {
           handle ->
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/cart/add.sql"))
-                  .bind("username", username)
+                  .bind(USERNAME, username)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
       return updateResultHandler.handleUpdateError(e);
