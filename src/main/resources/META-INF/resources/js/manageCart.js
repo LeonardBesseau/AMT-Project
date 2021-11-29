@@ -30,7 +30,7 @@ function storeProduct(productName, productPrice, imageId, quantity = 1) {
     name: productName,
     price: productPrice,
     imageId: imageId,
-    quantity: 1
+    quantity: quantity
   };
   if (cart === null) {
     // Add new cart with product
@@ -78,12 +78,12 @@ function changeProductQuantity(productName, productQuantity) {
           quantityLayout.value = Number(quantityLayout.value) + productQuantity;
 
           // Update view to the new total price
-          const price = parseInt(articleLayout.getElementsByClassName(
+          const price = parseFloat(articleLayout.getElementsByClassName(
               PRODUCT_PRICE_CLASSNAME)[0].innerHTML);
           const totalLayout = articleLayout.getElementsByClassName(
               PRODUCT_TOTAL_CLASSNAME)[0];
           totalLayout.innerHTML = (Number(quantityLayout.value)
-              * price).toString()
+              * price).toString() + " CHF"
         } else {
           // Filter the cart with product.quantity <= 0
           cart = cart.filter((product) => {
@@ -113,27 +113,27 @@ function retrieveCart() {
       document.getElementById("cart_list").innerHTML +=
           "<tr class=\"cart_article\" id=\"" + name + "\">\n" +
           " <td class=\"cart_product\">\n" +
-          "  <img src=\"/image/" + product.imageId
+          "  <img class=\"cart_product_image\" src=\"/image/" + product.imageId
           + "\" alt=\"Oups missing image\">\n" +
           " </td>\n" +
           " <td class=\"cart_description\">\n" +
-          "  <h4><a href=\"\">" + name + "</a></h4>\n" +
+          "  <h4><a href=\"/product/view/" + product.name + "\">" + name + "</a></h4>\n" +
           " </td>" +
           " <td class=\"cart_price\">\n" +
-          "  <p class=\"cart_price_input\">" + product.price + "</p>\n" +
+          "  <p class=\"cart_price_input\">" + product.price + " CHF</p>\n" +
           " </td>\n" +
           " <td class=\"cart_quantity\">\n" +
           "  <div class=\"cart_quantity_button\">\n" +
-          "   <a class=\"cart_quantity_up\" onclick=\"changeProductQuantity(\'"
-          + name + "\', 1)\"> + </a>\n" +
-          "   <input class=\"cart_quantity_input\" type=\"text\" name=\"quantity\" value=\""
-          + quantity + "\" autocomplete=\"off\" size=\"2\">\n" +
           "   <a class=\"cart_quantity_down\" onclick=\"changeProductQuantity(\'"
           + name + "\', -1)\"> - </a>\n" +
+          "   <input class=\"cart_quantity_input\" type=\"text\" name=\"quantity\" value=\""
+          + quantity + "\" disabled autocomplete=\"off\" size=\"2\">\n" +
+          "   <a class=\"cart_quantity_up\" onclick=\"changeProductQuantity(\'"
+          + name + "\', 1)\"> + </a>\n" +
           "  </div>\n" +
           " </td>\n" +
           " <td class=\"cart_total\">\n" +
-          "  <p class=\"cart_total_price\">" + total + "</p>\n" +
+          "  <p class=\"cart_total_price\">" + total + " CHF</p>\n" +
           " </td>\n" +
           " <td class=\"cart_delete\">\n" +
           "  <a class=\"cart_quantity_delete\" onclick=\"removeProduct(\'"

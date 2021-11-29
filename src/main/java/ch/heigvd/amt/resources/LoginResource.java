@@ -1,5 +1,7 @@
 package ch.heigvd.amt.resources;
 
+import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.services.CartService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,25 +20,48 @@ import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+/** Class allowing to serve the login page and to treat the requests which are made on it */
 @Path("/login")
 @ApplicationScoped
 public class LoginResource {
 
-  private static final String REGISTER_ERROR = "registerError";
-  private static final String REGISTER_SUCCESS = "registerSuccess";
-  private static final String LOGIN_ERROR = "loginError";
-  private static final String AUTHSERV_ADDR = "http://10.0.1.92:8080";
 
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  // names of Qute templates
+  private static final String REGISTER_ERROR =
+      "registerError"; // used to display the errors about registration on the login page
+  private static final String REGISTER_SUCCESS =
+      "registerSuccess"; // used to display that the account has been created
+  private static final String LOGIN_ERROR =
+      "loginError"; // used to display the errors about registration on the login page
 
+  private static final String AUTHSERV_ADDR =
+      "http://10.0.1.92:8080"; // authentication server address, will go in a config file in the
+  // future
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // used to parse JSON object
+  private final CartService cartService;
   @Inject
   @Location("LoginView/login.html")
   Template login;
+
+  /**
+   * Method allowing to display the login page if the cookies are not already set
+   *
+   * @param jwtToken cookie that contains the JWT token
+   * @param userRole cookie that contains the user role
+   * @return either a Response to go to the home page if the cookies are already set, or the
+   *     template of the login page
+   */
+  @Inject
+  LoginResource(CartService cartService) {
+    this.cartService = cartService;
+  }
 
   @GET
   @Path("/view")
@@ -44,25 +69,33 @@ public class LoginResource {
   public Object getLoginPage(
       @CookieParam("jwt_token") NewCookie jwtToken, @CookieParam("user_role") NewCookie userRole) {
 
-    try {
-      if (jwtToken != null && userRole != null) {
 
-        String resource = "/product/view";
-        if (getUserInfo(jwtToken)[1].equals("admin")) {
-          resource = "/product/admin/view";
-        }
-        return Response.status(Response.Status.MOVED_PERMANENTLY)
-            .cookie(jwtToken, userRole)
-            .location(URI.create(resource))
-            .build();
+    if (jwtToken != null && userRole != null) {
+      String resource = "/product/view";
+      String[] userInfo = getUserInfo(jwtToken);
+      if (userInfo == null) {
+        // Parsing error
+        return Response.status(Status.INTERNAL_SERVER_ERROR);
       }
-      return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null);
-    } catch (JsonProcessingException e) {
-      Log.error("JsonProcessingException occured");
-      return Response.status(Status.INTERNAL_SERVER_ERROR);
+      if (userInfo[1].equals("admin")) {
+        resource = "/product/admin/view";
+      }
+      return Response.status(Response.Status.MOVED_PERMANENTLY)
+          .cookie(jwtToken, userRole)
+          .location(URI.create(resource))
+          .build();
     }
+    return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null);
   }
 
+  /**
+   * Method treating the sign-in form fields sent by the POST request
+   *
+   * @param username username of the user
+   * @param password password of the user
+   * @return either a Response to go to the home page if the cookies are already set, or the
+   *     template of the login page
+   */
   @POST
   @Path("/signin")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -79,13 +112,15 @@ public class LoginResource {
         case 200:
           NewCookie[] cookies = createCookies(body);
           String resource = "/product/view";
+
+          // if the user is an admin, he will be redirected to the home page for admins
           if (getUserInfo(cookies[0])[1].equals("admin")) {
             resource = "/product/admin/view";
           }
           return Response.status(Response.Status.MOVED_PERMANENTLY)
               .cookie(cookies[0], cookies[1])
               .location(URI.create(resource))
-              .build();
+              .build(); // return the home page if the login was a success
         default: // currently 403
           return login.data(
               REGISTER_SUCCESS,
@@ -93,7 +128,10 @@ public class LoginResource {
               REGISTER_ERROR,
               null,
               LOGIN_ERROR,
-              OBJECT_MAPPER.readTree(body).get("error").asText());
+              OBJECT_MAPPER
+                  .readTree(body)
+                  .get("error")
+                  .asText()); // return the login page template if the login went wrong
       }
     } catch (IOException e) {
       Log.error("IOException occured");
@@ -101,6 +139,15 @@ public class LoginResource {
     }
   }
 
+  /**
+   * Method treating the sign-up form fields sent by the POST request
+   *
+   * @param username username of the user
+   * @param password password of the user
+   * @param confirmPassword repeated password of the user to match with the first one
+   * @return the template of the login page with Qute parameters that indicate if there was an error
+   *     or not
+   */
   @POST
   @Path("/signup")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -121,6 +168,10 @@ public class LoginResource {
 
       switch (response.getStatusInfo().getStatusCode()) {
         case 201:
+          // Create cart for the new user
+          if (cartService.addCart(username) != UpdateResult.success()) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR);
+          }
           return login.data(
               REGISTER_SUCCESS, "Account created", REGISTER_ERROR, null, LOGIN_ERROR, null);
         case 409:
@@ -148,17 +199,26 @@ public class LoginResource {
     }
   }
 
-  private Response sendToAuthServ(String resource, String username, String password)
-      throws IOException {
+  /**
+   * Method allowing to communicate with the authentication server
+   *
+   * @param resource resource of the authentication server where to send the data
+   * @param username username of the user
+   * @param password password of the user
+   * @return response of the authentication server
+   */
+  private Response sendToAuthServ(String resource, String username, String password) {
 
     Objects.requireNonNull(resource);
     Objects.requireNonNull(username);
     Objects.requireNonNull(password);
 
+    // creating the JSON object to send
     ObjectNode jsonInput = JsonNodeFactory.instance.objectNode();
     jsonInput.put("username", username);
     jsonInput.put("password", password);
 
+    // sending the JSON object to the authentication server and get its response
     Client client = ClientBuilder.newClient();
     return client
         .target(AUTHSERV_ADDR)
@@ -168,10 +228,20 @@ public class LoginResource {
         .post(Entity.json(jsonInput.toString()));
   }
 
+  /**
+   * Method allowing to create the cookies according to the response body of the authentication
+   * server
+   *
+   * @param ResponseBody body of the response
+   * @return array of the JWT token cookie and the user role cookie
+   * @throws JsonProcessingException if an error occurred when parsing the JSON object of the
+   *     response
+   */
   private NewCookie[] createCookies(String ResponseBody) throws JsonProcessingException {
 
     Objects.requireNonNull(ResponseBody);
 
+    // Parsing the response
     JsonNode jsonBody = OBJECT_MAPPER.readTree(ResponseBody);
     String token = jsonBody.get("token").asText();
     String role = jsonBody.get("account").get("role").asText();
@@ -182,13 +252,26 @@ public class LoginResource {
     return new NewCookie[] {cookieJWT, cookieRole};
   }
 
-  public static String[] getUserInfo(NewCookie jwtToken) throws JsonProcessingException {
+  /**
+   * Method allowing to extract the username and the role of the user of the JWT token
+   *
+   * @param jwtToken cookie that contains the JWT token
+   * @return array containing the username and the role of the user
+   * @throws JsonProcessingException if an error occurred when parsing the JSON object of the JWT
+   *     token
+   */
+
+  public static String[] getUserInfo(Cookie jwtToken) {
 
     Objects.requireNonNull(jwtToken);
-
-    String[] chunks = jwtToken.toString().split("\\.");
-    JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
-
-    return new String[] {payload.get("sub").asText(), payload.get("role").asText()};
+    String[] userInfo = null;
+    try {
+      String[] chunks = jwtToken.toString().split("\\.");
+      JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
+      userInfo = new String[] {payload.get("sub").asText(), payload.get("role").asText()};
+    } catch (JsonProcessingException e) {
+      Log.error("An error occurred while parsing the jwt token");
+    }
+    return userInfo;
   }
 }

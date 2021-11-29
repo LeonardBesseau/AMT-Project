@@ -1,0 +1,1 @@
+DELETE FROM cart_product WHERE user_name = :username AND product_name = :name;
