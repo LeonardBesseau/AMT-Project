@@ -3,23 +3,18 @@ package ch.heigvd.amt.resources;
 import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.services.CartService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.logging.Log;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -47,14 +42,14 @@ public class CartResource {
   @GET
   @Path("/view")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getCart(@CookieParam("jwt_token") NewCookie jwtToken) {
+  public TemplateInstance getCart(@CookieParam("jwt_token") Cookie jwtToken) {
 
     String username = "Visitor";
     boolean isMember = false;
     List<CartProduct> products = null;
 
     if (jwtToken != null) {
-      username = getUsernameFromJWT(jwtToken);
+      username = LoginResource.getUserInfo(jwtToken)[0];
       products = cartService.getAllProduct(username);
       isMember = true;
     }
@@ -66,19 +61,19 @@ public class CartResource {
   @POST
   @Path("/product")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_HTML)
   public Response addProduct(
-      @CookieParam("jwt_token") NewCookie jwtToken,
+      @CookieParam("jwt_token") Cookie jwtToken,
       @FormParam("product_name") String productName,
       @FormParam("product_quantity") Integer productQuantity) {
 
     // Check if logged in
     if (jwtToken == null) {
-      return Response.status(Status.UNAUTHORIZED).build();
+      return redirectTo("/login/view");
     }
 
     // Try to get the username from jwt
-    String username = getUsernameFromJWT(jwtToken);
+    String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -96,19 +91,19 @@ public class CartResource {
   @POST
   @Path("/product/{name}")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_HTML)
   public Response updateProduct(
-      @CookieParam("jwt_token") NewCookie jwtToken,
+      @CookieParam("jwt_token") Cookie jwtToken,
       @PathParam("name") String productName,
       @FormParam("product_quantity") Integer productQuantity) {
 
     // Check if logged in
     if (jwtToken == null) {
-      return Response.status(Status.UNAUTHORIZED).build();
+      return redirectTo("/login/view");
     }
 
     // Try to get the username from jwt
-    String username = getUsernameFromJWT(jwtToken);
+    String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -123,30 +118,24 @@ public class CartResource {
     } else {
       // Delete product if quantity is 0 or below and refresh page
       cartService.deleteProduct(username, productName);
-      URI uri = null;
-      try {
-        uri = new URI("/cart/view");
-      } catch (URISyntaxException e) {
-        e.printStackTrace();
-      }
-      return Response.seeOther(uri).build();
+      return redirectTo("/cart/view");
     }
     return Response.status(Status.NO_CONTENT).build();
   }
 
   @DELETE
   @Path("/product/{name}")
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.TEXT_HTML)
   public Response deleteProduct(
-      @CookieParam("jwt_token") NewCookie jwtToken, @PathParam("name") String productName) {
+      @CookieParam("jwt_token") Cookie jwtToken, @PathParam("name") String productName) {
 
     // Check if logged in
     if (jwtToken == null) {
-      return Response.status(Status.UNAUTHORIZED).build();
+      return redirectTo("/login/view");
     }
 
     // Try to get the username from jwt
-    String username = getUsernameFromJWT(jwtToken);
+    String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -156,41 +145,38 @@ public class CartResource {
   }
 
   @DELETE
-  @Produces(MediaType.TEXT_PLAIN)
-  public Response clearCart(@CookieParam("jwt_token") NewCookie jwtToken) {
+  @Produces(MediaType.TEXT_HTML)
+  public Response clearCart(@CookieParam("jwt_token") Cookie jwtToken) {
 
     // Check if logged in
     if (jwtToken == null) {
-      return Response.status(Status.UNAUTHORIZED).build();
+      return redirectTo("/login/view");
     }
 
     // Try to get the username from jwt
-    String username = getUsernameFromJWT(jwtToken);
+    String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
 
-    cartService.clear(username);
+    cartService.clearCart(username);
     return Response.ok().build();
   }
 
   /**
-   * Get the username from the JWT token
+   * Redirect user's to a page
    *
-   * @param jwtToken JWT token
-   * @return username or null if a parsing error occurred
-   * @throws NullPointerException - if the jwtToken is null
+   * @param url url of the page
+   * @return page to redirect the user to
    */
-  private String getUsernameFromJWT(NewCookie jwtToken) throws NullPointerException {
-    Objects.requireNonNull(jwtToken);
-    String username = null;
+  private Response redirectTo(String url) {
+    Response response = null;
     try {
-      String[] chunks = jwtToken.toString().split("\\.");
-      JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
-      username = payload.get("sub").asText();
-    } catch (JsonProcessingException e) {
-      Log.error("An error occurred while parsing the jwt token");
+      URI uri = new URI(url);
+      response = Response.seeOther(uri).build();
+    } catch (URISyntaxException e) {
+      e.printStackTrace();
     }
-    return username;
+    return response;
   }
 }

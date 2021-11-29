@@ -79,7 +79,7 @@ public class ProductResource {
   public TemplateInstance getAllView(@CookieParam("jwt_token") NewCookie jwtToken) {
 
     // Check if it's a member (we assume that admins can access this page too)
-    Boolean isMember = jwtToken != null;
+    boolean isMember = jwtToken != null;
     return productList.data(
         "items",
         productService.getAllProduct(),
@@ -98,7 +98,7 @@ public class ProductResource {
   @Produces(MediaType.TEXT_HTML)
   public Object getAllView(
       @PathParam("id") String name, @CookieParam("jwt_token") NewCookie jwtToken) {
-    Boolean isMember = jwtToken != null;
+    boolean isMember = jwtToken != null;
     Optional<Product> product = productService.getProduct(name);
     if (product.isEmpty()) {
       return Response.status(Status.NOT_FOUND);

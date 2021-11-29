@@ -2,7 +2,6 @@ package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.database.UpdateResultHandler;
-import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.util.ArrayList;
@@ -73,23 +72,19 @@ public class CartService {
    * @return the result of the operation
    */
   public UpdateResult updateProductQuantity(String username, String name, int newQuantity) {
-    if (newQuantity > 0) {
-      try {
-        jdbi.useHandle(
-            handle ->
-                handle
-                    .createUpdate(ResourceLoader.loadResource("sql/cart/updateProductQuantity.sql"))
-                    .bind("username", username)
-                    .bind("name", name)
-                    .bind("quantity", newQuantity)
-                    .execute());
-      } catch (UnableToExecuteStatementException e) {
-        return updateResultHandler.handleUpdateError(e);
-      }
-      return UpdateResult.success();
-    } else {
-      return new UpdateResult(UpdateStatus.INVALID_CHECK);
+    try {
+      jdbi.useHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/cart/updateProductQuantity.sql"))
+                  .bind("username", username)
+                  .bind("name", name)
+                  .bind("quantity", newQuantity)
+                  .execute());
+    } catch (UnableToExecuteStatementException e) {
+      return updateResultHandler.handleUpdateError(e);
     }
+    return UpdateResult.success();
   }
 
   /**
@@ -113,7 +108,7 @@ public class CartService {
    *
    * @param username name of the user
    */
-  public void clear(String username) {
+  public void clearCart(String username) {
     jdbi.useHandle(
         handle ->
             handle
@@ -127,7 +122,7 @@ public class CartService {
    *
    * @param username name of the user
    */
-  public void delete(String username) {
+  public void deleteCart(String username) {
     jdbi.useHandle(
         handle ->
             handle
@@ -142,7 +137,7 @@ public class CartService {
    * @param username name of the user
    * @return the result of the operation
    */
-  public UpdateResult add(String username) {
+  public UpdateResult addCart(String username) {
     try {
       jdbi.useHandle(
           handle ->

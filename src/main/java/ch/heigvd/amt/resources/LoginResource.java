@@ -1,5 +1,6 @@
 package ch.heigvd.amt.resources;
 
+import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.services.CartService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,6 +20,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
@@ -31,7 +33,7 @@ public class LoginResource {
   private static final String REGISTER_ERROR = "registerError";
   private static final String REGISTER_SUCCESS = "registerSuccess";
   private static final String LOGIN_ERROR = "loginError";
-  private static final String AUTHSERV_ADDR = "http://10.0.1.92:8080";
+  private static final String AUTHSERV_ADDR = "http://localhost:8082";
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private final CartService cartService;
@@ -51,23 +53,22 @@ public class LoginResource {
   public Object getLoginPage(
       @CookieParam("jwt_token") NewCookie jwtToken, @CookieParam("user_role") NewCookie userRole) {
 
-    try {
-      if (jwtToken != null && userRole != null) {
-
-        String resource = "/product/view";
-        if (getUserInfo(jwtToken)[1].equals("admin")) {
-          resource = "/product/admin/view";
-        }
-        return Response.status(Response.Status.MOVED_PERMANENTLY)
-            .cookie(jwtToken, userRole)
-            .location(URI.create(resource))
-            .build();
+    if (jwtToken != null && userRole != null) {
+      String resource = "/product/view";
+      String[] userInfo = getUserInfo(jwtToken);
+      if (userInfo == null) {
+        // Parsing error
+        return Response.status(Status.INTERNAL_SERVER_ERROR);
       }
-      return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null);
-    } catch (JsonProcessingException e) {
-      Log.error("JsonProcessingException occured");
-      return Response.status(Status.INTERNAL_SERVER_ERROR);
+      if (userInfo[1].equals("admin")) {
+        resource = "/product/admin/view";
+      }
+      return Response.status(Response.Status.MOVED_PERMANENTLY)
+          .cookie(jwtToken, userRole)
+          .location(URI.create(resource))
+          .build();
     }
+    return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null);
   }
 
   @POST
@@ -129,8 +130,9 @@ public class LoginResource {
       switch (response.getStatusInfo().getStatusCode()) {
         case 201:
           // Create cart for the new user
-          cartService.add(username);
-
+          if (cartService.addCart(username) != UpdateResult.success()) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR);
+          }
           return login.data(
               REGISTER_SUCCESS, "Account created", REGISTER_ERROR, null, LOGIN_ERROR, null);
         case 409:
@@ -192,13 +194,17 @@ public class LoginResource {
     return new NewCookie[] {cookieJWT, cookieRole};
   }
 
-  public static String[] getUserInfo(NewCookie jwtToken) throws JsonProcessingException {
+  public static String[] getUserInfo(Cookie jwtToken) {
 
     Objects.requireNonNull(jwtToken);
-
-    String[] chunks = jwtToken.toString().split("\\.");
-    JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
-
-    return new String[] {payload.get("sub").asText(), payload.get("role").asText()};
+    String[] userInfo = null;
+    try {
+      String[] chunks = jwtToken.toString().split("\\.");
+      JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
+      userInfo = new String[] {payload.get("sub").asText(), payload.get("role").asText()};
+    } catch (JsonProcessingException e) {
+      Log.error("An error occurred while parsing the jwt token");
+    }
+    return userInfo;
   }
 }

@@ -103,14 +103,14 @@ public class CartServiceTest {
 
   @Test
   void clearCart() {
-    cartService.clear(USERNAME);
+    cartService.clearCart(USERNAME);
     List<CartProduct> result1 = cartService.getAllProduct(USERNAME);
     Assertions.assertTrue(result1.isEmpty());
   }
 
   @Test
   void deleteCart() {
-    cartService.delete(USERNAME);
+    cartService.deleteCart(USERNAME);
     List<CartProduct> result1 = cartService.getAllProduct(USERNAME);
     Assertions.assertTrue(result1.isEmpty());
   }
@@ -118,10 +118,11 @@ public class CartServiceTest {
   @Test
   void addCart() {
     // Check for duplicate
-    Assertions.assertEquals(new UpdateResult(UpdateStatus.DUPLICATE), cartService.add(USERNAME));
+    Assertions.assertEquals(
+        new UpdateResult(UpdateStatus.DUPLICATE), cartService.addCart(USERNAME));
 
     // Add the cart
-    Assertions.assertEquals(UpdateResult.success(), cartService.add("loup"));
+    Assertions.assertEquals(UpdateResult.success(), cartService.addCart("loup"));
 
     // Check the cart was added
     cartService.addProduct("loup", PRODUCT_1);
