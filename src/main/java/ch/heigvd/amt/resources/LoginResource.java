@@ -1,5 +1,7 @@
 package ch.heigvd.amt.resources;
 
+import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.services.CartService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +20,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
@@ -27,6 +30,7 @@ import javax.ws.rs.core.Response.Status;
 @Path("/login")
 @ApplicationScoped
 public class LoginResource {
+
 
   // names of Qute templates
   private static final String REGISTER_ERROR =
@@ -41,7 +45,7 @@ public class LoginResource {
   // future
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // used to parse JSON object
-
+  private final CartService cartService;
   @Inject
   @Location("LoginView/login.html")
   Template login;
@@ -54,38 +58,34 @@ public class LoginResource {
    * @return either a Response to go to the home page if the cookies are already set, or the
    *     template of the login page
    */
+  @Inject
+  LoginResource(CartService cartService) {
+    this.cartService = cartService;
+  }
+
   @GET
   @Path("/view")
   @Produces(MediaType.TEXT_HTML)
   public Object getLoginPage(
       @CookieParam("jwt_token") NewCookie jwtToken, @CookieParam("user_role") NewCookie userRole) {
 
-    try {
-      if (jwtToken != null && userRole != null) {
 
-        String resource = "/product/view";
-
-        // if the user is an admin, he will be redirected to the home page for admins
-        if (getUserInfo(jwtToken)[1].equals("admin")) {
-          resource = "/product/admin/view";
-        }
-        return Response.status(Response.Status.MOVED_PERMANENTLY)
-            .cookie(jwtToken, userRole)
-            .location(URI.create(resource))
-            .build(); // return a response to redirect the user on the home page
+    if (jwtToken != null && userRole != null) {
+      String resource = "/product/view";
+      String[] userInfo = getUserInfo(jwtToken);
+      if (userInfo == null) {
+        // Parsing error
+        return Response.status(Status.INTERNAL_SERVER_ERROR);
       }
-      return login.data(
-          REGISTER_SUCCESS,
-          null,
-          REGISTER_ERROR,
-          null,
-          LOGIN_ERROR,
-          null); // return the login page template
-
-    } catch (JsonProcessingException e) {
-      Log.error("JsonProcessingException occured");
-      return Response.status(Status.INTERNAL_SERVER_ERROR);
+      if (userInfo[1].equals("admin")) {
+        resource = "/product/admin/view";
+      }
+      return Response.status(Response.Status.MOVED_PERMANENTLY)
+          .cookie(jwtToken, userRole)
+          .location(URI.create(resource))
+          .build();
     }
+    return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null);
   }
 
   /**
@@ -168,6 +168,10 @@ public class LoginResource {
 
       switch (response.getStatusInfo().getStatusCode()) {
         case 201:
+          // Create cart for the new user
+          if (cartService.addCart(username) != UpdateResult.success()) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR);
+          }
           return login.data(
               REGISTER_SUCCESS, "Account created", REGISTER_ERROR, null, LOGIN_ERROR, null);
         case 409:
@@ -256,14 +260,18 @@ public class LoginResource {
    * @throws JsonProcessingException if an error occurred when parsing the JSON object of the JWT
    *     token
    */
-  public static String[] getUserInfo(NewCookie jwtToken) throws JsonProcessingException {
+
+  public static String[] getUserInfo(Cookie jwtToken) {
 
     Objects.requireNonNull(jwtToken);
-
-    // Decoding the parts of the token
-    String[] chunks = jwtToken.toString().split("\\.");
-    JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
-
-    return new String[] {payload.get("sub").asText(), payload.get("role").asText()};
+    String[] userInfo = null;
+    try {
+      String[] chunks = jwtToken.toString().split("\\.");
+      JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
+      userInfo = new String[] {payload.get("sub").asText(), payload.get("role").asText()};
+    } catch (JsonProcessingException e) {
+      Log.error("An error occurred while parsing the jwt token");
+    }
+    return userInfo;
   }
 }
