@@ -30,7 +30,6 @@ class CartServiceTest {
   void setupEach() {
     PostgisResource.runQuery(
         dataSource,
-        "sql/init_db.sql",
         "sql/reset_db.sql",
         "sql/insert_product.sql",
         "sql/insert_cart.sql");

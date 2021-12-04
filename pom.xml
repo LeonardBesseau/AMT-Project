@@ -163,8 +163,6 @@
           </java>
         </configuration>
       </plugin>
-
-
     </plugins>
   </build>
 
