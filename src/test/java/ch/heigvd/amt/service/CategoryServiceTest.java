@@ -25,8 +25,7 @@ class CategoryServiceTest {
 
   @BeforeEach
   void setupEach() {
-    PostgisResource.runQuery(
-        dataSource, "sql/reset_db.sql", "sql/insert_product.sql");
+    PostgisResource.runQuery(dataSource, "sql/reset_db.sql", "sql/insert_product.sql");
   }
 
   @Test
