@@ -1,5 +1,8 @@
 package ch.heigvd.amt.resources;
 
+import static ch.heigvd.amt.resources.ImageResource.extractImageData;
+
+import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Image;
@@ -267,9 +270,11 @@ public class ProductResource {
 
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
-      imageId = imageService.manageImage(inputParts.get(0));
-      if (imageId < 0) {
+      UpdateResult imageUpload = imageService.addImage(extractImageData(inputParts.get(0)));
+      if (imageUpload.getStatus() != UpdateStatus.SUCCESS) {
         imageError = true;
+      } else {
+        imageId = imageUpload.getGeneratedId();
       }
     }
 
@@ -409,9 +414,11 @@ public class ProductResource {
 
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
-      imageId = imageService.manageImage(inputParts.get(0));
-      if (imageId < 0) {
+      UpdateResult imageUpload = imageService.addImage(extractImageData(inputParts.get(0)));
+      if (imageUpload.getStatus() != UpdateStatus.SUCCESS) {
         imageError = true;
+      } else {
+        imageId = imageUpload.getGeneratedId();
       }
     }
 

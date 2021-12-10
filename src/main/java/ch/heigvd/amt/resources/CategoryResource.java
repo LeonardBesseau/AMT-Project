@@ -23,6 +23,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /** Manages category related routes */
 @Path("/category")
@@ -115,7 +116,9 @@ public class CategoryResource {
     List<Product> list = productService.getAllProduct(Collections.singletonList(category));
     if (confirm || list.isEmpty()) {
       categoryService.deleteCategory(category);
-      return Response.status(301).location(URI.create(CATEGORY_ADMIN_VIEW_URL)).build();
+      return Response.status(Status.MOVED_PERMANENTLY)
+          .location(URI.create(CATEGORY_ADMIN_VIEW_URL))
+          .build();
     }
     return categoryDelete.data(LIST_KEY, list, CATEGORY, category, "clientDisplay", false);
   }
