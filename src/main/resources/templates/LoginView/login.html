@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{#include head}
+	{#title} Login | Les Boulangers {/title}
+	{/include}
+    <!--[if lt IE 9]>
+    <script src="/js/html5shiv.js"></script>
+    <![endif]-->
+</head><!--/head-->
+
+<body>
+<div class="header-middle">
+	<!--header-middle-->
+	<nav class="navbar-expand-lg navbar-light bg-light">
+		<div class="container container-fluid">
+			<a class="navbar-brand" href="/product/view">Les Boulangers</a>
+			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+							aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarSupportedContent">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<li class="nav-item">
+						<a href="/cart/view" class="nav-link active">
+							<i class="fa fa-shopping-cart">
+							</i>
+							Cart
+						</a>
+					</li>
+					<li class="nav-item">
+						<a href="/product/view" class="nav-link active">
+							<i class="fa fa-list">
+							</i>
+							Products
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+</div>
+
+	<section id="form"><!--form-->
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-4 col-sm-offset-1">
+					<div class="login-form"><!--login form-->
+						<h2>Login to your account</h2>
+						<form method=POST action="/login/signin">
+							<input type="text" name="username" placeholder="Username" required/>
+							<input type="password" name="password" placeholder="Password" required/>
+							{#if loginError}
+							<div class="alert alert-danger">
+								{loginError}
+							</div>
+							{/if}
+							<button type="submit" class="btn btn-default">Login</button>
+						</form>
+					</div><!--/login form-->
+				</div>
+				<div class="col-sm-1">
+					<h2 class="or">OR</h2>
+				</div>
+				<div class="col-sm-4">
+					<div class="signup-form"><!--sign up form-->
+						<h2>New User Signup!</h2>
+						<form method=POST action="/login/signup">
+							<input type="text" name="username" placeholder="Username" required/>
+							<input type="password" name="password" placeholder="Password" required/>
+							<input type="password" name="confirmPassword" placeholder="Confirm password" required/>
+							{#if registerError}
+								<div class="alert alert-danger">
+									{registerError}
+								</div>
+							{/if}
+							{#if registerSuccess}
+							<div class="alert alert-success">
+								{registerSuccess}
+							</div>
+							{/if}
+							<button type="submit" class="btn btn-default">Signup</button>
+						</form>
+					</div><!--/sign up form-->
+				</div>
+			</div>
+		</div>
+	</section><!--/form-->
+
+    <script src="/js/jquery.js"></script>
+	<script src="/js/price-range.js"></script>
+    <script src="/js/jquery.scrollUp.min.js"></script>
+	<script src="/js/bootstrap.min.js"></script>
+    <script src="/js/jquery.prettyPhoto.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

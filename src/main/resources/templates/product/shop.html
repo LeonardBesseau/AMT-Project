@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {#include head}
+    {#title} Shop | Les Boulangers {/title}
+    {/include}
+    <link rel="shortcut icon" href="../images/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="../images/ico/apple-touch-icon-144-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="../images/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="../images/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="../images/ico/apple-touch-icon-57-precomposed.png">
+    <script type="text/javascript" src="/js/manageCart.js"></script>
+</head>
+<!--/head-->
+
+<body>
+<header id="header" class="header" style="margin-bottom: 20px">
+    {#if admin}
+    {#include adminHeader}{/include}
+    {#else}
+    {#include userHeader}{/include}
+    {/if}
+</header>
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="left-sidebar">
+                    <h2>Category</h2>
+                    <div class="panel-group category-products text-center" id="accordian">
+                        <!--category-productsr-->
+                        <form method="post">
+                            {#for category in categories}
+                            <input type="checkbox" class="btn-check" id="btn-check-{category.name}"
+                                   name="{category.name}"
+                                   autocomplete="off"
+                                   {#if filters && filters.contains(category.name)} checked {/if} />
+                            <label class="btn btn-primary" for="btn-check-{category.name}">{category.name}</label>
+                            {/for}
+                            <button type="submit" class="btn btn-warning">Filter</button>
+                        </form>
+                    </div>
+                    <!--/category-products-->
+                </div>
+            </div>
+
+            <div class="col-sm-9 padding-right">
+                {#if admin}
+                <a href="/product/admin/view/create" class="btn btn-success"><i class="fa"></i>Add product</a>
+                {/if}
+                <h2 class="title text-center">Products</h2>
+                <div class="features_items container container-fluid">
+                    <!--features_items-->
+                    {#if items.isEmpty()}
+                    <h1 class="text-danger text-center">No item matches your search</h1>
+                    {/if}
+
+                    <div class="row row-cols-3">
+                        {#for item in items}
+                        <div class="col-md-4">
+                            <div class="product-image-wrapper">
+                                <div class="single-products">
+                                    <div class="text-center">
+                                        <div class="container">
+                                            <img src="/image/{item.image.id}" alt="" width="250" height="300"/>
+                                            {#if item.quantity == 0}
+                                            {#include watermark}
+                                            {#watermark} Out of stock {/watermark}
+                                            {/include}
+                                            {/if}
+                                        </div>
+                                        {#if item.price and item.price > 0}
+                                        <h2>{item.price} CHF</h2>
+                                        {/if}
+                                        <p>{item.name}</p>
+
+                                        {#if !admin}
+                                        {#if item.price and item.price > 0 and item.quantity > 0}
+                                        {#if !member}
+                                        <!-- Visitor -->
+                                        <a href=""
+                                           onclick="storeProduct('{item.name}', '{item.price}', '{item.image.id}')"
+                                           class="btn btn-default add-to-cart">
+                                            <i class="fa fa-shopping-cart">
+                                            </i>Add to cart
+                                        </a>
+                                        {#else}
+                                        <!-- Member -->
+                                        <form class="form-add-to-cart" method="post" action="/cart/product">
+                                            <input type="text" id="product_name" name="product_name" value="{item.name}"
+                                                   hidden/>
+                                            <input type="number" id="product_quantity" name="product_quantity" value="1"
+                                                   hidden/>
+                                            <button class="btn btn-default add-to-cart">
+                                                <i class="fa fa-shopping-cart"></i>
+                                                Add to cart
+                                            </button>
+                                        </form>
+                                        {/if}
+                                        <a href="/product/view/{item.name}" class="btn btn-default show-details">
+                                            <i class="fa fa-book"></i>
+                                            Details
+                                        </a>
+                                        {/if}
+                                        {#else}
+                                        <a href="/product/admin/view/{item.name}" class="btn btn-default add-to-cart">
+                                            <i class="fa fa-tools">
+                                            </i>Modify</a>
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/for}
+                    </div>
+                </div>
+                <!--features_items-->
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

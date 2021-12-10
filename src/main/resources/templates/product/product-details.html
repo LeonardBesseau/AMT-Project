@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {#include head}
+    {#title} {item.name} {/title}
+    {/include}
+    <link href="/css/prettyPhoto.css" rel="stylesheet">
+    <link href="/css/price-range.css" rel="stylesheet">
+    <link href="/css/animate.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
+    <link href="/css/responsive.css" rel="stylesheet">
+    <script type="text/javascript" src="/js/manageCart.js"></script>
+</head><!--/head-->
+
+<body>
+<header id="header" class="header" style="margin-bottom: 20px">
+    {#if admin}
+    {#include adminHeader}{/include}
+    {#else}
+    {#include userHeader}{/include}
+    {/if}
+</header>
+
+<section>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-9 padding-right">
+                <div class="product-details"><!--product-details-->
+                    <div class="col-sm-5">
+                        <div class="view-product">
+                            <img src="/image/{item.image.id}" alt=""/>
+                        </div>
+                    </div>
+                    <div class="col-sm-7">
+                        <div class="product-information"><!--/product-information-->
+                            <h2>{item.name}</h2>
+                            <p>{item.description}</p>
+                            <span>
+                <span>{item.price} CHF</span>
+                <label>Quantity:
+                  <input id="quantity" type="number" value="1" min="1"/>
+                </label>
+                {#if !member}
+                <!-- Visitor -->
+                <button type="button" class="btn btn-default cart"
+                        onclick="storeProduct('{item.name}', '{item.price}',
+                         '{item.image.id}', quantity.value)">
+                  <i class="fa fa-shopping-cart"></i>
+                  Add to cart
+				</button>
+                {#else}
+                <!-- Member -->
+                <form class="form-add-to-cart" method="post" action="/cart/product">
+                    <input type="text" id="product_name" name="product_name" value="{item.name}" hidden/>
+                    <input type="number" id="product_quantity" name="product_quantity" hidden/>
+                    <button class="btn btn-default cart" onclick="getQuantity()">
+                        <i class="fa fa-shopping-cart"></i>
+                        Add to cart
+                    </button>
+                    <script>
+                        function getQuantity() {
+                            document.getElementById("product_quantity").value = document.getElementById("quantity").value;
+                        }
+                    </script>
+                </form>
+                {/if}
+              </span>
+                        </div><!--/product-information-->
+                    </div>
+                </div><!--/product-details-->
+            </div>
+        </div>
+    </div>
+</section>
+
+</body>
+</html>

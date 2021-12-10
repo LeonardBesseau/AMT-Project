@@ -1,0 +1,1 @@
+SELECT DISTINCT category_name as name FROM category_product ORDER BY name;

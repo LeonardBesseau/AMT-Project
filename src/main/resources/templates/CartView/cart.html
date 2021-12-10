@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {#include head}
+    {#title} Cart | Les Boulangers {/title}
+    {/include}
+</head><!--/head-->
+
+{#if member}
+<body>
+{#else}
+<!--Handle visitor cart in localStorage-->
+<body onload="retrieveCart()">
+{/if}
+
+<!--header-->
+<header id="header" class="header" style="margin-bottom: 20px">
+    {#include userHeader}{/include}
+</header>
+
+<!--Cart-->
+<section id="cart_items">
+    <div class="container" style="">
+        <!--Clear button-->
+        <div class="cart_clear">
+            {#if member}
+            <a class="cart_clear_all" onclick=sendDelete('/cart')><i class="fa fa-times"></i></a>
+            {#else}
+            <a class="cart_clear_all" onclick=clearCart()><i class="fa fa-times"></i></a>
+            {/if}
+            <p class="cart_clear_all_p">Delete cart</p>
+        </div>
+        <!--Product table-->
+        <div id="cart_info" class="table-responsive cart_info">
+            <table class="table table-condensed">
+                <thead>
+                <tr class="cart_menu">
+                    <td class="image">Product</td>
+                    <td class="description"></td>
+                    <td class="price">Price</td>
+                    <td class="quantity">Quantity</td>
+                    <td class="total">Total</td>
+                    <td></td>
+                </tr>
+                </thead>
+                <tbody id="cart_list">
+                <h3>{username}'s cart</h3>
+                {#if member}
+                {#for product in products}
+                <tr class="cart_article" id="{product.name}">
+                    <td class="cart_product">
+                        <img class="cart_product_image" src="/image/{product.imageId}" alt="Oups missing image">
+                    </td>
+                    <td class="cart_description">
+                        <h4><a href="/product/view/{product.name}"> {product.name} </a></h4>
+                    </td>
+                    <td class="cart_price">
+                        <p id="{product.name}_price" class="cart_price_input">{product.price} CHF</p>
+                    </td>
+                    <td class="cart_quantity">
+                        <form id="{product.name}_form" method="post" action="/cart/product/{product.name}" class="cart_quantity_button">
+                            <a class="cart_quantity_down" onclick="updateQuantity('{product.name}', -1)">-</a>
+                            <input id="{product.name}_quantity" class="cart_quantity_input" name="product_quantity" value="{product.quantity}"
+                                   readonly autocomplete="off" size="2"/>
+                            <a class="cart_quantity_up" onclick="updateQuantity('{product.name}', 1)">+</a>
+                        </form>
+                    </td>
+                    <td class="cart_total">
+                        <p id="{product.name}_total" class="cart_total_price">{product.getTotal()} CHF</p>
+                    </td>
+                    <td class="cart_delete">
+                        <a class="cart_quantity_delete" onclick="sendDelete('/cart/product/{product.name}')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </td>
+                </tr>
+                {/for}
+                {/if}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+<script>
+    function updateQuantity(productName, newQuantity) {
+        // Update quantity
+        let quantity = Number(document.getElementById(productName + "_quantity").value) + newQuantity;
+        document.getElementById(productName + "_quantity").value = quantity;
+
+        // Update total
+        let price = parseFloat(document.getElementById(productName + "_price").innerText.split(" ")[0]);
+        document.getElementById(productName + "_total").innerText = (price * quantity).toString() + " CHF";
+
+        // Send form
+        document.getElementById(productName + "_form").submit();
+    }
+
+    function sendDelete(url) {
+        fetch(url, {
+            method: 'DELETE',
+        }).then(() => location.reload());
+    }
+</script>
+<script type="text/javascript" src="/js/manageCart.js"></script>
+</body>
+</html>
