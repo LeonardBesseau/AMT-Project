@@ -119,13 +119,11 @@ public class ImageService {
    */
   private byte[] rescaleImage(byte[] input) throws IOException {
     BufferedImage image = ImageIO.read(new ByteArrayInputStream(input));
-    java.awt.Image resultingImage =
-        image.getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGTH, java.awt.Image.SCALE_DEFAULT);
     BufferedImage rescaledImage =
         new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGTH, BufferedImage.TYPE_INT_RGB);
-    rescaledImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    ImageIO.write(rescaledImage, "png", byteArrayOutputStream);
-    return byteArrayOutputStream.toByteArray();
+    rescaledImage.getGraphics().drawImage(image, 0, 0, null);
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    ImageIO.write(rescaledImage, "png", output);
+    return output.toByteArray();
   }
 }

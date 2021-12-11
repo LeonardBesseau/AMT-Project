@@ -257,8 +257,6 @@ public class LoginResource {
    *
    * @param jwtToken cookie that contains the JWT token
    * @return array containing the username and the role of the user
-   * @throws JsonProcessingException if an error occurred when parsing the JSON object of the JWT
-   *     token
    */
   public static String[] getUserInfo(Cookie jwtToken) {
 
