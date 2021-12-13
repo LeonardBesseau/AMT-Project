@@ -11,7 +11,7 @@ import org.postgresql.util.ServerErrorMessage;
  *     postgresql</a>
  */
 @Singleton
-public class PostgresUpdateResultHandler implements UpdateResultHandler {
+public class PostgresUpdateHandler implements UpdateHandler {
 
   public UpdateResult handleUpdateError(StatementException e) {
     if (e.getCause() instanceof PSQLException) {

@@ -1,7 +1,7 @@
 package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateResultHandler;
+import ch.heigvd.amt.database.UpdateHandler;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.util.ArrayList;
@@ -16,12 +16,12 @@ public class CartService {
 
   public static final String USERNAME = "username";
   private final Jdbi jdbi;
-  private final UpdateResultHandler updateResultHandler;
+  private final UpdateHandler updateHandler;
 
   @Inject
-  public CartService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
+  public CartService(Jdbi jdbi, UpdateHandler updateHandler) {
     this.jdbi = jdbi;
-    this.updateResultHandler = updateResultHandler;
+    this.updateHandler = updateHandler;
   }
 
   /**
@@ -59,7 +59,7 @@ public class CartService {
                   .bind("quantity", cartProduct.getQuantity())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
     return UpdateResult.success();
   }
@@ -83,7 +83,7 @@ public class CartService {
                   .bind("quantity", newQuantity)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
     return UpdateResult.success();
   }
@@ -147,7 +147,7 @@ public class CartService {
                   .bind(USERNAME, username)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
     return UpdateResult.success();
   }

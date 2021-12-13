@@ -1,7 +1,7 @@
 package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateResultHandler;
+import ch.heigvd.amt.database.UpdateHandler;
 import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.utils.ResourceLoader;
@@ -20,14 +20,14 @@ import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 public class ImageService {
 
   private final Jdbi jdbi;
-  private final UpdateResultHandler updateResultHandler;
+  private final UpdateHandler updateHandler;
 
   private static final Logger logger = Logger.getLogger(ImageService.class);
 
   @Inject
-  public ImageService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
+  public ImageService(Jdbi jdbi, UpdateHandler updateHandler) {
     this.jdbi = jdbi;
-    this.updateResultHandler = updateResultHandler;
+    this.updateHandler = updateHandler;
   }
 
   /**
@@ -65,7 +65,7 @@ public class ImageService {
                       .one());
       return new UpdateResult(UpdateStatus.SUCCESS, newId);
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
   }
 
@@ -87,7 +87,7 @@ public class ImageService {
                   .execute());
       return new UpdateResult(UpdateStatus.SUCCESS);
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
   }
 
