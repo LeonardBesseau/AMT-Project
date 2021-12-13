@@ -1,33 +1,36 @@
 package ch.heigvd.amt.services;
 
+import ch.heigvd.amt.database.UpdateHandler;
 import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateResultHandler;
 import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.utils.ResourceLoader;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
-import org.apache.commons.io.IOUtils;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jdbi.v3.core.Jdbi;
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
 
 @ApplicationScoped
 public class ImageService {
 
+  public static final int IMAGE_WIDTH = 250;
+  public static final int IMAGE_HEIGTH = 300;
   private final Jdbi jdbi;
-  private final UpdateResultHandler updateResultHandler;
+  private final UpdateHandler updateHandler;
 
   private static final Logger logger = Logger.getLogger(ImageService.class);
 
   @Inject
-  public ImageService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
+  public ImageService(Jdbi jdbi, UpdateHandler updateHandler) {
     this.jdbi = jdbi;
-    this.updateResultHandler = updateResultHandler;
+    this.updateHandler = updateHandler;
   }
 
   /**
@@ -52,7 +55,7 @@ public class ImageService {
    * @param data the data of the image
    * @return The result of the operation with the generated id set if successful
    */
-  public UpdateResult addImage(byte[] data) {
+  private UpdateResult addImageToDB(byte[] data) {
     try {
       Integer newId =
           jdbi.withHandle(
@@ -65,7 +68,7 @@ public class ImageService {
                       .one());
       return new UpdateResult(UpdateStatus.SUCCESS, newId);
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
   }
 
@@ -76,7 +79,7 @@ public class ImageService {
    * @param id the id of the image
    * @return the status of the operation
    */
-  public UpdateResult updateImage(byte[] data, int id) {
+  private UpdateResult updateImageToDB(byte[] data, int id) {
     try {
       jdbi.useHandle(
           handle ->
@@ -87,49 +90,40 @@ public class ImageService {
                   .execute());
       return new UpdateResult(UpdateStatus.SUCCESS);
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
   }
 
   /**
-   * @param inputPart
-   * @param id
-   * @return
+   * @param imageData an array with the image data
+   * @param id the id of the image to update
+   * @return the result of the operation
    */
-  public int manageImage(InputPart inputPart, int id) {
-    // TODO add image treatment to set size.
-    try {
-      InputStream inputStream = inputPart.getBody(InputStream.class, null);
-      byte[] bytes = IOUtils.toByteArray(inputStream);
-      if (bytes.length == 0) {
-        return -1;
-      }
-      var res = updateImage(bytes, id);
-      if (res.getStatus() == UpdateStatus.SUCCESS) {
-        return id;
-      }
-      return -1;
-    } catch (IOException e) {
-      e.printStackTrace();
-      return -1;
-    }
+  public UpdateResult updateImage(byte[] imageData, int id) throws IOException {
+    return updateImageToDB(rescaleImage(imageData), id);
   }
 
-  public int manageImage(InputPart inputPart) {
-    try {
-      InputStream inputStream = inputPart.getBody(InputStream.class, null);
-      byte[] bytes = IOUtils.toByteArray(inputStream);
-      if (bytes.length == 0) {
-        return Image.DEFAULT_IMAGE_ID;
-      }
-      var res = addImage(bytes);
-      if (res.getStatus() == UpdateStatus.SUCCESS) {
-        return res.getGeneratedId();
-      }
-      return -1;
-    } catch (IOException e) {
-      e.printStackTrace();
-      return -1;
-    }
+  /**
+   * @param imageData an array with the image data
+   * @return the result of the operation in the database
+   * @throws IOException if an IO Exception occurs
+   */
+  public UpdateResult addImage(byte[] imageData) throws IOException {
+    return addImageToDB(rescaleImage(imageData));
+  }
+
+  /**
+   * @param input the data of the image
+   * @return the data of the image rescaled
+   * @throws IOException if an IO Exception occurs
+   */
+  private byte[] rescaleImage(byte[] input) throws IOException {
+    BufferedImage image = ImageIO.read(new ByteArrayInputStream(input));
+    BufferedImage rescaledImage =
+        new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGTH, BufferedImage.TYPE_INT_RGB);
+    rescaledImage.getGraphics().drawImage(image, 0, 0, null);
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    ImageIO.write(rescaledImage, "png", output);
+    return output.toByteArray();
   }
 }

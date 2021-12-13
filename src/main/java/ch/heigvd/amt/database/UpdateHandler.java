@@ -3,7 +3,7 @@ package ch.heigvd.amt.database;
 import org.jdbi.v3.core.statement.StatementException;
 
 /** Handler for update operation on databases */
-public interface UpdateResultHandler {
+public interface UpdateHandler {
 
   /**
    * Handle a SQL Statement error if it is an Integrity Constraint error. Rethrows it otherwise

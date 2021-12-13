@@ -1,7 +1,7 @@
 package ch.heigvd.amt.services;
 
+import ch.heigvd.amt.database.UpdateHandler;
 import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateResultHandler;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.utils.ResourceLoader;
@@ -33,14 +33,14 @@ public class ProductService {
   public static final String IMAGE_ID = "image_id";
   public static final String LIST = "list";
   private final Jdbi jdbi;
-  private final UpdateResultHandler updateResultHandler;
+  private final UpdateHandler updateHandler;
 
   private static final Logger logger = Logger.getLogger(ProductService.class);
 
   @Inject
-  public ProductService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
+  public ProductService(Jdbi jdbi, UpdateHandler updateHandler) {
     this.jdbi = jdbi;
-    this.updateResultHandler = updateResultHandler;
+    this.updateHandler = updateHandler;
   }
 
   /**
@@ -111,7 +111,7 @@ public class ProductService {
                   .bind(CATEGORY_NAME, categoryName)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
     return UpdateResult.success();
   }
@@ -151,15 +151,16 @@ public class ProductService {
                   .bind(IMAGE_ID, product.getImage().getId())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
     return UpdateResult.success();
   }
 
   /**
-   * Update a product
+   * Update a product Note that updating a non-existing product will not fail and will return
+   * success
    *
-   * @param product the product with updated data
+   * @param product the product with updated data.
    * @return the status of the operation
    */
   public UpdateResult updateProduct(Product product) {
@@ -176,7 +177,7 @@ public class ProductService {
                     .bind(QUANTITY, product.getQuantity())
                     .execute());
       } catch (UnableToExecuteStatementException e) {
-        return updateResultHandler.handleUpdateError(e);
+        return updateHandler.handleUpdateError(e);
       }
     } else {
       try {
@@ -191,7 +192,7 @@ public class ProductService {
                     .bind(IMAGE_ID, product.getImage().getId())
                     .execute());
       } catch (UnableToExecuteStatementException e) {
-        return updateResultHandler.handleUpdateError(e);
+        return updateHandler.handleUpdateError(e);
       }
     }
     return UpdateResult.success();

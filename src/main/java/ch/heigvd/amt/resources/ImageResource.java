@@ -1,10 +1,14 @@
 package ch.heigvd.amt.resources;
 
+import ch.heigvd.amt.database.UpdateResult;
+import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.services.ImageService;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +25,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -83,17 +89,29 @@ public class ImageResource {
   @RolesAllowed("Admin")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
-  public Object addImage(@MultipartForm MultipartFormDataInput input) {
+  public Object addImage(@MultipartForm MultipartFormDataInput input) throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
     List<InputPart> inputParts = uploadForm.get("image");
     for (InputPart inputPart : inputParts) {
-      if (imageService.manageImage(inputPart, 0) > -1) {
-        return Response.status(301).location(URI.create("/product/admin/view/")).build();
+      byte[] bytes = extractImageData(inputPart);
+      if (bytes.length == 0) {
+        return Response.status(Status.BAD_REQUEST).entity("The image cannot be empty").build();
+      }
+      UpdateResult result = imageService.updateImage(bytes, 0);
+      if (result.getStatus() != UpdateStatus.SUCCESS) {
+        return Response.status(Status.INTERNAL_SERVER_ERROR)
+            .entity("An error occurred with the image")
+            .build();
       } else {
-        return Response.ok().entity("File non-uploaded").build();
+        return Response.status(301).location(URI.create("/product/admin/view/")).build();
       }
     }
     return Response.ok().entity("No file uploaded").build();
+  }
+
+  public static byte[] extractImageData(InputPart inputPart) throws IOException {
+    InputStream inputStream = inputPart.getBody(InputStream.class, null);
+    return IOUtils.toByteArray(inputStream);
   }
 }

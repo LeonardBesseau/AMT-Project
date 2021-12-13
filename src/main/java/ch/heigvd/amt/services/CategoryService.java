@@ -1,7 +1,7 @@
 package ch.heigvd.amt.services;
 
+import ch.heigvd.amt.database.UpdateHandler;
 import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateResultHandler;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.util.ArrayList;
@@ -17,12 +17,12 @@ public class CategoryService {
 
   private final Jdbi jdbi;
 
-  private final UpdateResultHandler updateResultHandler;
+  private final UpdateHandler updateHandler;
 
   @Inject
-  public CategoryService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
+  public CategoryService(Jdbi jdbi, UpdateHandler updateHandler) {
     this.jdbi = jdbi;
-    this.updateResultHandler = updateResultHandler;
+    this.updateHandler = updateHandler;
   }
 
   /**
@@ -100,7 +100,7 @@ public class CategoryService {
                   .bind("name", category.getName())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      return updateHandler.handleUpdateError(e);
     }
     return UpdateResult.success();
   }
