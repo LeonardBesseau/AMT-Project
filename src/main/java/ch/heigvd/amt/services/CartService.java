@@ -1,7 +1,7 @@
 package ch.heigvd.amt.services;
 
-import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.database.UpdateHandler;
+import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.util.ArrayList;

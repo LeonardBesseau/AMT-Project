@@ -13,10 +13,11 @@
     <version.quarkus>2.4.2.Final</version.quarkus>
     <version.quarkus-platform>2.4.2.Final</version.quarkus-platform>
     <version.quarkus-plugin>2.4.2.Final</version.quarkus-plugin>
-    <version.jdbi>3.23.0</version.jdbi>
+    <version.jdbi>3.24.1</version.jdbi>
     <version.testcontainers>1.16.2</version.testcontainers>
     <version.surefire-plugin>3.0.0-M5</version.surefire-plugin>
     <version.spotless>2.12.2</version.spotless>
+    <version.wiremock>2.32.0</version.wiremock>
   </properties>
 
 
@@ -115,6 +116,15 @@
       <version>${version.testcontainers}</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock-jre8</artifactId>
+      <scope>test</scope>
+      <version>${version.wiremock}</version>
+    </dependency>
+
+
 
   </dependencies>
 
