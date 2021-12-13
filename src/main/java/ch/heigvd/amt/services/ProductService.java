@@ -157,9 +157,10 @@ public class ProductService {
   }
 
   /**
-   * Update a product
+   * Update a product Note that updating a non-existing product will not fail and will return
+   * success
    *
-   * @param product the product with updated data
+   * @param product the product with updated data.
    * @return the status of the operation
    */
   public UpdateResult updateProduct(Product product) {
