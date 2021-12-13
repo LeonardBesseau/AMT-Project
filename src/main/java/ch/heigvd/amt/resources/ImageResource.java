@@ -9,6 +9,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -47,6 +49,7 @@ public class ImageResource {
    */
   @GET
   @Path("/{id}")
+  @PermitAll
   @Produces("image/png") // TODO check if can be improved
   public Response get(@PathParam("id") int id) {
     Optional<Image> image = imageService.getImage(id);
@@ -63,6 +66,7 @@ public class ImageResource {
    */
   @GET
   @Path("/view/default")
+  @RolesAllowed("Admin")
   @Produces(MediaType.TEXT_HTML)
   public Object getDefaultManagement() {
     return defaultImageManagement.data("imageError", null);
@@ -76,6 +80,7 @@ public class ImageResource {
    */
   @POST
   @Path("/view/default")
+  @RolesAllowed("Admin")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object addImage(@MultipartForm MultipartFormDataInput input) {

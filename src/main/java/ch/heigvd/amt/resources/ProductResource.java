@@ -13,6 +13,8 @@ import io.quarkus.qute.TemplateInstance;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -80,6 +82,7 @@ public class ProductResource {
    * @return a list of product
    */
   @GET
+  @PermitAll
   @Produces(MediaType.APPLICATION_JSON)
   public List<Product> getAll() {
     return productService.getAllProduct();
@@ -92,6 +95,7 @@ public class ProductResource {
    */
   @GET
   @Path("/view")
+  @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAllView(@CookieParam("jwt_token") NewCookie jwtToken) {
 
@@ -118,6 +122,7 @@ public class ProductResource {
    */
   @GET
   @Path("/view/{id}")
+  @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public Object getAllView(
       @PathParam("id") String name, @CookieParam("jwt_token") NewCookie jwtToken) {
@@ -137,6 +142,7 @@ public class ProductResource {
    */
   @POST
   @Path("/view")
+  @PermitAll
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object getAllViewWithFilter(MultivaluedMap<String, String> input) {
@@ -159,6 +165,7 @@ public class ProductResource {
    */
   @GET
   @Path("/admin/view")
+  @RolesAllowed("Admin")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAdminView() {
 
@@ -181,6 +188,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view")
+  @RolesAllowed("Admin")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object getAdminViewWithFilter(MultivaluedMap<String, String> input) {
@@ -204,6 +212,7 @@ public class ProductResource {
    */
   @GET
   @Path("/admin/view/{id}")
+  @RolesAllowed("Admin")
   @Produces(MediaType.TEXT_HTML)
   public Object getDetails(@PathParam("id") String name) {
     Optional<Product> product = productService.getProduct(name);
@@ -229,6 +238,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/{id}")
+  @RolesAllowed("Admin")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object updateProduct(
@@ -311,6 +321,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/{id}/category")
+  @RolesAllowed("Admin")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object updateCategoryForProduct(
@@ -341,6 +352,7 @@ public class ProductResource {
    */
   @GET
   @Path("admin/view/create")
+  @RolesAllowed("Admin")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance createProductView() {
     return productAdd.data(
@@ -365,6 +377,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/create")
+  @RolesAllowed("Admin")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object addProduct(@MultipartForm MultipartFormDataInput input) throws IOException {

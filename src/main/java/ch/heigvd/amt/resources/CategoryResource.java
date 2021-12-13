@@ -11,6 +11,7 @@ import io.quarkus.qute.TemplateInstance;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -63,6 +64,7 @@ public class CategoryResource {
    */
   @GET
   @Path("/admin/view/")
+  @RolesAllowed("Admin")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAll() {
     return categoryList.data(LIST_KEY, categoryService.getAllCategory());
@@ -75,6 +77,7 @@ public class CategoryResource {
    */
   @GET
   @Path("/admin/view/create")
+  @RolesAllowed("Admin")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getFormAdd() {
     return categoryAdd.data(CATEGORY, null);
@@ -89,6 +92,7 @@ public class CategoryResource {
    */
   @POST
   @Path("/admin/create")
+  @RolesAllowed("Admin")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object addCategory(@FormParam("name") String category) {
@@ -109,6 +113,7 @@ public class CategoryResource {
    */
   @POST
   @Path("/admin/delete/{id}")
+  @RolesAllowed("Admin")
   @Produces(MediaType.TEXT_HTML)
   public Object deleteCategory(
       @PathParam("id") String category, @QueryParam("confirm") boolean confirm) {

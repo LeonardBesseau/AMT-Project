@@ -2,6 +2,7 @@ package ch.heigvd.amt.resources;
 
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -20,6 +21,7 @@ public class AdminResource {
 
   @GET
   @Path("/view")
+  @RolesAllowed("Admin")
   @Produces(MediaType.TEXT_HTML)
   public Object getAdminPanel() {
     return adminMainPage.instance();
