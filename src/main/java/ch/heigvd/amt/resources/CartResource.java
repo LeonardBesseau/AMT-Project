@@ -1,6 +1,5 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.services.CartService;
 import io.quarkus.qute.Location;
@@ -12,7 +11,15 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -82,12 +89,8 @@ public class CartResource {
 
     // Add product or update the quantity if it already exists
     CartProduct product = new CartProduct(productName, null, null, productQuantity);
-    UpdateResult status = cartService.addProduct(username, product);
-    if (status == UpdateResult.success()) {
-      return Response.status(Status.NO_CONTENT).build();
-    } else {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-    }
+    cartService.addProduct(username, product);
+    return Response.status(Status.NO_CONTENT).build();
   }
 
   @POST
@@ -113,11 +116,7 @@ public class CartResource {
 
     // Update the quantity
     if (productQuantity > 0) {
-      UpdateResult status =
-          cartService.updateProductQuantity(username, productName, productQuantity);
-      if (status != UpdateResult.success()) {
-        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-      }
+      cartService.updateProductQuantity(username, productName, productQuantity);
     } else {
       // Delete product if quantity is 0 or below and refresh page
       cartService.deleteProduct(username, productName);

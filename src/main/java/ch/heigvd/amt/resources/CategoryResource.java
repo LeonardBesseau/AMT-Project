@@ -1,6 +1,6 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.database.UpdateStatus;
+import ch.heigvd.amt.database.exception.DatabaseGenericException;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.CategoryService;
@@ -97,10 +97,12 @@ public class CategoryResource {
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object addCategory(@FormParam("name") String category) {
-    if (categoryService.addCategory(new Category(category)).getStatus() == UpdateStatus.SUCCESS) {
+    try {
+      categoryService.addCategory(new Category(category));
       return Response.status(301).location(URI.create(CATEGORY_ADMIN_VIEW_URL)).build();
+    } catch (DatabaseGenericException e) {
+      return categoryAdd.data(CATEGORY, category);
     }
-    return categoryAdd.data(CATEGORY, category);
   }
 
   /**

@@ -1,7 +1,6 @@
 package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.database.UpdateHandler;
-import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.utils.ResourceLoader;
@@ -99,9 +98,8 @@ public class ProductService {
    *
    * @param productName the name of the product
    * @param categoryName the name of the category
-   * @return the result of the operation
    */
-  public UpdateResult addCategory(String productName, String categoryName) {
+  public void addCategory(String productName, String categoryName) {
     try {
       jdbi.useHandle(
           handle ->
@@ -111,9 +109,8 @@ public class ProductService {
                   .bind(CATEGORY_NAME, categoryName)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateHandler.handleUpdateError(e);
+      updateHandler.handleUpdateError(e);
     }
-    return UpdateResult.success();
   }
 
   /**
@@ -136,24 +133,19 @@ public class ProductService {
    * Create a new product
    *
    * @param product the identifier of the product
-   * @return the status of the operation
    */
-  public UpdateResult addProduct(Product product) {
+  public void addProduct(Product product) {
     try {
       jdbi.useHandle(
           handle ->
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/product/add.sql"))
-                  .bind(NAME, product.getName())
-                  .bind(PRICE, product.getPrice())
-                  .bind(DESCRIPTION, product.getDescription())
-                  .bind(QUANTITY, product.getQuantity())
+                  .bindBean(product)
                   .bind(IMAGE_ID, product.getImage().getId())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateHandler.handleUpdateError(e);
+      updateHandler.handleUpdateError(e);
     }
-    return UpdateResult.success();
   }
 
   /**
@@ -163,7 +155,7 @@ public class ProductService {
    * @param product the product with updated data.
    * @return the status of the operation
    */
-  public UpdateResult updateProduct(Product product) {
+  public void updateProduct(Product product) {
     String toUpdate = "price=:price, quantity=:quantity";
     if (product.getImage() == null) {
       try {
@@ -172,12 +164,10 @@ public class ProductService {
                 handle
                     .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
                     .define(LIST, toUpdate)
-                    .bind(NAME, product.getName())
-                    .bind(PRICE, product.getPrice())
-                    .bind(QUANTITY, product.getQuantity())
+                    .bindBean(product)
                     .execute());
       } catch (UnableToExecuteStatementException e) {
-        return updateHandler.handleUpdateError(e);
+        updateHandler.handleUpdateError(e);
       }
     } else {
       try {
@@ -185,17 +175,16 @@ public class ProductService {
             handle ->
                 handle
                     .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
-                    .define(LIST, toUpdate + ", image_id=:image_id")
-                    .bind(NAME, product.getName())
-                    .bind(PRICE, product.getPrice())
-                    .bind(QUANTITY, product.getQuantity())
+                    .define(
+                        LIST,
+                        product.getImage() == null ? toUpdate : toUpdate + ", image_id=:image_id")
+                    .bindBean(product)
                     .bind(IMAGE_ID, product.getImage().getId())
                     .execute());
       } catch (UnableToExecuteStatementException e) {
-        return updateHandler.handleUpdateError(e);
+        updateHandler.handleUpdateError(e);
       }
     }
-    return UpdateResult.success();
   }
 
   /**

@@ -1,7 +1,6 @@
 package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.database.UpdateHandler;
-import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.util.ArrayList;
@@ -89,9 +88,8 @@ public class CategoryService {
    * Add category to the database
    *
    * @param category the name of the new category
-   * @return the result of the operation
    */
-  public UpdateResult addCategory(Category category) {
+  public void addCategory(Category category) {
     try {
       jdbi.useHandle(
           handle ->
@@ -100,8 +98,7 @@ public class CategoryService {
                   .bind("name", category.getName())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateHandler.handleUpdateError(e);
+      updateHandler.handleUpdateError(e);
     }
-    return UpdateResult.success();
   }
 }

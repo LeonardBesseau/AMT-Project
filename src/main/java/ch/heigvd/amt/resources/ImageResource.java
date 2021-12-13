@@ -1,7 +1,5 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.services.ImageService;
 import io.quarkus.qute.Location;
@@ -93,21 +91,19 @@ public class ImageResource {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
     List<InputPart> inputParts = uploadForm.get("image");
-    for (InputPart inputPart : inputParts) {
-      byte[] bytes = extractImageData(inputPart);
-      if (bytes.length == 0) {
-        return Response.status(Status.BAD_REQUEST).entity("The image cannot be empty").build();
-      }
-      UpdateResult result = imageService.updateImage(bytes, 0);
-      if (result.getStatus() != UpdateStatus.SUCCESS) {
-        return Response.status(Status.INTERNAL_SERVER_ERROR)
-            .entity("An error occurred with the image")
-            .build();
-      } else {
-        return Response.status(301).location(URI.create("/product/admin/view/")).build();
-      }
+    if (inputParts.isEmpty()) {
+      return Response.ok().entity("No file uploaded").build();
     }
-    return Response.ok().entity("No file uploaded").build();
+
+    InputPart inputPart = inputParts.get(0);
+
+    byte[] bytes = extractImageData(inputPart);
+    if (bytes.length == 0) {
+      return Response.status(Status.BAD_REQUEST).entity("The image cannot be empty").build();
+    }
+
+    imageService.updateImage(bytes, 0);
+    return Response.status(301).location(URI.create("/product/admin/view/")).build();
   }
 
   public static byte[] extractImageData(InputPart inputPart) throws IOException {

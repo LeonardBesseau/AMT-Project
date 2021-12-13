@@ -1,8 +1,6 @@
 package ch.heigvd.amt.services;
 
 import ch.heigvd.amt.database.UpdateHandler;
-import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.awt.image.BufferedImage;
@@ -53,23 +51,22 @@ public class ImageService {
    * Add an image to the database
    *
    * @param data the data of the image
-   * @return The result of the operation with the generated id set if successful
+   * @return The generated id set
    */
-  private UpdateResult addImageToDB(byte[] data) {
+  private int addImageToDB(byte[] data) {
     try {
-      Integer newId =
-          jdbi.withHandle(
-              handle ->
-                  handle
-                      .createUpdate(ResourceLoader.loadResource("sql/image/add.sql"))
-                      .bind("data", data)
-                      .executeAndReturnGeneratedKeys()
-                      .mapTo(int.class)
-                      .one());
-      return new UpdateResult(UpdateStatus.SUCCESS, newId);
+      return jdbi.withHandle(
+          handle ->
+              handle
+                  .createUpdate(ResourceLoader.loadResource("sql/image/add.sql"))
+                  .bind("data", data)
+                  .executeAndReturnGeneratedKeys()
+                  .mapTo(int.class)
+                  .one());
     } catch (UnableToExecuteStatementException e) {
-      return updateHandler.handleUpdateError(e);
+      updateHandler.handleUpdateError(e);
     }
+    throw new RuntimeException("Cannot be reached");
   }
 
   /**
@@ -77,9 +74,8 @@ public class ImageService {
    *
    * @param data a byte array of the image data
    * @param id the id of the image
-   * @return the status of the operation
    */
-  private UpdateResult updateImageToDB(byte[] data, int id) {
+  private void updateImageToDB(byte[] data, int id) {
     try {
       jdbi.useHandle(
           handle ->
@@ -88,27 +84,25 @@ public class ImageService {
                   .bind("data", data)
                   .bind("id", id)
                   .execute());
-      return new UpdateResult(UpdateStatus.SUCCESS);
     } catch (UnableToExecuteStatementException e) {
-      return updateHandler.handleUpdateError(e);
+      updateHandler.handleUpdateError(e);
     }
   }
 
   /**
    * @param imageData an array with the image data
    * @param id the id of the image to update
-   * @return the result of the operation
    */
-  public UpdateResult updateImage(byte[] imageData, int id) throws IOException {
-    return updateImageToDB(rescaleImage(imageData), id);
+  public void updateImage(byte[] imageData, int id) throws IOException {
+    updateImageToDB(rescaleImage(imageData), id);
   }
 
   /**
    * @param imageData an array with the image data
-   * @return the result of the operation in the database
+   * @return the id of the new image
    * @throws IOException if an IO Exception occurs
    */
-  public UpdateResult addImage(byte[] imageData) throws IOException {
+  public int addImage(byte[] imageData) throws IOException {
     return addImageToDB(rescaleImage(imageData));
   }
 
