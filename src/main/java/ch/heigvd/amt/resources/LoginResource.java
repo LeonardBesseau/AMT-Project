@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
 import java.util.Objects;
+import javax.annotation.security.PermitAll;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -66,6 +67,7 @@ public class LoginResource {
    */
   @GET
   @Path("/view")
+  @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public Object getLoginPage(
       @CookieParam("jwt_token") NewCookie jwtToken, @CookieParam("user_role") NewCookie userRole) {
@@ -98,6 +100,7 @@ public class LoginResource {
    */
   @POST
   @Path("/signin")
+  @PermitAll
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object connectToExistingAccount(
@@ -150,6 +153,7 @@ public class LoginResource {
    */
   @POST
   @Path("/signup")
+  @PermitAll
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object createNewAccount(
