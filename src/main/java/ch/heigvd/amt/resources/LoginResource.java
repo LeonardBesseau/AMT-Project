@@ -1,6 +1,5 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.services.CartService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -173,9 +172,9 @@ public class LoginResource {
       switch (response.getStatusInfo().getStatusCode()) {
         case 201:
           // Create cart for the new user
-          if (cartService.addCart(username) != UpdateResult.success()) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR);
-          }
+
+          cartService.addCart(username);
+
           return login.data(
               REGISTER_SUCCESS, "Account created", REGISTER_ERROR, null, LOGIN_ERROR, null);
         case 409:

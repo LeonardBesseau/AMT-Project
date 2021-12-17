@@ -2,8 +2,8 @@ package ch.heigvd.amt.resources;
 
 import static ch.heigvd.amt.resources.ImageResource.extractImageData;
 
-import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateStatus;
+import ch.heigvd.amt.database.exception.DatabaseGenericException;
+import ch.heigvd.amt.database.exception.DuplicateEntryException;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.models.Product;
@@ -15,12 +15,21 @@ import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import java.io.IOException;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.NewCookie;
@@ -280,11 +289,10 @@ public class ProductResource {
 
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
-      UpdateResult imageUpload = imageService.addImage(extractImageData(inputParts.get(0)));
-      if (imageUpload.getStatus() != UpdateStatus.SUCCESS) {
+      try {
+        imageId = imageService.addImage(extractImageData(inputParts.get(0)));
+      } catch (DatabaseGenericException e) {
         imageError = true;
-      } else {
-        imageId = imageUpload.getGeneratedId();
       }
     }
 
@@ -298,19 +306,14 @@ public class ProductResource {
           imageError);
     }
 
-    if (productService
-            .updateProduct(
-                new Product(
-                    name,
-                    price,
-                    null,
-                    quantity,
-                    imageId == Image.DEFAULT_IMAGE_ID ? null : new Image(imageId, null),
-                    null))
-            .getStatus()
-        != UpdateStatus.SUCCESS) {
-      return Response.status(Status.BAD_REQUEST);
-    }
+    productService.updateProduct(
+        new Product(
+            name,
+            price,
+            null,
+            quantity,
+            imageId == Image.DEFAULT_IMAGE_ID ? null : new Image(imageId, null),
+            null));
 
     return Response.status(Status.MOVED_PERMANENTLY)
         .location(URI.create(PRODUCTS_ADMIN_VIEW_URL))
@@ -427,11 +430,10 @@ public class ProductResource {
 
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
-      UpdateResult imageUpload = imageService.addImage(extractImageData(inputParts.get(0)));
-      if (imageUpload.getStatus() != UpdateStatus.SUCCESS) {
+      try {
+        imageId = imageService.addImage(extractImageData(inputParts.get(0)));
+      } catch (DatabaseGenericException e) {
         imageError = true;
-      } else {
-        imageId = imageUpload.getGeneratedId();
       }
     }
 
@@ -449,11 +451,10 @@ public class ProductResource {
           imageError);
     }
 
-    if (productService
-            .addProduct(
-                new Product(name, price, description, quantity, new Image(imageId, null), null))
-            .getStatus()
-        == UpdateStatus.DUPLICATE) {
+    try {
+      productService.addProduct(
+          new Product(name, price, description, quantity, new Image(imageId, null), null));
+    } catch (DuplicateEntryException e) {
       return productAdd.data(
           MISSING_KEY,
           null,
@@ -468,5 +469,11 @@ public class ProductResource {
     }
 
     return Response.status(301).location(URI.create(PRODUCTS_ADMIN_VIEW_URL)).build();
+  }
+
+  @GET
+  @Path("/crash")
+  public Object test() {
+    throw new DuplicateEntryException();
   }
 }

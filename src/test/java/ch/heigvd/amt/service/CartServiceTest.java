@@ -1,8 +1,9 @@
 package ch.heigvd.amt.service;
 
 import ch.heigvd.amt.database.PostgisResource;
-import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateStatus;
+import ch.heigvd.amt.database.exception.DuplicateEntryException;
+import ch.heigvd.amt.database.exception.InvalidCheckConditionException;
+import ch.heigvd.amt.database.exception.InvalidReferenceException;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.services.CartService;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -47,25 +48,24 @@ class CartServiceTest {
   @Test
   void addProductExist() {
     // Add the product
-    Assertions.assertEquals(
-        UpdateResult.success(),
-        cartService.addProduct(USERNAME, new CartProduct("3", null, null, 5)));
+    Assertions.assertDoesNotThrow(
+        () -> cartService.addProduct(USERNAME, new CartProduct("3", null, null, 5)));
     int result2 = cartService.getAllProduct(USERNAME).size();
     Assertions.assertEquals(3, result2);
   }
 
   @Test
   void addProductDoesNotExist() {
-    Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.INVALID_REFERENCE),
-        cartService.addProduct(USERNAME, new CartProduct("F", null, null, 5)));
+    Assertions.assertThrows(
+        InvalidReferenceException.class,
+        () -> cartService.addProduct(USERNAME, new CartProduct("F", null, null, 5)));
   }
 
   @Test
   void addProductNonValidQuantity() {
-    Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.INVALID_CHECK),
-        cartService.addProduct(USERNAME, new CartProduct("3", null, null, 0)));
+    Assertions.assertThrows(
+        InvalidCheckConditionException.class,
+        () -> cartService.addProduct(USERNAME, new CartProduct("3", null, null, 0)));
   }
 
   @Test
@@ -84,17 +84,16 @@ class CartServiceTest {
 
   @Test
   void updateProductQuantity() {
-    Assertions.assertEquals(
-        UpdateResult.success(), cartService.updateProductQuantity(USERNAME, "1", 11));
+    Assertions.assertDoesNotThrow(() -> cartService.updateProductQuantity(USERNAME, "1", 11));
     List<CartProduct> result1 = cartService.getAllProduct(USERNAME);
     Assertions.assertEquals(11, result1.get(0).getQuantity());
   }
 
   @Test
   void updateProductQuantityNonValid() {
-    Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.INVALID_CHECK),
-        cartService.updateProductQuantity(USERNAME, "1", -5));
+    Assertions.assertThrows(
+        InvalidCheckConditionException.class,
+        () -> cartService.updateProductQuantity(USERNAME, "1", -5));
   }
 
   @Test
@@ -114,11 +113,10 @@ class CartServiceTest {
   @Test
   void addCart() {
     // Check for duplicate
-    Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.DUPLICATE), cartService.addCart(USERNAME));
+    Assertions.assertThrows(DuplicateEntryException.class, () -> cartService.addCart(USERNAME));
 
     // Add the cart
-    Assertions.assertEquals(UpdateResult.success(), cartService.addCart("loup"));
+    Assertions.assertDoesNotThrow(() -> cartService.addCart("loup"));
 
     // Check the cart was added
     cartService.addProduct("loup", PRODUCT_1);

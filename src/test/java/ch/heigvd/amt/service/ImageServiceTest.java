@@ -1,7 +1,6 @@
 package ch.heigvd.amt.service;
 
 import ch.heigvd.amt.database.PostgisResource;
-import ch.heigvd.amt.database.UpdateStatus;
 import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.services.ImageService;
 import com.google.common.io.Resources;
@@ -36,11 +35,8 @@ class ImageServiceTest {
 
     var res = imageService.addImage(image);
 
-    Assertions.assertEquals(UpdateStatus.SUCCESS, res.getStatus());
-    Assertions.assertNotNull(res.getGeneratedId());
-
     // Test if resize is valid
-    Image imageResult = imageService.getImage(res.getGeneratedId()).orElseThrow();
+    Image imageResult = imageService.getImage(res).orElseThrow();
     BufferedImage data = ImageIO.read(new ByteArrayInputStream(imageResult.getData()));
     Assertions.assertEquals(ImageService.IMAGE_WIDTH, data.getWidth());
     Assertions.assertEquals(ImageService.IMAGE_HEIGTH, data.getHeight());
@@ -52,8 +48,8 @@ class ImageServiceTest {
     var defaultImage = imageService.getImage(Image.DEFAULT_IMAGE_ID).orElseThrow();
     Assertions.assertEquals(0, defaultImage.getData().length);
 
-    Assertions.assertEquals(
-        UpdateStatus.SUCCESS, imageService.updateImage(image, defaultImage.getId()).getStatus());
+    Image finalDefaultImage = defaultImage;
+    Assertions.assertDoesNotThrow(() -> imageService.updateImage(image, finalDefaultImage.getId()));
     defaultImage = imageService.getImage(Image.DEFAULT_IMAGE_ID).orElseThrow();
     Assertions.assertNotEquals(0, defaultImage.getData().length);
   }
