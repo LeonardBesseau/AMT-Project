@@ -157,7 +157,8 @@ public class ProductResource {
   @PermitAll
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
-  public Object getAllViewWithFilter(MultivaluedMap<String, String> input, @CookieParam("jwt_token") NewCookie jwtToken) {
+  public Object getAllViewWithFilter(
+      MultivaluedMap<String, String> input, @CookieParam("jwt_token") NewCookie jwtToken) {
     boolean isMember = jwtToken != null;
     List<String> selectedFilter = new ArrayList<>(input.keySet());
     return productList.data(

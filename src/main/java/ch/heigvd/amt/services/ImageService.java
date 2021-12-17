@@ -112,7 +112,9 @@ public class ImageService {
    * @throws IOException if an IO Exception occurs
    */
   private byte[] rescaleImage(byte[] input) throws IOException {
-    java.awt.Image image = ImageIO.read(new ByteArrayInputStream(input)).getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGTH, java.awt.Image.SCALE_DEFAULT);
+    java.awt.Image image =
+        ImageIO.read(new ByteArrayInputStream(input))
+            .getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGTH, java.awt.Image.SCALE_DEFAULT);
     BufferedImage rescaledImage =
         new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGTH, BufferedImage.TYPE_INT_RGB);
     rescaledImage.getGraphics().drawImage(image, 0, 0, null);
