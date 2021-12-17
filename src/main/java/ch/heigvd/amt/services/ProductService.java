@@ -26,9 +26,6 @@ public class ProductService {
   public static final String NAME = "name";
   public static final String PRODUCT_NAME = "product_name";
   public static final String CATEGORY_NAME = "category_name";
-  public static final String PRICE = "price";
-  public static final String DESCRIPTION = "description";
-  public static final String QUANTITY = "quantity";
   public static final String IMAGE_ID = "image_id";
   public static final String LIST = "list";
   private final Jdbi jdbi;
@@ -153,7 +150,6 @@ public class ProductService {
    * success
    *
    * @param product the product with updated data.
-   * @return the status of the operation
    */
   public void updateProduct(Product product) {
     String toUpdate = "price=:price, quantity=:quantity";

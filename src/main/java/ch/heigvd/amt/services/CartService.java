@@ -84,7 +84,7 @@ public class CartService {
   }
 
   /**
-   * Delete a product from the cart of a secific user
+   * Delete a product from the cart of a specific user
    *
    * @param username name of the user
    * @param name name of the product

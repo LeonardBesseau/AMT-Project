@@ -470,10 +470,4 @@ public class ProductResource {
 
     return Response.status(301).location(URI.create(PRODUCTS_ADMIN_VIEW_URL)).build();
   }
-
-  @GET
-  @Path("/crash")
-  public Object test() {
-    throw new DuplicateEntryException();
-  }
 }

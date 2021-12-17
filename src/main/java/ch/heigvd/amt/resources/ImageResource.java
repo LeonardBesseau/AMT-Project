@@ -54,7 +54,7 @@ public class ImageResource {
   @GET
   @Path("/{id}")
   @PermitAll
-  @Produces("image/png") // TODO check if can be improved
+  @Produces("image/png")
   public Response get(@PathParam("id") int id) {
     Optional<Image> image = imageService.getImage(id);
     if (image.isEmpty()) {
