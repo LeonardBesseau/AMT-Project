@@ -65,7 +65,7 @@ public class CategoryResource {
    */
   @GET
   @Path("/admin/view/")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAll() {
     return categoryList.data(LIST_KEY, categoryService.getAllCategory());
@@ -78,7 +78,7 @@ public class CategoryResource {
    */
   @GET
   @Path("/admin/view/create")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getFormAdd() {
     return categoryAdd.data(CATEGORY, null);
@@ -93,7 +93,7 @@ public class CategoryResource {
    */
   @POST
   @Path("/admin/create")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object addCategory(@FormParam("name") String category) {
@@ -116,7 +116,7 @@ public class CategoryResource {
    */
   @POST
   @Path("/admin/delete/{id}")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public Object deleteCategory(
       @PathParam("id") String category, @QueryParam("confirm") boolean confirm) {

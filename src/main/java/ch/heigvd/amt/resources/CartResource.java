@@ -8,6 +8,7 @@ import io.quarkus.qute.TemplateInstance;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -48,7 +49,7 @@ public class CartResource {
    */
   @GET
   @Path("/view")
-  @RolesAllowed("Member")
+  @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getCart(@CookieParam("jwt_token") Cookie jwtToken) {
 
@@ -68,7 +69,7 @@ public class CartResource {
 
   @POST
   @Path("/product")
-  @RolesAllowed("Member")
+  @RolesAllowed("MEMBER")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Response addProduct(
@@ -95,7 +96,7 @@ public class CartResource {
 
   @POST
   @Path("/product/{name}")
-  @RolesAllowed("Member")
+  @RolesAllowed("MEMBER")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Response updateProduct(
@@ -127,7 +128,7 @@ public class CartResource {
 
   @DELETE
   @Path("/product/{name}")
-  @RolesAllowed("Member")
+  @RolesAllowed("MEMBER")
   @Produces(MediaType.TEXT_HTML)
   public Response deleteProduct(
       @CookieParam("jwt_token") Cookie jwtToken, @PathParam("name") String productName) {
@@ -148,7 +149,7 @@ public class CartResource {
   }
 
   @DELETE
-  @RolesAllowed("Member")
+  @RolesAllowed("MEMBER")
   @Produces(MediaType.TEXT_HTML)
   public Response clearCart(@CookieParam("jwt_token") Cookie jwtToken) {
 

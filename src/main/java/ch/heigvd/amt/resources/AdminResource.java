@@ -21,7 +21,7 @@ public class AdminResource {
 
   @GET
   @Path("/view")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public Object getAdminPanel() {
     return adminMainPage.instance();
