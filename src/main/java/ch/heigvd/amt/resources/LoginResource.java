@@ -66,10 +66,9 @@ public class LoginResource {
   @Path("/view")
   @PermitAll
   @Produces(MediaType.TEXT_HTML)
-  public Object getLoginPage(
-      @CookieParam("jwt_token") NewCookie jwtToken) {
+  public Object getLoginPage(@CookieParam("jwt_token") NewCookie jwtToken) {
 
-    if (jwtToken != null ) {
+    if (jwtToken != null) {
       String resource = "/product/view";
       String[] userInfo = getUserInfo(jwtToken);
       if (userInfo.length == 0) {
