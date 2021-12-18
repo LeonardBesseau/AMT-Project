@@ -41,8 +41,7 @@ public class LoginResource {
       "loginError"; // used to display the errors about registration on the login page
 
   @ConfigProperty(name = "auth.server.url")
-  String AUTHSERV_ADDR; // authentication server address, will go in a config file in the
-  // future
+  String AUTHSERV_ADDR;
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); // used to parse JSON object
   private final CartService cartService;
@@ -60,7 +59,6 @@ public class LoginResource {
    * Method allowing to display the login page if the cookies are not already set
    *
    * @param jwtToken cookie that contains the JWT token
-   * @param userRole cookie that contains the user role
    * @return either a Response to go to the home page if the cookies are already set, or the
    *     template of the login page
    */
@@ -69,20 +67,20 @@ public class LoginResource {
   @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public Object getLoginPage(
-      @CookieParam("jwt_token") NewCookie jwtToken, @CookieParam("user_role") NewCookie userRole) {
+      @CookieParam("jwt_token") NewCookie jwtToken) {
 
-    if (jwtToken != null && userRole != null) {
+    if (jwtToken != null ) {
       String resource = "/product/view";
       String[] userInfo = getUserInfo(jwtToken);
       if (userInfo.length == 0) {
         // Parsing error
         return Response.status(Status.INTERNAL_SERVER_ERROR);
       }
-      if (userInfo[1].equals("admin")) {
+      if (userInfo[1].equals("ADMIN")) {
         resource = "/product/admin/view";
       }
       return Response.status(Response.Status.MOVED_PERMANENTLY)
-          .cookie(jwtToken, userRole)
+          .cookie(jwtToken)
           .location(URI.create(resource))
           .build();
     }
@@ -112,15 +110,15 @@ public class LoginResource {
       // we keep the switch structure if we have to add codes that produce different behaviours
       switch (response.getStatusInfo().getStatusCode()) {
         case 200:
-          NewCookie[] cookies = createCookies(body);
+          NewCookie jwtCookie = createJwtCookie(body);
           String resource = "/product/view";
 
           // if the user is an admin, he will be redirected to the home page for admins
-          if (getUserInfo(cookies[0])[1].equals("admin")) {
+          if (getUserInfo(jwtCookie)[1].equals("ADMIN")) {
             resource = "/product/admin/view";
           }
           return Response.status(Response.Status.MOVED_PERMANENTLY)
-              .cookie(cookies[0], cookies[1])
+              .cookie(jwtCookie)
               .location(URI.create(resource))
               .build(); // return the home page if the login was a success
         default: // currently 403
@@ -172,9 +170,7 @@ public class LoginResource {
       switch (response.getStatusInfo().getStatusCode()) {
         case 201:
           // Create cart for the new user
-
           cartService.addCart(username);
-
           return login.data(
               REGISTER_SUCCESS, "Account created", REGISTER_ERROR, null, LOGIN_ERROR, null);
         case 409:
@@ -232,27 +228,22 @@ public class LoginResource {
   }
 
   /**
-   * Method allowing to create the cookies according to the response body of the authentication
-   * server
+   * Method allowing to create a jwt cookie
    *
    * @param responseBody body of the response
    * @return array of the JWT token cookie and the user role cookie
    * @throws JsonProcessingException if an error occurred when parsing the JSON object of the
    *     response
    */
-  private NewCookie[] createCookies(String responseBody) throws JsonProcessingException {
+  private NewCookie createJwtCookie(String responseBody) throws JsonProcessingException {
 
     Objects.requireNonNull(responseBody);
 
     // Parsing the response
     JsonNode jsonBody = OBJECT_MAPPER.readTree(responseBody);
     String token = jsonBody.get("token").asText();
-    String role = jsonBody.get("account").get("role").asText();
 
-    NewCookie cookieJWT = new NewCookie("jwt_token", token, "/", "localhost", "", -1, false, true);
-    NewCookie cookieRole = new NewCookie("user_role", role, "/", "localhost", "", -1, false, false);
-
-    return new NewCookie[] {cookieJWT, cookieRole};
+    return new NewCookie("jwt_token", token, "/", "localhost", "", -1, false, true);
   }
 
   /**
@@ -268,7 +259,7 @@ public class LoginResource {
     try {
       String[] chunks = jwtToken.toString().split("\\.");
       JsonNode payload = OBJECT_MAPPER.readTree(new String(Base64.getDecoder().decode(chunks[1])));
-      userInfo = new String[] {payload.get("sub").asText(), payload.get("role").asText()};
+      userInfo = new String[] {payload.get("sub").asText(), payload.get("groups").get(0).asText()};
     } catch (JsonProcessingException e) {
       Log.error("An error occurred while parsing the jwt token");
       throw new IllegalArgumentException("The jwt is invalid", e);

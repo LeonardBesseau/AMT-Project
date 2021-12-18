@@ -77,11 +77,6 @@ public class CartResource {
       @FormParam("product_name") String productName,
       @FormParam("product_quantity") Integer productQuantity) {
 
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
-
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
@@ -103,11 +98,6 @@ public class CartResource {
       @CookieParam("jwt_token") Cookie jwtToken,
       @PathParam("name") String productName,
       @FormParam("product_quantity") Integer productQuantity) {
-
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
 
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
@@ -133,11 +123,6 @@ public class CartResource {
   public Response deleteProduct(
       @CookieParam("jwt_token") Cookie jwtToken, @PathParam("name") String productName) {
 
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
-
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
@@ -152,11 +137,6 @@ public class CartResource {
   @RolesAllowed("MEMBER")
   @Produces(MediaType.TEXT_HTML)
   public Response clearCart(@CookieParam("jwt_token") Cookie jwtToken) {
-
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
 
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
