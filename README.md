@@ -1,5 +1,5 @@
 # Les Boulangers
-Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargés de créer un site web de e-commerce décomposé en microservices.
+Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargé de créer un site web de e-commerce décomposé en microservices.
 
 ## Description
 Nous avons choisi de créer une boutique en ligne de boulangerie et pâtisserie.
@@ -23,7 +23,7 @@ Les étapes ci-dessous permettent de mettre en place l'environnement de dévelop
 
    - Standalone
 
-   Si vous disposez déjà de postgres, vous pouvez créez une nouvelle base de données ou en utiliser une existante. Les scripts pour créer les tables se trouvent dans `sql/tables`. 
+   Si vous disposez déjà de postgres, vous pouvez créer une nouvelle base de données ou en utiliser une existante.  
 
    Une fois la configuration terminée, vous pouvez mettre les informations de connexions dans le fichier `config/application.properties`. (L'utilisateur à fournir doit avoir des droits de lecture et d'écriture)
 
@@ -31,9 +31,13 @@ Les étapes ci-dessous permettent de mettre en place l'environnement de dévelop
      1. `docker-compose up` dans le dossier `docker`
      2. Se connecter à la base de données et exécuter les scripts se trouvant dans  `sql/tables`.
 
+   Pour autant que la DB soit vide, liquidbase se chargera de créer les tables nécessaires au lancement du projet. 
+
+3. Copier la clé publique du serveur d'authentification dans `main/ressources`. La clé publique doit se nommer `publicKey.pem` sinon il faudra modifier le fichier `main/ressources/application.properties`. 
+
 3. Lancer l'application en mode *dev* avec `mvn compile quarkus:dev`.
 
-4. Se connecter avec un navigateur à sur localhost:8080. La page d’accueil retourne un 404 avec la liste des routes.
+4. Se connecter avec un navigateur sur localhost:8080.
 
 
 ## Contribution
