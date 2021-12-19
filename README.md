@@ -11,12 +11,15 @@ Nous avons choisi de créer une boutique en ligne de boulangerie et pâtisserie.
 - [Java 11](https://adoptopenjdk.net/installation.html)
 - [Docker](https://docs.docker.com/get-docker/) et [docker-compose](https://docs.docker.com/compose/install/) (optionnels)
 
-## Déploiement
-- Télécharger la release et l'extraire. Ajouter les données de connexion à la base de données dans le fichier `config/application.properties` (il peut être nécessaire de le créer).
-- Lancer le serveur avec `java -jar target/quarkus-app/quarkus-run.jar`
+## Déploiement pour la production
+- Télécharger la release et l'extraire. 
+- Ajouter les données de connexion à la base de données dans le fichier `config/application.properties` (il peut être nécessaire de le créer).
+- Ajouter la clé publique (nommée `publicKey.pem`) dans le dossier contenant l'exécutable. Si vous souhaitez changer le nom ou l'emplacement de la clé, il suffit d'ajouter à la configuration `mp.jwt.verify.publickey.location=[LOCATION]` où **LOCATION** est l'emplacement de la clé. Pour la génération de la clé, se reférer à la documentation du [service d'authentification](https://github.com/K-do/AMT-AuthService/tree/dev)
+- Indiquer l'adresse du serveur d'authentification avec la propriété : `auth.server.url=[URL]` dans la config.
+- Lancer le serveur avec `java -jar target/quarkus-app/quarkus-run.jar`.
 
 
-## Installation
+## Installation pour le developpement
 Les étapes ci-dessous permettent de mettre en place l'environnement de développement en local afin de travailler sur le projet :
 
 1. Cloner le repository. 
@@ -25,17 +28,16 @@ Les étapes ci-dessous permettent de mettre en place l'environnement de dévelop
 
    - Standalone
 
-   Si vous disposez déjà de PostgreSQL, vous pouvez créer une nouvelle base de données ou en utiliser une existante:
+   Si vous disposez déjà de PostgreSQL, vous pouvez créer une nouvelle base de données ou en utiliser une existante.
+Pour créer une base de données depuis psql :
 
    ```sql
-   create database [DATABASE_NAME]; dans PostgreSQL
+   create database [DATABASE_NAME];
    ```
 
    Une fois la configuration terminée, vous pouvez mettre les informations de connexions dans le fichier `config/application.properties`. (L'utilisateur à fournir doit avoir des droits de lecture et d'écriture)
 
-   - Docker
-     1. `docker-compose up` dans le dossier `docker`
-     2. Se connecter à la base de données et exécuter les scripts se trouvant dans  `sql/tables`.
+   - Docker : `docker-compose up` dans le dossier `docker`
 
    Pour autant que la DB soit vide, Liquibase se chargera de créer les tables nécessaires au lancement du projet. 
 
