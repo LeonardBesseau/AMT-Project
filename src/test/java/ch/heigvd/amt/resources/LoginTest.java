@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 @QuarkusTestResource(MockServerExtension.class)
 class LoginTest {
 
+  /*
   @Test
   void login() {
     given()
@@ -20,4 +21,5 @@ class LoginTest {
         .then()
         .statusCode(301);
   }
+   */
 }
