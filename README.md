@@ -1,5 +1,7 @@
 # Les Boulangers
-Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargés de créer un site web de e-commerce décomposé en microservices.
+Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargés de créer un site web de e-commerce décomposé en microservices. 
+
+Le repository du service d'authentification est disponible via ce lien: https://github.com/K-do/AMT-AuthService/tree/dev 
 
 ## Description
 Nous avons choisi de créer une boutique en ligne de boulangerie et pâtisserie.
@@ -23,7 +25,11 @@ Les étapes ci-dessous permettent de mettre en place l'environnement de dévelop
 
    - Standalone
 
-   Si vous disposez déjà de postgres, vous pouvez créer une nouvelle base de données ou en utiliser une existante.  
+   Si vous disposez déjà de postgres, vous pouvez créer une nouvelle base de données ou en utiliser une existante:
+
+   ```sql
+   create database [DATABASE_NAME]; dans psql
+   ```
 
    Une fois la configuration terminée, vous pouvez mettre les informations de connexions dans le fichier `config/application.properties`. (L'utilisateur à fournir doit avoir des droits de lecture et d'écriture)
 
