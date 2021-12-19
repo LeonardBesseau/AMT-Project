@@ -180,7 +180,7 @@ public class LoginResource {
               OBJECT_MAPPER.readTree(body).get("error").asText(),
               LOGIN_ERROR,
               null);
-        case 422:
+        case 400:
           return login.data(
               REGISTER_SUCCESS,
               null,
