@@ -22,10 +22,10 @@ public class MockServerExtension implements QuarkusTestResourceLifecycleManager 
             .createObjectNode()
             .put(
                 "token",
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6Ik1lbWJlciJ9.8dwWWPpQANT5Lb5bT1kU_8x0nmQP4SIBr4vRBoLzigE")
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiZ3JvdXBzIjpbIk1FTUJFUiJdfQ.DtDNtUCSVy4xrHrv7OuMmFFxTZjdYmNxprN_9oypQ7A")
             .set(
                 "account",
-                new ObjectMapper().createObjectNode().put("role", "Member").put("username", "A"));
+                new ObjectMapper().createObjectNode().put("role", "MEMBER").put("username", "A"));
 
     stubFor(
         post(urlEqualTo("/auth/login"))
@@ -39,7 +39,7 @@ public class MockServerExtension implements QuarkusTestResourceLifecycleManager 
             .willReturn(
                 aResponse()
                     .withHeader("Content-Type", "application/json")
-                    .withBody("{\"username\":\"A\"," + "\"role\":\"Member\"" + "}")));
+                    .withBody("{\"username\":\"A\"," + "\"role\":\"MEMBER\"" + "}")));
 
     Map<String, String> config = new HashMap<>();
     // Hijack url at runtime

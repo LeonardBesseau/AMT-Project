@@ -8,6 +8,7 @@ import io.quarkus.qute.TemplateInstance;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -48,7 +49,7 @@ public class CartResource {
    */
   @GET
   @Path("/view")
-  @RolesAllowed("Member")
+  @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getCart(@CookieParam("jwt_token") Cookie jwtToken) {
 
@@ -68,18 +69,13 @@ public class CartResource {
 
   @POST
   @Path("/product")
-  @RolesAllowed("Member")
+  @RolesAllowed("MEMBER")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Response addProduct(
       @CookieParam("jwt_token") Cookie jwtToken,
       @FormParam("product_name") String productName,
       @FormParam("product_quantity") Integer productQuantity) {
-
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
 
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
@@ -95,18 +91,13 @@ public class CartResource {
 
   @POST
   @Path("/product/{name}")
-  @RolesAllowed("Member")
+  @RolesAllowed("MEMBER")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Response updateProduct(
       @CookieParam("jwt_token") Cookie jwtToken,
       @PathParam("name") String productName,
       @FormParam("product_quantity") Integer productQuantity) {
-
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
 
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
@@ -127,15 +118,10 @@ public class CartResource {
 
   @DELETE
   @Path("/product/{name}")
-  @RolesAllowed("Member")
+  @RolesAllowed("MEMBER")
   @Produces(MediaType.TEXT_HTML)
   public Response deleteProduct(
       @CookieParam("jwt_token") Cookie jwtToken, @PathParam("name") String productName) {
-
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
 
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
@@ -148,14 +134,9 @@ public class CartResource {
   }
 
   @DELETE
-  @RolesAllowed("Member")
+  @RolesAllowed("MEMBER")
   @Produces(MediaType.TEXT_HTML)
   public Response clearCart(@CookieParam("jwt_token") Cookie jwtToken) {
-
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
 
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];

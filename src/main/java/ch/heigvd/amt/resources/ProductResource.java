@@ -181,7 +181,7 @@ public class ProductResource {
    */
   @GET
   @Path("/admin/view")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAdminView() {
 
@@ -204,7 +204,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object getAdminViewWithFilter(MultivaluedMap<String, String> input) {
@@ -228,7 +228,7 @@ public class ProductResource {
    */
   @GET
   @Path("/admin/view/{id}")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public Object getDetails(@PathParam("id") String name) {
     Optional<Product> product = productService.getProduct(name);
@@ -254,7 +254,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/{id}")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object updateProduct(
@@ -333,7 +333,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/{id}/category")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object updateCategoryForProduct(
@@ -364,7 +364,7 @@ public class ProductResource {
    */
   @GET
   @Path("admin/view/create")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance createProductView() {
     return productAdd.data(
@@ -389,7 +389,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/create")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object addProduct(@MultipartForm MultipartFormDataInput input) throws IOException {

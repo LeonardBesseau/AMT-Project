@@ -70,7 +70,7 @@ public class ImageResource {
    */
   @GET
   @Path("/view/default")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public Object getDefaultManagement() {
     return defaultImageManagement.data("imageError", null);
@@ -84,7 +84,7 @@ public class ImageResource {
    */
   @POST
   @Path("/view/default")
-  @RolesAllowed("Admin")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object addImage(@MultipartForm MultipartFormDataInput input) throws IOException {
