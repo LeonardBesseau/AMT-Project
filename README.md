@@ -37,7 +37,7 @@ Les étapes ci-dessous permettent de mettre en place l'environnement de dévelop
      1. `docker-compose up` dans le dossier `docker`
      2. Se connecter à la base de données et exécuter les scripts se trouvant dans  `sql/tables`.
 
-   Pour autant que la DB soit vide, liquidbase se chargera de créer les tables nécessaires au lancement du projet. 
+   Pour autant que la DB soit vide, liquibase se chargera de créer les tables nécessaires au lancement du projet. 
 
 3. Copier la clé publique du serveur d'authentification dans `main/ressources`. La clé publique doit se nommer `publicKey.pem` sinon il faudra modifier le fichier `main/ressources/application.properties`. L'algorithme de vérification de signature est ES256. Si les clés générées utilisent un autre algorithme, il faudra modifier le fichier `main/ressources/application.properties` comme avant.
 
