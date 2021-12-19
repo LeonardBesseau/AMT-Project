@@ -1,5 +1,5 @@
 # Les Boulangers
-Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargé de créer un site web de e-commerce décomposé en microservices.
+Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargés de créer un site web de e-commerce décomposé en microservices.
 
 ## Description
 Nous avons choisi de créer une boutique en ligne de boulangerie et pâtisserie.
