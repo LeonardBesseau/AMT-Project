@@ -73,7 +73,7 @@ public class LoginResource {
       String[] userInfo = getUserInfo(jwtToken);
       if (userInfo.length == 0) {
         // Parsing error
-        return Response.status(Status.INTERNAL_SERVER_ERROR);
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
       }
       if (userInfo[1].equals("ADMIN")) {
         resource = "/product/admin/view";
@@ -134,7 +134,7 @@ public class LoginResource {
       }
     } catch (IOException e) {
       Log.error("IOException occured");
-      return Response.status(Status.INTERNAL_SERVER_ERROR);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -189,11 +189,11 @@ public class LoginResource {
               LOGIN_ERROR,
               null);
         default:
-          return Response.status(Status.NOT_ACCEPTABLE);
+          return Response.status(Status.NOT_ACCEPTABLE).build();
       }
     } catch (IOException e) {
       Log.error("IOException occured");
-      return Response.status(Status.INTERNAL_SERVER_ERROR);
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -216,14 +216,19 @@ public class LoginResource {
     jsonInput.put("username", username);
     jsonInput.put("password", password);
 
-    // sending the JSON object to the authentication server and get its response
     Client client = ClientBuilder.newClient();
-    return client
-        .target(AUTHSERV_ADDR)
-        .path(resource)
-        .request(MediaType.APPLICATION_JSON)
-        .accept(MediaType.APPLICATION_JSON)
-        .post(Entity.json(jsonInput.toString()));
+
+    try {
+      // sending the JSON object to the authentication service and get its response
+      return client
+          .target(AUTHSERV_ADDR)
+          .path(resource)
+          .request(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON)
+          .post(Entity.json(jsonInput.toString()));
+    } finally {
+      client.close();
+    }
   }
 
   /**
