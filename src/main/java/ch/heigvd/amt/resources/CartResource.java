@@ -2,7 +2,6 @@ package ch.heigvd.amt.resources;
 
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.services.CartService;
-import com.sun.mail.imap.protocol.Item;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;

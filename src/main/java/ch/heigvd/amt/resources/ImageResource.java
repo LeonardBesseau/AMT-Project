@@ -69,7 +69,8 @@ public class ImageResource {
   @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public Object getDefaultManagement(@CookieParam("jwt_token") Cookie jwtToken) {
-    return defaultImageManagement.data("imageError", null, "username", LoginResource.getUserInfo(jwtToken)[0]);
+    return defaultImageManagement.data(
+        "imageError", null, "username", LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**

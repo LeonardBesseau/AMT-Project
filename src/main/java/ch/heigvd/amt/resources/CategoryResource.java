@@ -62,7 +62,11 @@ public class CategoryResource {
   @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAll(@CookieParam("jwt_token") Cookie jwtToken) {
-    return categoryList.data(LIST_KEY, categoryService.getAllCategory(), "username", LoginResource.getUserInfo(jwtToken)[0]);
+    return categoryList.data(
+        LIST_KEY,
+        categoryService.getAllCategory(),
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -113,7 +117,9 @@ public class CategoryResource {
   @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public Object deleteCategory(
-      @PathParam("id") String category, @QueryParam("confirm") boolean confirm, @CookieParam("jwt_token") Cookie jwtToken) {
+      @PathParam("id") String category,
+      @QueryParam("confirm") boolean confirm,
+      @CookieParam("jwt_token") Cookie jwtToken) {
     List<Product> list = productService.getAllProduct(Collections.singletonList(category));
     if (confirm || list.isEmpty()) {
       categoryService.deleteCategory(category);
@@ -121,6 +127,14 @@ public class CategoryResource {
           .location(URI.create(CATEGORY_ADMIN_VIEW_URL))
           .build();
     }
-    return categoryDelete.data(LIST_KEY, list, CATEGORY, category, "clientDisplay", false, "username", LoginResource.getUserInfo(jwtToken)[0]);
+    return categoryDelete.data(
+        LIST_KEY,
+        list,
+        CATEGORY,
+        category,
+        "clientDisplay",
+        false,
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 }

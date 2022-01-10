@@ -114,7 +114,7 @@ public class ProductResource {
     objectMap.put(FILTERS_LIST_KEY, null);
     objectMap.put(ADMIN_KEY, false);
     objectMap.put("member", isMember);
-    if(jwtToken != null) {
+    if (jwtToken != null) {
       objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
     }
 
@@ -143,7 +143,7 @@ public class ProductResource {
     objectMap.put(ITEM_KEY, product.get());
     objectMap.put(ADMIN_KEY, false);
     objectMap.put("member", isMember);
-    if(jwtToken != null) {
+    if (jwtToken != null) {
       objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
     }
 
@@ -172,7 +172,7 @@ public class ProductResource {
     objectMap.put(FILTERS_LIST_KEY, selectedFilter);
     objectMap.put(ADMIN_KEY, false);
     objectMap.put("member", isMember);
-    if(jwtToken != null) {
+    if (jwtToken != null) {
       objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
     }
 
@@ -198,7 +198,9 @@ public class ProductResource {
         FILTERS_LIST_KEY,
         null,
         ADMIN_KEY,
-        true, "username", LoginResource.getUserInfo(jwtToken)[0]);
+        true,
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -212,7 +214,8 @@ public class ProductResource {
   @RolesAllowed("ADMIN")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
-  public Object getAdminViewWithFilter(MultivaluedMap<String, String> input, @CookieParam("jwt_token") NewCookie jwtToken) {
+  public Object getAdminViewWithFilter(
+      MultivaluedMap<String, String> input, @CookieParam("jwt_token") NewCookie jwtToken) {
     List<String> selectedFilter = new ArrayList<>(input.keySet());
     return productList.data(
         LIST_KEY,
@@ -222,7 +225,9 @@ public class ProductResource {
         FILTERS_LIST_KEY,
         selectedFilter,
         ADMIN_KEY,
-        true, "username", LoginResource.getUserInfo(jwtToken)[0]);
+        true,
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -235,7 +240,8 @@ public class ProductResource {
   @Path("/admin/view/{id}")
   @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public Object getDetails(@PathParam("id") String name, @CookieParam("jwt_token") NewCookie jwtToken) {
+  public Object getDetails(
+      @PathParam("id") String name, @CookieParam("jwt_token") NewCookie jwtToken) {
     Optional<Product> product = productService.getProduct(name);
     if (product.isPresent()) {
       var categories = categoryService.getAllCategory();
@@ -267,7 +273,9 @@ public class ProductResource {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object updateProduct(
-      @MultipartForm MultipartFormDataInput input, @PathParam("id") String name, @CookieParam("jwt_token") NewCookie jwtToken)
+      @MultipartForm MultipartFormDataInput input,
+      @PathParam("id") String name,
+      @CookieParam("jwt_token") NewCookie jwtToken)
       throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
     boolean isPriceInvalid = false;
@@ -407,7 +415,9 @@ public class ProductResource {
   @RolesAllowed("ADMIN")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
-  public Object addProduct(@MultipartForm MultipartFormDataInput input, @CookieParam("jwt_token") NewCookie jwtToken) throws IOException {
+  public Object addProduct(
+      @MultipartForm MultipartFormDataInput input, @CookieParam("jwt_token") NewCookie jwtToken)
+      throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
     boolean isNameMissing;
