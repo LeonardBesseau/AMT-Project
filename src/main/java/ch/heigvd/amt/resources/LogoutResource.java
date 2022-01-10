@@ -21,15 +21,13 @@ public class LogoutResource {
     @PermitAll
     @Produces(MediaType.TEXT_HTML)
     public Object logout(@CookieParam("jwt_token") NewCookie jwtToken) {
-        //if (jwtToken != null) {
             String resource = "/login/view";
+            // Put maxAge to 0 to delete the cookie
             jwtToken = new NewCookie("jwt_token", null, "/", "localhost", "", 0, false, true);
 
             return Response.status(Response.Status.FOUND)
                     .cookie(jwtToken)
                     .location(URI.create(resource))
                     .build();
-       // }
-        //return login.data(REGISTER_SUCCESS, null, REGISTER_ERROR, null, LOGIN_ERROR, null);
     }
 }
