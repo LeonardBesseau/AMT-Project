@@ -39,6 +39,7 @@ public class LoginResource {
       "registerSuccess"; // used to display that the account has been created
   private static final String LOGIN_ERROR =
       "loginError"; // used to display the errors about registration on the login page
+  private static final String SERVER_ERROR_URL = "/html/500.html";
 
   @ConfigProperty(name = "auth.server.url")
   String AUTHSERV_ADDR;
@@ -73,7 +74,7 @@ public class LoginResource {
       String[] userInfo = getUserInfo(jwtToken);
       if (userInfo.length == 0) {
         // Parsing error
-        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+        return Response.seeOther(URI.create(SERVER_ERROR_URL)).build();
       }
       if (userInfo[1].equals("ADMIN")) {
         resource = "/product/admin/view";
@@ -134,7 +135,7 @@ public class LoginResource {
       }
     } catch (IOException e) {
       Log.error("IOException occured");
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return Response.seeOther(URI.create(SERVER_ERROR_URL)).build();
     }
   }
 
@@ -193,7 +194,7 @@ public class LoginResource {
       }
     } catch (IOException e) {
       Log.error("IOException occured");
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return Response.seeOther(URI.create(SERVER_ERROR_URL)).build();
     }
   }
 
