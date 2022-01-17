@@ -15,9 +15,11 @@
 <body>
 <header id="header" class="header" style="margin-bottom: 20px">
     {#if admin}
-    {#include adminHeader}{/include}
-    {#else}
-    {#include userHeader}{/include}
+        {#include adminHeader}{/include}
+    {#else if member}
+        {#include userHeader}{/include}
+        {#else}
+            {#include header}{/include}
     {/if}
 </header>
 

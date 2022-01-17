@@ -5,9 +5,11 @@ import io.quarkus.qute.Template;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 
 /** Manages admin specific pages */
@@ -23,7 +25,7 @@ public class AdminResource {
   @Path("/view")
   @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public Object getAdminPanel() {
-    return adminMainPage.instance();
+  public Object getAdminPanel(@CookieParam("jwt_token") Cookie jwtToken) {
+    return adminMainPage.data("username", LoginResource.getUserInfo(jwtToken)[0]);
   }
 }

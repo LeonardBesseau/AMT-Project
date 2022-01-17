@@ -7,7 +7,9 @@ import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
@@ -62,9 +64,12 @@ public class CartResource {
       products = cartService.getAllProduct(username);
       isMember = true;
     }
-
-    return cart.data(
-        "admin", false, "member", isMember, "username", username, "products", products);
+    Map<String, Object> objectMap = new HashMap<>();
+    objectMap.put("admin", false);
+    objectMap.put("products", products);
+    objectMap.put("member", isMember);
+    objectMap.put("username", username);
+    return cart.data(objectMap);
   }
 
   @POST

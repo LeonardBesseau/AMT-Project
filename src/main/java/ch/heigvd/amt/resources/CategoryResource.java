@@ -14,14 +14,8 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -67,8 +61,12 @@ public class CategoryResource {
   @Path("/admin/view/")
   @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getAll() {
-    return categoryList.data(LIST_KEY, categoryService.getAllCategory());
+  public TemplateInstance getAll(@CookieParam("jwt_token") Cookie jwtToken) {
+    return categoryList.data(
+        LIST_KEY,
+        categoryService.getAllCategory(),
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -80,8 +78,8 @@ public class CategoryResource {
   @Path("/admin/view/create")
   @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getFormAdd() {
-    return categoryAdd.data(CATEGORY, null);
+  public TemplateInstance getFormAdd(@CookieParam("jwt_token") Cookie jwtToken) {
+    return categoryAdd.data(CATEGORY, null, "username", LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -119,7 +117,9 @@ public class CategoryResource {
   @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public Object deleteCategory(
-      @PathParam("id") String category, @QueryParam("confirm") boolean confirm) {
+      @PathParam("id") String category,
+      @QueryParam("confirm") boolean confirm,
+      @CookieParam("jwt_token") Cookie jwtToken) {
     List<Product> list = productService.getAllProduct(Collections.singletonList(category));
     if (confirm || list.isEmpty()) {
       categoryService.deleteCategory(category);
@@ -127,6 +127,14 @@ public class CategoryResource {
           .location(URI.create(CATEGORY_ADMIN_VIEW_URL))
           .build();
     }
-    return categoryDelete.data(LIST_KEY, list, CATEGORY, category, "clientDisplay", false);
+    return categoryDelete.data(
+        LIST_KEY,
+        list,
+        CATEGORY,
+        category,
+        "clientDisplay",
+        false,
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 }
