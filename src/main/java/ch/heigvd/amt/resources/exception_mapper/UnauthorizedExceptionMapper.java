@@ -12,6 +12,6 @@ import javax.ws.rs.ext.Provider;
 public class UnauthorizedExceptionMapper implements ExceptionMapper<UnauthorizedException> {
     @Override
     public Response toResponse(UnauthorizedException e) {
-        return Response.seeOther(UriBuilder.fromUri("/html/500.html").build()).build();
+        return Response.seeOther(UriBuilder.fromUri("/login/view").build()).build();
     }
 }

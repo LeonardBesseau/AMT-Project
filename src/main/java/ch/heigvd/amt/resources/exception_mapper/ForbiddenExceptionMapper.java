@@ -9,9 +9,8 @@ import javax.ws.rs.ext.Provider;
 @Provider
 @Priority(1)
 public class ForbiddenExceptionMapper implements ExceptionMapper<ForbiddenException> {
-
     @Override
     public Response toResponse(ForbiddenException e) {
-        return Response.seeOther(UriBuilder.fromUri("/html/500.html").build()).build();
+        return Response.seeOther(UriBuilder.fromUri("/login/view").build()).build();
     }
 }
