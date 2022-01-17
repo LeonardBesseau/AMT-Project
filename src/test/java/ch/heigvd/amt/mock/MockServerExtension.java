@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 public class MockServerExtension implements QuarkusTestResourceLifecycleManager {
@@ -41,10 +41,7 @@ public class MockServerExtension implements QuarkusTestResourceLifecycleManager 
                     .withHeader("Content-Type", "application/json")
                     .withBody("{\"username\":\"A\"," + "\"role\":\"MEMBER\"" + "}")));
 
-    Map<String, String> config = new HashMap<>();
-    // Hijack url at runtime
-    config.put("auth.server.url", wireMockServer.baseUrl());
-    return config;
+    return Collections.singletonMap("auth.server.url", wireMockServer.baseUrl());
   }
 
   @Override
