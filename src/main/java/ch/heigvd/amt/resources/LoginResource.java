@@ -105,6 +105,7 @@ public class LoginResource {
     try {
       Response response = sendToAuthServ("/auth/login", username, password);
       String body = response.readEntity(String.class);
+      response.close();
 
       // we keep the switch structure if we have to add codes that produce different behaviours
       switch (response.getStatusInfo().getStatusCode()) {
@@ -218,17 +219,13 @@ public class LoginResource {
 
     Client client = ClientBuilder.newClient();
 
-    try {
-      // sending the JSON object to the authentication service and get its response
-      return client
-          .target(AUTHSERV_ADDR)
-          .path(resource)
-          .request(MediaType.APPLICATION_JSON)
-          .accept(MediaType.APPLICATION_JSON)
-          .post(Entity.json(jsonInput.toString()));
-    } finally {
-      client.close();
-    }
+    // sending the JSON object to the authentication service and get its response
+    return client
+        .target(AUTHSERV_ADDR)
+        .path(resource)
+        .request(MediaType.APPLICATION_JSON)
+        .accept(MediaType.APPLICATION_JSON)
+        .post(Entity.json(jsonInput.toString()));
   }
 
   /**
