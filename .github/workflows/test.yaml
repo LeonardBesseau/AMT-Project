@@ -11,6 +11,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+      - name: Copy keys
+        working-directory: .
+        shell: bash
+        env: 
+          PUBLIC_KEY: ${{ secrets.PUBLICKEY }}
+        run: 
+          echo "$PUBLIC_KEY" > publicKey.pem
       - name: Cache Maven packages
         uses: actions/cache@v1
         with:
