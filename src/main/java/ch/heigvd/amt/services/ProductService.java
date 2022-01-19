@@ -138,7 +138,7 @@ public class ProductService {
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/product/add.sql"))
                   .bindBean(product)
-                  .bind(IMAGE_ID, product.getImage().getId())
+                  .bind(IMAGE_ID, product.getImage())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
       updateHandler.handleUpdateError(e);
@@ -175,7 +175,7 @@ public class ProductService {
                         LIST,
                         product.getImage() == null ? toUpdate : toUpdate + ", image_id=:image_id")
                     .bindBean(product)
-                    .bind(IMAGE_ID, product.getImage().getId())
+                    .bind(IMAGE_ID, product.getImage())
                     .execute());
       } catch (UnableToExecuteStatementException e) {
         updateHandler.handleUpdateError(e);

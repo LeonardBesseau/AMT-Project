@@ -1,0 +1,22 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+  <changeSet id="1" author="AMT">
+    <dropForeignKeyConstraint baseTableName="product" constraintName="fk_image_id"/>
+
+  </changeSet>
+  <changeSet id="2" author="AMT">
+    <dropTable tableName="image"/>
+  </changeSet>
+  <changeSet id="3" author="AMT">
+    <dropColumn tableName="product" columnName="image_id"/>
+  </changeSet>
+  <changeSet id="4" author="AMT">
+    <addColumn tableName="product">
+      <column name="image" type="UUID"/>
+    </addColumn>
+  </changeSet>
+
+
+</databaseChangeLog>

@@ -49,7 +49,7 @@
         </div>
       </div>
       <div class="col-md">
-        <img src="/image/{item.image.id}" alt="image" width="250" height="300"/>
+        <img src="/image/{#if item.image}{item.image}{#else}default {/if}" alt="image" width="250" height="300"/>
       </div>
     </div>
 

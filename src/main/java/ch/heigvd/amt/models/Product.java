@@ -4,8 +4,8 @@ import java.beans.ConstructorProperties;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import javax.annotation.Nullable;
-import org.jdbi.v3.core.mapper.Nested;
 
 public class Product {
 
@@ -13,7 +13,7 @@ public class Product {
   private final Double price;
   private final String description;
   private final Integer quantity;
-  private final Image image;
+  private final UUID image;
   private final List<Category> categories;
 
   @ConstructorProperties({"name", "price", "description", "quantity", "image", "category_name"})
@@ -22,7 +22,7 @@ public class Product {
       Double price,
       String description,
       Integer quantity,
-      @Nested("image") Image image,
+      @Nullable UUID image,
       @Nullable List<Category> categories) {
     this.name = name;
     this.price = price;
@@ -48,7 +48,7 @@ public class Product {
     return quantity;
   }
 
-  public Image getImage() {
+  public UUID getImage() {
     return image;
   }
 

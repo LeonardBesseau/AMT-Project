@@ -166,7 +166,7 @@ public class LoginResource {
     try {
       Response response = sendToAuthServ("/accounts/register", username, password);
       String body = response.readEntity(String.class);
-
+      response.close();
       switch (response.getStatusInfo().getStatusCode()) {
         case 201:
           // Create cart for the new user

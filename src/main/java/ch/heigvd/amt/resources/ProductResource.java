@@ -5,7 +5,6 @@ import static ch.heigvd.amt.resources.ImageResource.extractImageData;
 import ch.heigvd.amt.database.exception.DatabaseGenericException;
 import ch.heigvd.amt.database.exception.DuplicateEntryException;
 import ch.heigvd.amt.models.Category;
-import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.CategoryService;
 import ch.heigvd.amt.services.ImageService;
@@ -275,7 +274,7 @@ public class ProductResource {
   public Object updateProduct(
       @MultipartForm MultipartFormDataInput input,
       @PathParam("id") String name,
-      @CookieParam("jwt_token") NewCookie jwtToken)
+      @CookieParam("jwt_token") Cookie jwtToken)
       throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
     boolean isPriceInvalid = false;
@@ -284,7 +283,7 @@ public class ProductResource {
 
     Double price = null;
     Integer quantity = null;
-    int imageId = Image.DEFAULT_IMAGE_ID;
+    UUID imageId = null;
 
     String res = uploadForm.get("price").get(0).getBodyAsString();
     if (!res.isEmpty()) {
@@ -311,7 +310,7 @@ public class ProductResource {
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
       try {
-        imageId = imageService.addImage(extractImageData(inputParts.get(0)));
+        imageId = imageService.addImage(extractImageData(inputParts.get(0)), jwtToken.getName());
       } catch (DatabaseGenericException | NullPointerException e) {
         imageError = true;
       }
@@ -335,14 +334,7 @@ public class ProductResource {
       return productAdminDetails.data(objectMap);
     }
 
-    productService.updateProduct(
-        new Product(
-            name,
-            price,
-            null,
-            quantity,
-            imageId == Image.DEFAULT_IMAGE_ID ? null : new Image(imageId, null),
-            null));
+    productService.updateProduct(new Product(name, price, null, quantity, imageId, null));
 
     return Response.status(Status.MOVED_PERMANENTLY)
         .location(URI.create(PRODUCTS_ADMIN_VIEW_URL))
@@ -429,7 +421,7 @@ public class ProductResource {
     String description;
     Double price = null;
     Integer quantity = null;
-    int imageId = Image.DEFAULT_IMAGE_ID;
+    UUID imageId = null;
 
     isNameMissing = name.isEmpty();
 
@@ -460,7 +452,7 @@ public class ProductResource {
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
       try {
-        imageId = imageService.addImage(extractImageData(inputParts.get(0)));
+        imageId = imageService.addImage(extractImageData(inputParts.get(0)), jwtToken.getName());
       } catch (DatabaseGenericException | NullPointerException e) {
         imageError = true;
       }
@@ -478,8 +470,7 @@ public class ProductResource {
     }
 
     try {
-      productService.addProduct(
-          new Product(name, price, description, quantity, new Image(imageId, null), null));
+      productService.addProduct(new Product(name, price, description, quantity, imageId, null));
     } catch (DuplicateEntryException e) {
       Map<String, Object> objectMap = new HashMap<>();
       objectMap.put(MISSING_KEY, null);
