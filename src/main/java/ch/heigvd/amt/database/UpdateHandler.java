@@ -6,10 +6,10 @@ import org.jdbi.v3.core.statement.StatementException;
 public interface UpdateHandler {
 
   /**
-   * Convert a generic sql error into a more precise one. Rethrows the generic one if not handled
+   * Convert a generic sql error into a more precise one.
    *
    * @param e the error to handle
    * @throws StatementException if the error cannot be handled
    */
-  public void handleUpdateError(StatementException e);
+  void handleUpdateError(StatementException e);
 }
