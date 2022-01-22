@@ -136,7 +136,7 @@ public class ProductResource {
     boolean isMember = jwtToken != null;
     Optional<Product> product = productService.getProduct(name);
     if (product.isEmpty()) {
-      return Response.status(Status.NOT_FOUND);
+      return Response.seeOther(URI.create("/html/404.html")).build();
     }
 
     Map<String, Object> objectMap = new HashMap<>();
