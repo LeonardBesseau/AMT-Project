@@ -1,4 +1,4 @@
-package ch.heigvd.amt.services;
+package ch.heigvd.amt.services.exception;
 
 public class ImageException extends RuntimeException {
   public ImageException() {}

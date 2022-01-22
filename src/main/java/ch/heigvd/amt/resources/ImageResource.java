@@ -55,16 +55,16 @@ public class ImageResource {
   @Path("/{id}")
   @PermitAll
   @Produces("image/png")
-  public byte[] get(@PathParam("id") UUID id, @CookieParam("jwt_token") String token) {
-    return imageService.getImage(id, token);
+  public byte[] get(@PathParam("id") UUID id) {
+    return imageService.getImage(id);
   }
 
   @GET
   @Path("/default")
   @PermitAll
   @Produces("image/png")
-  public byte[] get(@CookieParam("jwt_token") String token) {
-    return imageService.getDefaultImage(token);
+  public byte[] get() {
+    return imageService.getDefaultImage();
   }
 
   /**

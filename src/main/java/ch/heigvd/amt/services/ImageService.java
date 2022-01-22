@@ -1,6 +1,7 @@
 package ch.heigvd.amt.services;
 
-import ch.heigvd.amt.database.UpdateHandler;
+import ch.heigvd.amt.services.exception.CDNNotReachableException;
+import ch.heigvd.amt.services.exception.ImageException;
 import ch.heigvd.amt.utils.CookieClientRequestFilter;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -9,8 +10,8 @@ import java.io.IOException;
 import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.imageio.ImageIO;
-import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -21,26 +22,17 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataWriter;
-import org.jdbi.v3.core.Jdbi;
 
 @ApplicationScoped
 public class ImageService {
 
   public static final int IMAGE_WIDTH = 250;
   public static final int IMAGE_HEIGTH = 300;
-  private final Jdbi jdbi;
-  private final UpdateHandler updateHandler;
 
   @ConfigProperty(name = "cdn.server.url")
   String CDN_ADDR;
 
   private static final Logger logger = Logger.getLogger(ImageService.class);
-
-  @Inject
-  public ImageService(Jdbi jdbi, UpdateHandler updateHandler) {
-    this.jdbi = jdbi;
-    this.updateHandler = updateHandler;
-  }
 
   /**
    * Get an image
@@ -48,19 +40,25 @@ public class ImageService {
    * @param imageId the id of the image
    * @return the image
    */
-  public byte[] getImage(UUID imageId, String token) {
-    return get(String.valueOf(imageId), token);
+  public byte[] getImage(UUID imageId) {
+    return get(String.valueOf(imageId));
   }
 
-  public byte[] getDefaultImage(String token) {
-    return get("/default", token);
+  public byte[] getDefaultImage() {
+    return get("/default");
   }
 
-  private byte[] get(String data, String token) {
+  /**
+   * Get the image data
+   *
+   * @param identifier the identifier of the image
+   * @return the data of the image
+   */
+  private byte[] get(String identifier) {
     Response r = null;
     try {
       Client client = ClientBuilder.newClient();
-      r = client.target(CDN_ADDR + "/image").path(data).request().get();
+      r = client.target(CDN_ADDR + "/image").path(identifier).request().get();
       if (r.getStatus() != Status.OK.getStatusCode()) {
         if (r.getStatus() == Status.NOT_FOUND.getStatusCode()) {
           throw new NotFoundException();
@@ -68,6 +66,8 @@ public class ImageService {
         throw new ImageException();
       }
       return r.readEntity(byte[].class);
+    } catch (ProcessingException e) {
+      throw new CDNNotReachableException(e);
     } finally {
       if (r != null) {
         r.close();
@@ -76,12 +76,12 @@ public class ImageService {
   }
 
   /**
-   * Add an image to the database
+   * Add an image
    *
    * @param data the data of the image
    * @return The generated id set
    */
-  private UUID addImageToDB(byte[] data, String token, String query) {
+  private UUID addImageToDB(byte[] data, String token, String defaultImageQuery) {
     Response r = null;
     try {
       MultipartFormDataOutput output = new MultipartFormDataOutput();
@@ -89,14 +89,13 @@ public class ImageService {
       Client client = ClientBuilder.newClient();
       r =
           client
-              .target(CDN_ADDR + "/image?default=" + query)
-              .register(MultipartFormDataWriter.class)
+              .target(CDN_ADDR + "/image?default=" + defaultImageQuery)
+              .register(MultipartFormDataWriter.class) // Need to explicitly register it
               .register(new CookieClientRequestFilter(token))
               .request()
               .post(Entity.entity(output, MediaType.MULTIPART_FORM_DATA));
 
       if (r.getStatus() != Status.CREATED.getStatusCode()) {
-        logger.warn(r.getStatus());
         throw new ImageException();
       }
       return r.readEntity(UUID.class);
