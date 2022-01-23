@@ -310,7 +310,7 @@ public class ProductResource {
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
       try {
-        imageId = imageService.addImage(extractImageData(inputParts.get(0)), jwtToken.getName());
+        imageId = imageService.addImage(extractImageData(inputParts.get(0)), jwtToken.getValue());
       } catch (DatabaseGenericException | NullPointerException e) {
         imageError = true;
       }
@@ -327,9 +327,6 @@ public class ProductResource {
       objectMap.put(INVALID_QUANTITY_KEY, false);
       objectMap.put(IMAGE_ERROR, false);
       objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
-      objectMap.put(INVALID_PRICE_KEY, isPriceInvalid);
-      objectMap.put(INVALID_QUANTITY_KEY, isQuantityInvalid);
-      objectMap.put(IMAGE_ERROR, imageError);
 
       return productAdminDetails.data(objectMap);
     }
@@ -452,7 +449,7 @@ public class ProductResource {
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
       try {
-        imageId = imageService.addImage(extractImageData(inputParts.get(0)), jwtToken.getName());
+        imageId = imageService.addImage(extractImageData(inputParts.get(0)), jwtToken.getValue());
       } catch (DatabaseGenericException | NullPointerException e) {
         imageError = true;
       }
