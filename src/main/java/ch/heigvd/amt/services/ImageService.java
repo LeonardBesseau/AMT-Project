@@ -96,9 +96,10 @@ public class ImageService {
               .post(Entity.entity(output, MediaType.MULTIPART_FORM_DATA));
 
       if (r.getStatus() != Status.CREATED.getStatusCode()) {
+        logger.error(r.getStatus());
         throw new ImageException();
       }
-      return r.readEntity(UUID.class);
+      return UUID.fromString(r.readEntity(String.class));
     } finally {
       if (r != null) {
         r.close();
