@@ -2,7 +2,6 @@ package ch.heigvd.amt.provider;
 
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.models.Category;
-import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.mapper.CategoryColumnMapper;
 import javax.enterprise.inject.Produces;
@@ -24,7 +23,6 @@ public class JdbiProvider {
     jdbi = Jdbi.create(dataSource).installPlugin(new PostgresPlugin());
     jdbi.registerRowMapper(ConstructorMapper.factory(Product.class));
     jdbi.registerRowMapper(ConstructorMapper.factory(Category.class));
-    jdbi.registerRowMapper(ConstructorMapper.factory(Image.class));
     jdbi.registerRowMapper(ConstructorMapper.factory(CartProduct.class));
     jdbi.registerColumnMapper(new CategoryColumnMapper());
     jdbi.registerArrayType(String.class, "TEXT");

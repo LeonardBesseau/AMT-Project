@@ -26,7 +26,7 @@ public class ProductService {
   public static final String NAME = "name";
   public static final String PRODUCT_NAME = "product_name";
   public static final String CATEGORY_NAME = "category_name";
-  public static final String IMAGE_ID = "image_id";
+  public static final String IMAGE_ID = "image";
   public static final String LIST = "list";
   private final Jdbi jdbi;
   private final UpdateHandler updateHandler;
@@ -138,7 +138,7 @@ public class ProductService {
               handle
                   .createUpdate(ResourceLoader.loadResource("sql/product/add.sql"))
                   .bindBean(product)
-                  .bind(IMAGE_ID, product.getImage().getId())
+                  .bind(IMAGE_ID, product.getImage())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
       updateHandler.handleUpdateError(e);
@@ -172,10 +172,9 @@ public class ProductService {
                 handle
                     .createUpdate(ResourceLoader.loadResource("sql/product/update.sql"))
                     .define(
-                        LIST,
-                        product.getImage() == null ? toUpdate : toUpdate + ", image_id=:image_id")
+                        LIST, product.getImage() == null ? toUpdate : toUpdate + ", image=:image")
                     .bindBean(product)
-                    .bind(IMAGE_ID, product.getImage().getId())
+                    .bind(IMAGE_ID, product.getImage())
                     .execute());
       } catch (UnableToExecuteStatementException e) {
         updateHandler.handleUpdateError(e);

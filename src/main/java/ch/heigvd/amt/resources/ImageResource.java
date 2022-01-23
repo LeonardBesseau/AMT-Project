@@ -1,21 +1,25 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.services.ImageService;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.UUID;
 import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -51,12 +55,16 @@ public class ImageResource {
   @Path("/{id}")
   @PermitAll
   @Produces("image/png")
-  public Response get(@PathParam("id") int id) {
-    Optional<Image> image = imageService.getImage(id);
-    if (image.isEmpty()) {
-      return Response.status(404).build();
-    }
-    return Response.ok(new ByteArrayInputStream(image.get().getData())).build();
+  public byte[] get(@PathParam("id") UUID id) {
+    return imageService.getImage(id);
+  }
+
+  @GET
+  @Path("/default")
+  @PermitAll
+  @Produces("image/png")
+  public byte[] get() {
+    return imageService.getDefaultImage();
   }
 
   /**
@@ -84,7 +92,9 @@ public class ImageResource {
   @RolesAllowed("ADMIN")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
-  public Object addImage(@MultipartForm MultipartFormDataInput input) throws IOException {
+  public Object addImage(
+      @MultipartForm MultipartFormDataInput input, @CookieParam("jwt_token") String jwtToken)
+      throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
     List<InputPart> inputParts = uploadForm.get("image");
@@ -99,7 +109,7 @@ public class ImageResource {
       return Response.status(Status.BAD_REQUEST).entity("The image cannot be empty").build();
     }
 
-    imageService.updateImage(bytes, 0);
+    imageService.addDefaultImage(bytes, jwtToken);
     return Response.status(301).location(URI.create("/product/admin/view/")).build();
   }
 
