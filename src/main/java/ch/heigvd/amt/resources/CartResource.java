@@ -32,8 +32,8 @@ import javax.ws.rs.core.Response.Status;
 @ApplicationScoped
 public class CartResource {
 
-  public static final String LOGIN_VIEW_URL = "/login/view";
   private final CartService cartService;
+  private static final String SERVER_ERROR_URL = "/html/500.html";
 
   @Inject
   @Location("CartView/cart.html")
@@ -85,7 +85,7 @@ public class CartResource {
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return redirectTo(SERVER_ERROR_URL);
     }
 
     // Add product or update the quantity if it already exists
@@ -107,7 +107,7 @@ public class CartResource {
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return redirectTo(SERVER_ERROR_URL);
     }
 
     // Update the quantity
@@ -131,7 +131,7 @@ public class CartResource {
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return redirectTo(SERVER_ERROR_URL);
     }
 
     cartService.deleteProduct(username, productName);
@@ -146,7 +146,7 @@ public class CartResource {
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return redirectTo(SERVER_ERROR_URL);
     }
 
     cartService.clearCart(username);
