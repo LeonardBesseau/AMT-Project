@@ -1,34 +1,38 @@
 package ch.heigvd.amt.services;
 
-import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateResultHandler;
-import ch.heigvd.amt.database.UpdateStatus;
-import ch.heigvd.amt.models.Image;
-import ch.heigvd.amt.utils.ResourceLoader;
+import ch.heigvd.amt.services.exception.CDNNotReachableException;
+import ch.heigvd.amt.services.exception.ImageException;
+import ch.heigvd.amt.utils.CookieClientRequestFilter;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Optional;
+import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import org.apache.commons.io.IOUtils;
+import javax.imageio.ImageIO;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.plugins.providers.multipart.InputPart;
-import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.core.statement.UnableToExecuteStatementException;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataOutput;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataWriter;
 
 @ApplicationScoped
 public class ImageService {
 
-  private final Jdbi jdbi;
-  private final UpdateResultHandler updateResultHandler;
+  public static final int IMAGE_WIDTH = 250;
+  public static final int IMAGE_HEIGTH = 300;
+
+  @ConfigProperty(name = "cdn.server.url")
+  String CDN_ADDR;
 
   private static final Logger logger = Logger.getLogger(ImageService.class);
-
-  @Inject
-  public ImageService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
-    this.jdbi = jdbi;
-    this.updateResultHandler = updateResultHandler;
-  }
 
   /**
    * Get an image
@@ -36,100 +40,105 @@ public class ImageService {
    * @param imageId the id of the image
    * @return the image
    */
-  public Optional<Image> getImage(int imageId) {
-    return jdbi.withHandle(
-        handle ->
-            handle
-                .createQuery(ResourceLoader.loadResource("sql/image/get.sql"))
-                .bind("id", imageId)
-                .mapTo(Image.class)
-                .findOne());
+  public byte[] getImage(UUID imageId) {
+    return get(String.valueOf(imageId));
+  }
+
+  public byte[] getDefaultImage() {
+    return get("/default");
   }
 
   /**
-   * Add an image to the database
+   * Get the image data
+   *
+   * @param identifier the identifier of the image
+   * @return the data of the image
+   */
+  private byte[] get(String identifier) {
+    Response r = null;
+    try {
+      Client client = ClientBuilder.newClient();
+      r = client.target(CDN_ADDR + "/image").path(identifier).request().get();
+      if (r.getStatus() != Status.OK.getStatusCode()) {
+        if (r.getStatus() == Status.NOT_FOUND.getStatusCode()) {
+          throw new NotFoundException();
+        }
+        throw new ImageException();
+      }
+      return r.readEntity(byte[].class);
+    } catch (ProcessingException e) {
+      throw new CDNNotReachableException(e);
+    } finally {
+      if (r != null) {
+        r.close();
+      }
+    }
+  }
+
+  /**
+   * Add an image
    *
    * @param data the data of the image
-   * @return The result of the operation with the generated id set if successful
+   * @return The generated id set
    */
-  public UpdateResult addImage(byte[] data) {
+  private UUID addImageToDB(byte[] data, String token, String defaultImageQuery) {
+    Response r = null;
     try {
-      Integer newId =
-          jdbi.withHandle(
-              handle ->
-                  handle
-                      .createUpdate(ResourceLoader.loadResource("sql/image/add.sql"))
-                      .bind("data", data)
-                      .executeAndReturnGeneratedKeys()
-                      .mapTo(int.class)
-                      .one());
-      return new UpdateResult(UpdateStatus.SUCCESS, newId);
-    } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      MultipartFormDataOutput output = new MultipartFormDataOutput();
+      output.addFormData("image", data, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+      Client client = ClientBuilder.newClient();
+      r =
+          client
+              .target(CDN_ADDR + "/image?default=" + defaultImageQuery)
+              .register(MultipartFormDataWriter.class) // Need to explicitly register it
+              .register(new CookieClientRequestFilter(token))
+              .request()
+              .post(Entity.entity(output, MediaType.MULTIPART_FORM_DATA));
+
+      if (r.getStatus() != Status.CREATED.getStatusCode()) {
+        logger.error(r.getStatus());
+        throw new ImageException();
+      }
+      return UUID.fromString(r.readEntity(String.class));
+    } finally {
+      if (r != null) {
+        r.close();
+      }
     }
   }
 
   /**
-   * Modify the image data
-   *
-   * @param data a byte array of the image data
-   * @param id the id of the image
-   * @return the status of the operation
+   * @param imageData an array with the image data
+   * @return the id of the new image
+   * @throws IOException if an IO Exception occurs
    */
-  public UpdateResult updateImage(byte[] data, int id) {
-    try {
-      jdbi.useHandle(
-          handle ->
-              handle
-                  .createUpdate(ResourceLoader.loadResource("sql/image/update.sql"))
-                  .bind("data", data)
-                  .bind("id", id)
-                  .execute());
-      return new UpdateResult(UpdateStatus.SUCCESS);
-    } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
-    }
+  public UUID addImage(byte[] imageData, String token) throws IOException {
+    return addImageToDB(rescaleImage(imageData), token, "false");
   }
 
   /**
-   * @param inputPart
-   * @param id
-   * @return
+   * @param imageData an array with the image data
+   * @return the id of the new image
+   * @throws IOException if an IO Exception occurs
    */
-  public int manageImage(InputPart inputPart, int id) {
-    // TODO add image treatment to set size.
-    try {
-      InputStream inputStream = inputPart.getBody(InputStream.class, null);
-      byte[] bytes = IOUtils.toByteArray(inputStream);
-      if (bytes.length == 0) {
-        return -1;
-      }
-      var res = updateImage(bytes, id);
-      if (res.getStatus() == UpdateStatus.SUCCESS) {
-        return id;
-      }
-      return -1;
-    } catch (IOException e) {
-      e.printStackTrace();
-      return -1;
-    }
+  public UUID addDefaultImage(byte[] imageData, String token) throws IOException {
+    return addImageToDB(rescaleImage(imageData), token, "true");
   }
 
-  public int manageImage(InputPart inputPart) {
-    try {
-      InputStream inputStream = inputPart.getBody(InputStream.class, null);
-      byte[] bytes = IOUtils.toByteArray(inputStream);
-      if (bytes.length == 0) {
-        return Image.DEFAULT_IMAGE_ID;
-      }
-      var res = addImage(bytes);
-      if (res.getStatus() == UpdateStatus.SUCCESS) {
-        return res.getGeneratedId();
-      }
-      return -1;
-    } catch (IOException e) {
-      e.printStackTrace();
-      return -1;
-    }
+  /**
+   * @param input the data of the image
+   * @return the data of the image rescaled
+   * @throws IOException if an IO Exception occurs
+   */
+  private byte[] rescaleImage(byte[] input) throws IOException {
+    java.awt.Image image =
+        ImageIO.read(new ByteArrayInputStream(input))
+            .getScaledInstance(IMAGE_WIDTH, IMAGE_HEIGTH, java.awt.Image.SCALE_DEFAULT);
+    BufferedImage rescaledImage =
+        new BufferedImage(IMAGE_WIDTH, IMAGE_HEIGTH, BufferedImage.TYPE_INT_RGB);
+    rescaledImage.getGraphics().drawImage(image, 0, 0, null);
+    ByteArrayOutputStream output = new ByteArrayOutputStream();
+    ImageIO.write(rescaledImage, "png", output);
+    return output.toByteArray();
   }
 }

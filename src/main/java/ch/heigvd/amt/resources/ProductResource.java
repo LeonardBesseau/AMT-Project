@@ -1,8 +1,10 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.database.UpdateStatus;
+import static ch.heigvd.amt.resources.ImageResource.extractImageData;
+
+import ch.heigvd.amt.database.exception.DatabaseGenericException;
+import ch.heigvd.amt.database.exception.DuplicateEntryException;
 import ch.heigvd.amt.models.Category;
-import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.CategoryService;
 import ch.heigvd.amt.services.ImageService;
@@ -13,13 +15,18 @@ import io.quarkus.qute.TemplateInstance;
 import java.io.IOException;
 import java.net.URI;
 import java.util.*;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.NewCookie;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.Status;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
@@ -80,6 +87,7 @@ public class ProductResource {
    * @return a list of product
    */
   @GET
+  @PermitAll
   @Produces(MediaType.APPLICATION_JSON)
   public List<Product> getAll() {
     return productService.getAllProduct();
@@ -92,22 +100,24 @@ public class ProductResource {
    */
   @GET
   @Path("/view")
+  @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getAllView(@CookieParam("jwt_token") NewCookie jwtToken) {
 
     // Check if it's a member (we assume that admins can access this page too)
     boolean isMember = jwtToken != null;
-    return productList.data(
-        LIST_KEY,
-        productService.getAllProduct(),
-        CATEGORIES_LIST_KEY,
-        categoryService.getAllUsedCategory(),
-        FILTERS_LIST_KEY,
-        null,
-        ADMIN_KEY,
-        false,
-        "member",
-        isMember);
+
+    Map<String, Object> objectMap = new HashMap<>();
+    objectMap.put(LIST_KEY, productService.getAllProduct());
+    objectMap.put(CATEGORIES_LIST_KEY, categoryService.getAllUsedCategory());
+    objectMap.put(FILTERS_LIST_KEY, null);
+    objectMap.put(ADMIN_KEY, false);
+    objectMap.put("member", isMember);
+    if (jwtToken != null) {
+      objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
+    }
+
+    return productList.data(objectMap);
   }
 
   /**
@@ -118,15 +128,25 @@ public class ProductResource {
    */
   @GET
   @Path("/view/{id}")
+  @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public Object getAllView(
       @PathParam("id") String name, @CookieParam("jwt_token") NewCookie jwtToken) {
     boolean isMember = jwtToken != null;
     Optional<Product> product = productService.getProduct(name);
     if (product.isEmpty()) {
-      return Response.status(Status.NOT_FOUND);
+      return Response.seeOther(URI.create("/html/404.html")).build();
     }
-    return productDetails.data(ITEM_KEY, product.get(), ADMIN_KEY, false, "member", isMember);
+
+    Map<String, Object> objectMap = new HashMap<>();
+    objectMap.put(ITEM_KEY, product.get());
+    objectMap.put(ADMIN_KEY, false);
+    objectMap.put("member", isMember);
+    if (jwtToken != null) {
+      objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
+    }
+
+    return productDetails.data(objectMap);
   }
 
   /**
@@ -137,19 +157,25 @@ public class ProductResource {
    */
   @POST
   @Path("/view")
+  @PermitAll
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
-  public Object getAllViewWithFilter(MultivaluedMap<String, String> input) {
+  public Object getAllViewWithFilter(
+      MultivaluedMap<String, String> input, @CookieParam("jwt_token") NewCookie jwtToken) {
+    boolean isMember = jwtToken != null;
     List<String> selectedFilter = new ArrayList<>(input.keySet());
-    return productList.data(
-        LIST_KEY,
-        productService.getAllProduct(selectedFilter),
-        CATEGORIES_LIST_KEY,
-        categoryService.getAllUsedCategory(),
-        FILTERS_LIST_KEY,
-        selectedFilter,
-        ADMIN_KEY,
-        false);
+
+    Map<String, Object> objectMap = new HashMap<>();
+    objectMap.put(LIST_KEY, productService.getAllProduct(selectedFilter));
+    objectMap.put(CATEGORIES_LIST_KEY, categoryService.getAllUsedCategory());
+    objectMap.put(FILTERS_LIST_KEY, selectedFilter);
+    objectMap.put(ADMIN_KEY, false);
+    objectMap.put("member", isMember);
+    if (jwtToken != null) {
+      objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
+    }
+
+    return productList.data(objectMap);
   }
 
   /**
@@ -159,8 +185,9 @@ public class ProductResource {
    */
   @GET
   @Path("/admin/view")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getAdminView() {
+  public TemplateInstance getAdminView(@CookieParam("jwt_token") NewCookie jwtToken) {
 
     return productList.data(
         LIST_KEY,
@@ -170,7 +197,9 @@ public class ProductResource {
         FILTERS_LIST_KEY,
         null,
         ADMIN_KEY,
-        true);
+        true,
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -181,9 +210,11 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
-  public Object getAdminViewWithFilter(MultivaluedMap<String, String> input) {
+  public Object getAdminViewWithFilter(
+      MultivaluedMap<String, String> input, @CookieParam("jwt_token") NewCookie jwtToken) {
     List<String> selectedFilter = new ArrayList<>(input.keySet());
     return productList.data(
         LIST_KEY,
@@ -193,7 +224,9 @@ public class ProductResource {
         FILTERS_LIST_KEY,
         selectedFilter,
         ADMIN_KEY,
-        true);
+        true,
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -204,17 +237,23 @@ public class ProductResource {
    */
   @GET
   @Path("/admin/view/{id}")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public Object getDetails(@PathParam("id") String name) {
+  public Object getDetails(
+      @PathParam("id") String name, @CookieParam("jwt_token") NewCookie jwtToken) {
     Optional<Product> product = productService.getProduct(name);
     if (product.isPresent()) {
       var categories = categoryService.getAllCategory();
-      return productAdminDetails.data(
-          ITEM_KEY, product.get(),
-          CATEGORIES_LIST_KEY, categories,
-          INVALID_PRICE_KEY, false,
-          INVALID_QUANTITY_KEY, false,
-          IMAGE_ERROR, false);
+
+      Map<String, Object> objectMap = new HashMap<>();
+      objectMap.put(ITEM_KEY, product.get());
+      objectMap.put(CATEGORIES_LIST_KEY, categories);
+      objectMap.put(INVALID_PRICE_KEY, false);
+      objectMap.put(INVALID_QUANTITY_KEY, false);
+      objectMap.put(IMAGE_ERROR, false);
+      objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
+
+      return productAdminDetails.data(objectMap);
     }
     return Response.status(Status.BAD_REQUEST);
   }
@@ -229,10 +268,13 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/{id}")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
   public Object updateProduct(
-      @MultipartForm MultipartFormDataInput input, @PathParam("id") String name)
+      @MultipartForm MultipartFormDataInput input,
+      @PathParam("id") String name,
+      @CookieParam("jwt_token") Cookie jwtToken)
       throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
     boolean isPriceInvalid = false;
@@ -241,7 +283,7 @@ public class ProductResource {
 
     Double price = null;
     Integer quantity = null;
-    int imageId = Image.DEFAULT_IMAGE_ID;
+    UUID imageId = null;
 
     String res = uploadForm.get("price").get(0).getBodyAsString();
     if (!res.isEmpty()) {
@@ -267,35 +309,29 @@ public class ProductResource {
 
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
-      imageId = imageService.manageImage(inputParts.get(0));
-      if (imageId < 0) {
+      try {
+        imageId = imageService.addImage(extractImageData(inputParts.get(0)), jwtToken.getValue());
+      } catch (DatabaseGenericException | NullPointerException e) {
         imageError = true;
       }
     }
 
     if (imageError || isQuantityInvalid || isPriceInvalid) {
-      return productAdminDetails.data(
-          INVALID_PRICE_KEY,
-          isPriceInvalid,
-          INVALID_QUANTITY_KEY,
-          isQuantityInvalid,
-          IMAGE_ERROR,
-          imageError);
+      Optional<Product> product = productService.getProduct(name);
+      var categories = categoryService.getAllCategory();
+
+      Map<String, Object> objectMap = new HashMap<>();
+      objectMap.put(ITEM_KEY, product.get());
+      objectMap.put(CATEGORIES_LIST_KEY, categories);
+      objectMap.put(INVALID_PRICE_KEY, false);
+      objectMap.put(INVALID_QUANTITY_KEY, false);
+      objectMap.put(IMAGE_ERROR, false);
+      objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
+
+      return productAdminDetails.data(objectMap);
     }
 
-    if (productService
-            .updateProduct(
-                new Product(
-                    name,
-                    price,
-                    null,
-                    quantity,
-                    imageId == Image.DEFAULT_IMAGE_ID ? null : new Image(imageId, null),
-                    null))
-            .getStatus()
-        != UpdateStatus.SUCCESS) {
-      return Response.status(Status.BAD_REQUEST);
-    }
+    productService.updateProduct(new Product(name, price, null, quantity, imageId, null));
 
     return Response.status(Status.MOVED_PERMANENTLY)
         .location(URI.create(PRODUCTS_ADMIN_VIEW_URL))
@@ -311,6 +347,7 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/{id}/category")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object updateCategoryForProduct(
@@ -341,19 +378,18 @@ public class ProductResource {
    */
   @GET
   @Path("admin/view/create")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance createProductView() {
-    return productAdd.data(
-        MISSING_KEY,
-        null,
-        DUPLICATE_KEY,
-        null,
-        INVALID_PRICE_KEY,
-        null,
-        INVALID_QUANTITY_KEY,
-        null,
-        IMAGE_ERROR,
-        null);
+  public TemplateInstance createProductView(@CookieParam("jwt_token") NewCookie jwtToken) {
+    Map<String, Object> objectMap = new HashMap<>();
+    objectMap.put(MISSING_KEY, null);
+    objectMap.put(DUPLICATE_KEY, null);
+    objectMap.put(INVALID_PRICE_KEY, null);
+    objectMap.put(INVALID_QUANTITY_KEY, null);
+    objectMap.put(IMAGE_ERROR, null);
+    objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
+
+    return productAdd.data(objectMap);
   }
 
   /**
@@ -365,9 +401,12 @@ public class ProductResource {
    */
   @POST
   @Path("/admin/view/create")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
-  public Object addProduct(@MultipartForm MultipartFormDataInput input) throws IOException {
+  public Object addProduct(
+      @MultipartForm MultipartFormDataInput input, @CookieParam("jwt_token") NewCookie jwtToken)
+      throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
     boolean isNameMissing;
@@ -379,7 +418,7 @@ public class ProductResource {
     String description;
     Double price = null;
     Integer quantity = null;
-    int imageId = Image.DEFAULT_IMAGE_ID;
+    UUID imageId = null;
 
     isNameMissing = name.isEmpty();
 
@@ -409,42 +448,35 @@ public class ProductResource {
 
     List<InputPart> inputParts = uploadForm.get("image");
     if (!inputParts.isEmpty()) {
-      imageId = imageService.manageImage(inputParts.get(0));
-      if (imageId < 0) {
+      try {
+        imageId = imageService.addImage(extractImageData(inputParts.get(0)), jwtToken.getValue());
+      } catch (DatabaseGenericException | NullPointerException e) {
         imageError = true;
       }
     }
 
     if (imageError || isQuantityInvalid || isPriceInvalid || isNameMissing) {
-      return productAdd.data(
-          MISSING_KEY,
-          isNameMissing,
-          DUPLICATE_KEY,
-          null,
-          INVALID_PRICE_KEY,
-          isPriceInvalid,
-          INVALID_QUANTITY_KEY,
-          isQuantityInvalid,
-          IMAGE_ERROR,
-          imageError);
+      Map<String, Object> objectMap = new HashMap<>();
+      objectMap.put(MISSING_KEY, isNameMissing);
+      objectMap.put(DUPLICATE_KEY, null);
+      objectMap.put(INVALID_PRICE_KEY, isPriceInvalid);
+      objectMap.put(INVALID_QUANTITY_KEY, isQuantityInvalid);
+      objectMap.put(IMAGE_ERROR, imageError);
+      objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
+      return productAdd.data(objectMap);
     }
 
-    if (productService
-            .addProduct(
-                new Product(name, price, description, quantity, new Image(imageId, null), null))
-            .getStatus()
-        == UpdateStatus.DUPLICATE) {
-      return productAdd.data(
-          MISSING_KEY,
-          null,
-          DUPLICATE_KEY,
-          name,
-          INVALID_PRICE_KEY,
-          null,
-          INVALID_QUANTITY_KEY,
-          null,
-          IMAGE_ERROR,
-          null);
+    try {
+      productService.addProduct(new Product(name, price, description, quantity, imageId, null));
+    } catch (DuplicateEntryException e) {
+      Map<String, Object> objectMap = new HashMap<>();
+      objectMap.put(MISSING_KEY, null);
+      objectMap.put(DUPLICATE_KEY, name);
+      objectMap.put(INVALID_PRICE_KEY, null);
+      objectMap.put(INVALID_QUANTITY_KEY, null);
+      objectMap.put(IMAGE_ERROR, null);
+      objectMap.put("username", LoginResource.getUserInfo(jwtToken)[0]);
+      return productAdd.data(objectMap);
     }
 
     return Response.status(301).location(URI.create(PRODUCTS_ADMIN_VIEW_URL)).build();

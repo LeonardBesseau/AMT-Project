@@ -1,24 +1,30 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.models.Image;
 import ch.heigvd.amt.services.ImageService;
 import io.quarkus.qute.Location;
 import io.quarkus.qute.Template;
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.UUID;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -47,13 +53,18 @@ public class ImageResource {
    */
   @GET
   @Path("/{id}")
-  @Produces("image/png") // TODO check if can be improved
-  public Response get(@PathParam("id") int id) {
-    Optional<Image> image = imageService.getImage(id);
-    if (image.isEmpty()) {
-      return Response.status(404).build();
-    }
-    return Response.ok(new ByteArrayInputStream(image.get().getData())).build();
+  @PermitAll
+  @Produces("image/png")
+  public byte[] get(@PathParam("id") UUID id) {
+    return imageService.getImage(id);
+  }
+
+  @GET
+  @Path("/default")
+  @PermitAll
+  @Produces("image/png")
+  public byte[] get() {
+    return imageService.getDefaultImage();
   }
 
   /**
@@ -63,9 +74,11 @@ public class ImageResource {
    */
   @GET
   @Path("/view/default")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public Object getDefaultManagement() {
-    return defaultImageManagement.data("imageError", null);
+  public Object getDefaultManagement(@CookieParam("jwt_token") Cookie jwtToken) {
+    return defaultImageManagement.data(
+        "imageError", null, "username", LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -76,19 +89,32 @@ public class ImageResource {
    */
   @POST
   @Path("/view/default")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Produces(MediaType.TEXT_HTML)
-  public Object addImage(@MultipartForm MultipartFormDataInput input) {
+  public Object addImage(
+      @MultipartForm MultipartFormDataInput input, @CookieParam("jwt_token") String jwtToken)
+      throws IOException {
     Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
 
     List<InputPart> inputParts = uploadForm.get("image");
-    for (InputPart inputPart : inputParts) {
-      if (imageService.manageImage(inputPart, 0) > -1) {
-        return Response.status(301).location(URI.create("/product/admin/view/")).build();
-      } else {
-        return Response.ok().entity("File non-uploaded").build();
-      }
+    if (inputParts.isEmpty()) {
+      return Response.ok().entity("No file uploaded").build();
     }
-    return Response.ok().entity("No file uploaded").build();
+
+    InputPart inputPart = inputParts.get(0);
+
+    byte[] bytes = extractImageData(inputPart);
+    if (bytes.length == 0) {
+      return Response.status(Status.BAD_REQUEST).entity("The image cannot be empty").build();
+    }
+
+    imageService.addDefaultImage(bytes, jwtToken);
+    return Response.status(301).location(URI.create("/product/admin/view/")).build();
+  }
+
+  public static byte[] extractImageData(InputPart inputPart) throws IOException {
+    InputStream inputStream = inputPart.getBody(InputStream.class, null);
+    return IOUtils.toByteArray(inputStream);
   }
 }

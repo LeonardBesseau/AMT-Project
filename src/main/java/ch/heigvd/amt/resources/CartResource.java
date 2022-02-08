@@ -1,6 +1,5 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.database.UpdateResult;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.services.CartService;
 import io.quarkus.qute.Location;
@@ -8,10 +7,22 @@ import io.quarkus.qute.Template;
 import io.quarkus.qute.TemplateInstance;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -21,8 +32,8 @@ import javax.ws.rs.core.Response.Status;
 @ApplicationScoped
 public class CartResource {
 
-  public static final String LOGIN_VIEW_URL = "/login/view";
   private final CartService cartService;
+  private static final String SERVER_ERROR_URL = "/html/500.html";
 
   @Inject
   @Location("CartView/cart.html")
@@ -40,6 +51,7 @@ public class CartResource {
    */
   @GET
   @Path("/view")
+  @PermitAll
   @Produces(MediaType.TEXT_HTML)
   public TemplateInstance getCart(@CookieParam("jwt_token") Cookie jwtToken) {
 
@@ -52,13 +64,17 @@ public class CartResource {
       products = cartService.getAllProduct(username);
       isMember = true;
     }
-
-    return cart.data(
-        "admin", false, "member", isMember, "username", username, "products", products);
+    Map<String, Object> objectMap = new HashMap<>();
+    objectMap.put("admin", false);
+    objectMap.put("products", products);
+    objectMap.put("member", isMember);
+    objectMap.put("username", username);
+    return cart.data(objectMap);
   }
 
   @POST
   @Path("/product")
+  @RolesAllowed("MEMBER")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Response addProduct(
@@ -66,29 +82,21 @@ public class CartResource {
       @FormParam("product_name") String productName,
       @FormParam("product_quantity") Integer productQuantity) {
 
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
-
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return redirectTo(SERVER_ERROR_URL);
     }
 
     // Add product or update the quantity if it already exists
     CartProduct product = new CartProduct(productName, null, null, productQuantity);
-    UpdateResult status = cartService.addProduct(username, product);
-    if (status == UpdateResult.success()) {
-      return Response.status(Status.NO_CONTENT).build();
-    } else {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-    }
+    cartService.addProduct(username, product);
+    return Response.status(Status.NO_CONTENT).build();
   }
 
   @POST
   @Path("/product/{name}")
+  @RolesAllowed("MEMBER")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Response updateProduct(
@@ -96,24 +104,15 @@ public class CartResource {
       @PathParam("name") String productName,
       @FormParam("product_quantity") Integer productQuantity) {
 
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
-
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return redirectTo(SERVER_ERROR_URL);
     }
 
     // Update the quantity
     if (productQuantity > 0) {
-      UpdateResult status =
-          cartService.updateProductQuantity(username, productName, productQuantity);
-      if (status != UpdateResult.success()) {
-        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
-      }
+      cartService.updateProductQuantity(username, productName, productQuantity);
     } else {
       // Delete product if quantity is 0 or below and refresh page
       cartService.deleteProduct(username, productName);
@@ -124,19 +123,15 @@ public class CartResource {
 
   @DELETE
   @Path("/product/{name}")
+  @RolesAllowed("MEMBER")
   @Produces(MediaType.TEXT_HTML)
   public Response deleteProduct(
       @CookieParam("jwt_token") Cookie jwtToken, @PathParam("name") String productName) {
 
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
-
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return redirectTo(SERVER_ERROR_URL);
     }
 
     cartService.deleteProduct(username, productName);
@@ -144,18 +139,14 @@ public class CartResource {
   }
 
   @DELETE
+  @RolesAllowed("MEMBER")
   @Produces(MediaType.TEXT_HTML)
   public Response clearCart(@CookieParam("jwt_token") Cookie jwtToken) {
-
-    // Check if logged in
-    if (jwtToken == null) {
-      return redirectTo(LOGIN_VIEW_URL);
-    }
 
     // Try to get the username from jwt
     String username = LoginResource.getUserInfo(jwtToken)[0];
     if (username == null) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return redirectTo(SERVER_ERROR_URL);
     }
 
     cartService.clearCart(username);

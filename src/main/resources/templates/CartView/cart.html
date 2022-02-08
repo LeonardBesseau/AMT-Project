@@ -15,7 +15,11 @@
 
 <!--header-->
 <header id="header" class="header" style="margin-bottom: 20px">
-    {#include userHeader}{/include}
+    {#if member}
+        {#include userHeader}{/include}
+        {#else}
+            {#include header}{/include}
+    {/if}
 </header>
 
 <!--Cart-->

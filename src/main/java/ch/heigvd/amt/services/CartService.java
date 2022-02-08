@@ -1,7 +1,6 @@
 package ch.heigvd.amt.services;
 
-import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateResultHandler;
+import ch.heigvd.amt.database.UpdateHandler;
 import ch.heigvd.amt.models.CartProduct;
 import ch.heigvd.amt.utils.ResourceLoader;
 import java.util.ArrayList;
@@ -16,12 +15,12 @@ public class CartService {
 
   public static final String USERNAME = "username";
   private final Jdbi jdbi;
-  private final UpdateResultHandler updateResultHandler;
+  private final UpdateHandler updateHandler;
 
   @Inject
-  public CartService(Jdbi jdbi, UpdateResultHandler updateResultHandler) {
+  public CartService(Jdbi jdbi, UpdateHandler updateHandler) {
     this.jdbi = jdbi;
-    this.updateResultHandler = updateResultHandler;
+    this.updateHandler = updateHandler;
   }
 
   /**
@@ -46,9 +45,8 @@ public class CartService {
    *
    * @param username name of the user
    * @param cartProduct cartProduct to add
-   * @return the result of the operation
    */
-  public UpdateResult addProduct(String username, CartProduct cartProduct) {
+  public void addProduct(String username, CartProduct cartProduct) {
     try {
       jdbi.useHandle(
           handle ->
@@ -59,9 +57,8 @@ public class CartService {
                   .bind("quantity", cartProduct.getQuantity())
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      updateHandler.handleUpdateError(e);
     }
-    return UpdateResult.success();
   }
 
   /**
@@ -70,9 +67,8 @@ public class CartService {
    * @param username name of the user
    * @param name name of the product
    * @param newQuantity the new quantity to put
-   * @return the result of the operation
    */
-  public UpdateResult updateProductQuantity(String username, String name, int newQuantity) {
+  public void updateProductQuantity(String username, String name, int newQuantity) {
     try {
       jdbi.useHandle(
           handle ->
@@ -83,13 +79,12 @@ public class CartService {
                   .bind("quantity", newQuantity)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      updateHandler.handleUpdateError(e);
     }
-    return UpdateResult.success();
   }
 
   /**
-   * Delete a product from the cart of a secific user
+   * Delete a product from the cart of a specific user
    *
    * @param username name of the user
    * @param name name of the product
@@ -136,9 +131,8 @@ public class CartService {
    * Add a cart specific to the user
    *
    * @param username name of the user
-   * @return the result of the operation
    */
-  public UpdateResult addCart(String username) {
+  public void addCart(String username) {
     try {
       jdbi.useHandle(
           handle ->
@@ -147,8 +141,7 @@ public class CartService {
                   .bind(USERNAME, username)
                   .execute());
     } catch (UnableToExecuteStatementException e) {
-      return updateResultHandler.handleUpdateError(e);
+      updateHandler.handleUpdateError(e);
     }
-    return UpdateResult.success();
   }
 }

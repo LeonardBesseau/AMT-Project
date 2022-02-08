@@ -1,8 +1,8 @@
 package ch.heigvd.amt.service;
 
 import ch.heigvd.amt.database.PostgisResource;
-import ch.heigvd.amt.database.UpdateResult;
-import ch.heigvd.amt.database.UpdateStatus;
+import ch.heigvd.amt.database.exception.DuplicateEntryException;
+import ch.heigvd.amt.database.exception.InvalidReferenceException;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.ProductService;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -97,33 +97,68 @@ class ProductServiceTest {
   }
 
   @Test
-  void add() {
+  void addCategory() {
     Product product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertTrue(product.getCategories().isEmpty());
 
-    Assertions.assertEquals(
-        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
+    Assertions.assertDoesNotThrow(
+        () -> productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(1, product.getCategories().size());
     Assertions.assertEquals(CATEGORY_A_NAME, product.getCategories().get(0).getName());
 
     // Check idempotent
-    Assertions.assertEquals(
-        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
+    Assertions.assertDoesNotThrow(
+        () -> productService.addCategory(PRODUCT_NAME_3, CATEGORY_A_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(1, product.getCategories().size());
     Assertions.assertEquals(CATEGORY_A_NAME, product.getCategories().get(0).getName());
 
-    Assertions.assertEquals(
-        UpdateResult.success(), productService.addCategory(PRODUCT_NAME_3, CATEGORY_B_NAME));
+    Assertions.assertDoesNotThrow(
+        () -> productService.addCategory(PRODUCT_NAME_3, CATEGORY_B_NAME));
     product = productService.getProduct(PRODUCT_NAME_3).orElseThrow();
     Assertions.assertEquals(2, product.getCategories().size());
 
-    Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.INVALID_REFERENCE),
-        productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
-    Assertions.assertEquals(
-        new UpdateResult(UpdateStatus.INVALID_REFERENCE),
-        productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
+    Assertions.assertThrows(
+        InvalidReferenceException.class, () -> productService.addCategory(PRODUCT_NAME_3, UNKNOWN));
+    Assertions.assertThrows(
+        InvalidReferenceException.class,
+        () -> productService.addCategory(UNKNOWN, CATEGORY_A_NAME));
+  }
+
+  @Test
+  void removeCategory() {
+    Product product = productService.getProduct(PRODUCT_NAME_1).orElseThrow();
+    Assertions.assertEquals(2, product.getCategories().size());
+
+    productService.removeCategory(product.getName(), CATEGORY_A_NAME);
+    product = productService.getProduct(PRODUCT_NAME_1).orElseThrow();
+    Assertions.assertEquals(1, product.getCategories().size());
+
+    productService.removeCategory(product.getName(), UNKNOWN);
+    product = productService.getProduct(PRODUCT_NAME_1).orElseThrow();
+    Assertions.assertEquals(1, product.getCategories().size());
+  }
+
+  @Test
+  void addProduct() {
+    Product newProduct = new Product("New product", 10.0, "Test product", 1, null, null);
+    Assertions.assertDoesNotThrow(() -> productService.addProduct(newProduct));
+
+    Assertions.assertThrows(
+        DuplicateEntryException.class, () -> productService.addProduct(newProduct));
+  }
+
+  @Test
+  void updateProduct() {
+    Product invalidProduct = new Product(UNKNOWN, 10.0, "Test product", 1, null, null);
+    Assertions.assertDoesNotThrow(() -> productService.updateProduct(invalidProduct));
+
+    double price = 99999999.999;
+    Product updatedProduct = new Product(PRODUCT_NAME_1, price, "Test product", 1, null, null);
+    Assertions.assertDoesNotThrow(() -> productService.updateProduct(updatedProduct));
+
+    Product product = productService.getProduct(PRODUCT_NAME_1).orElseThrow();
+    Assertions.assertEquals(price, product.getPrice());
   }
 }

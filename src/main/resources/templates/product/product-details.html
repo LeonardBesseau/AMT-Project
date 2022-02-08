@@ -15,9 +15,11 @@
 <body>
 <header id="header" class="header" style="margin-bottom: 20px">
     {#if admin}
-    {#include adminHeader}{/include}
-    {#else}
-    {#include userHeader}{/include}
+        {#include adminHeader}{/include}
+    {#else if member}
+        {#include userHeader}{/include}
+        {#else}
+            {#include header}{/include}
     {/if}
 </header>
 
@@ -28,7 +30,7 @@
                 <div class="product-details"><!--product-details-->
                     <div class="col-sm-5">
                         <div class="view-product">
-                            <img src="/image/{item.image.id}" alt=""/>
+                            <img src="/image/{#if item.image}{item.image}{#else}default {/if}" alt=""/>
                         </div>
                     </div>
                     <div class="col-sm-7">

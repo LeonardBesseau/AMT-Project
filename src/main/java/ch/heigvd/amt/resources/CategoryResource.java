@@ -1,6 +1,6 @@
 package ch.heigvd.amt.resources;
 
-import ch.heigvd.amt.database.UpdateStatus;
+import ch.heigvd.amt.database.exception.DatabaseGenericException;
 import ch.heigvd.amt.models.Category;
 import ch.heigvd.amt.models.Product;
 import ch.heigvd.amt.services.CategoryService;
@@ -11,18 +11,14 @@ import io.quarkus.qute.TemplateInstance;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /** Manages category related routes */
 @Path("/category")
@@ -63,9 +59,14 @@ public class CategoryResource {
    */
   @GET
   @Path("/admin/view/")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getAll() {
-    return categoryList.data(LIST_KEY, categoryService.getAllCategory());
+  public TemplateInstance getAll(@CookieParam("jwt_token") Cookie jwtToken) {
+    return categoryList.data(
+        LIST_KEY,
+        categoryService.getAllCategory(),
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -75,9 +76,10 @@ public class CategoryResource {
    */
   @GET
   @Path("/admin/view/create")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
-  public TemplateInstance getFormAdd() {
-    return categoryAdd.data(CATEGORY, null);
+  public TemplateInstance getFormAdd(@CookieParam("jwt_token") Cookie jwtToken) {
+    return categoryAdd.data(CATEGORY, null, "username", LoginResource.getUserInfo(jwtToken)[0]);
   }
 
   /**
@@ -89,13 +91,16 @@ public class CategoryResource {
    */
   @POST
   @Path("/admin/create")
+  @RolesAllowed("ADMIN")
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Produces(MediaType.TEXT_HTML)
   public Object addCategory(@FormParam("name") String category) {
-    if (categoryService.addCategory(new Category(category)).getStatus() == UpdateStatus.SUCCESS) {
+    try {
+      categoryService.addCategory(new Category(category));
       return Response.status(301).location(URI.create(CATEGORY_ADMIN_VIEW_URL)).build();
+    } catch (DatabaseGenericException e) {
+      return categoryAdd.data(CATEGORY, category);
     }
-    return categoryAdd.data(CATEGORY, category);
   }
 
   /**
@@ -109,14 +114,27 @@ public class CategoryResource {
    */
   @POST
   @Path("/admin/delete/{id}")
+  @RolesAllowed("ADMIN")
   @Produces(MediaType.TEXT_HTML)
   public Object deleteCategory(
-      @PathParam("id") String category, @QueryParam("confirm") boolean confirm) {
+      @PathParam("id") String category,
+      @QueryParam("confirm") boolean confirm,
+      @CookieParam("jwt_token") Cookie jwtToken) {
     List<Product> list = productService.getAllProduct(Collections.singletonList(category));
     if (confirm || list.isEmpty()) {
       categoryService.deleteCategory(category);
-      return Response.status(301).location(URI.create(CATEGORY_ADMIN_VIEW_URL)).build();
+      return Response.status(Status.MOVED_PERMANENTLY)
+          .location(URI.create(CATEGORY_ADMIN_VIEW_URL))
+          .build();
     }
-    return categoryDelete.data(LIST_KEY, list, CATEGORY, category, "clientDisplay", false);
+    return categoryDelete.data(
+        LIST_KEY,
+        list,
+        CATEGORY,
+        category,
+        "clientDisplay",
+        false,
+        "username",
+        LoginResource.getUserInfo(jwtToken)[0]);
   }
 }

@@ -1,5 +1,7 @@
 # Les Boulangers
-Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargés de créer un site web de e-commerce décomposé en microservices.
+Dans le cadre du projet du cours AMT (Application multi-tiers) à la HEIG-VD, nous sommes chargés de créer un site web de e-commerce décomposé en microservices. 
+
+Le repository du service d'authentification est disponible via ce lien: https://github.com/K-do/AMT-AuthService/tree/dev 
 
 ## Description
 Nous avons choisi de créer une boutique en ligne de boulangerie et pâtisserie.
@@ -9,12 +11,15 @@ Nous avons choisi de créer une boutique en ligne de boulangerie et pâtisserie.
 - [Java 11](https://adoptopenjdk.net/installation.html)
 - [Docker](https://docs.docker.com/get-docker/) et [docker-compose](https://docs.docker.com/compose/install/) (optionnels)
 
-## Déploiement
-- Télécharger la release et l'extraire. Ajouter les données de connexion à la base de données dans le fichier `config/application.properties` (il peut être nécessaire de le créer).
-- Lancer le serveur avec `java -jar target/quarkus-app/quarkus-run.jar`
+## Déploiement pour la production
+- Télécharger la release et l'extraire. 
+- Ajouter les données de connexion à la base de données dans le fichier `config/application.properties` (il peut être nécessaire de le créer).
+- Ajouter la clé publique (nommée `publicKey.pem`) dans le dossier contenant l'exécutable. Si vous souhaitez changer le nom ou l'emplacement de la clé, il suffit d'ajouter à la configuration `mp.jwt.verify.publickey.location=[LOCATION]` où **LOCATION** est l'emplacement de la clé. Pour la génération de la clé, se reférer à la documentation du [service d'authentification](https://github.com/K-do/AMT-AuthService/tree/dev)
+- Indiquer l'adresse du serveur d'authentification avec la propriété : `auth.server.url=[URL]` dans la config.
+- Lancer le serveur avec `java -jar target/quarkus-app/quarkus-run.jar`.
 
 
-## Installation
+## Installation pour le developpement
 Les étapes ci-dessous permettent de mettre en place l'environnement de développement en local afin de travailler sur le projet :
 
 1. Cloner le repository. 
@@ -23,17 +28,24 @@ Les étapes ci-dessous permettent de mettre en place l'environnement de dévelop
 
    - Standalone
 
-   Si vous disposez déjà de postgres, vous pouvez créez une nouvelle base de données ou en utiliser une existante. Les scripts pour créer les tables se trouvent dans `sql/tables`. 
+   Si vous disposez déjà de PostgreSQL, vous pouvez créer une nouvelle base de données ou en utiliser une existante.
+Pour créer une base de données depuis psql :
+
+   ```sql
+   create database [DATABASE_NAME];
+   ```
 
    Une fois la configuration terminée, vous pouvez mettre les informations de connexions dans le fichier `config/application.properties`. (L'utilisateur à fournir doit avoir des droits de lecture et d'écriture)
 
-   - Docker
-     1. `docker-compose up` dans le dossier `docker`
-     2. Se connecter à la base de données et exécuter les scripts se trouvant dans  `sql/tables`.
+   - Docker : `docker-compose up` dans le dossier `docker`
+
+   Pour autant que la DB soit vide, Liquibase se chargera de créer les tables nécessaires au lancement du projet. 
+
+3. Copier la clé publique du serveur d'authentification dans `main/ressources`. La clé publique doit se nommer `publicKey.pem` sinon il faudra modifier le fichier `main/ressources/application.properties`. L'algorithme de vérification de signature est ES256. Si les clés générées utilisent un autre algorithme, il faudra modifier le fichier `main/ressources/application.properties` comme avant.
 
 3. Lancer l'application en mode *dev* avec `mvn compile quarkus:dev`.
 
-4. Se connecter avec un navigateur à sur localhost:8080. La page d’accueil retourne un 404 avec la liste des routes.
+4. Se connecter avec un navigateur sur localhost:8080.
 
 
 ## Contribution
